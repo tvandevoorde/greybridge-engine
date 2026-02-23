@@ -7,6 +7,8 @@
 ##   func() -> int   # must return a value in [1, 20]
 class_name SavingThrow
 
+const SaveResultClass = preload("res://rules_engine/core/save_result.gd")
+
 
 ## Resolves a saving throw against the given DC.
 ##
@@ -17,25 +19,24 @@ class_name SavingThrow
 ##   is_proficient     - Whether the actor has proficiency in this saving throw
 ##   roll_d20          - Callable returning an int in [1, 20] (injected for determinism)
 ##
-## Returns a Dictionary:
-##   "roll"    - Raw d20 result
-##   "total"   - Roll + applicable bonuses
-##   "success" - true when total >= dc
+## Returns a SaveResult with fields:
+##   roll    - Raw d20 result
+##   total   - Roll + applicable bonuses
+##   success - true when total >= dc
 static func resolve(
 	dc: int,
 	ability_modifier: int,
 	proficiency_bonus: int,
 	is_proficient: bool,
 	roll_d20: Callable
-) -> Dictionary:
+) -> SaveResult:
 	var roll: int = roll_d20.call()
 	var bonus: int = ability_modifier + (proficiency_bonus if is_proficient else 0)
-	var total: int = roll + bonus
-	return {
-		"roll": roll,
-		"total": total,
-		"success": total >= dc,
-	}
+	var result := SaveResultClass.new()
+	result.roll = roll
+	result.total = roll + bonus
+	result.success = result.total >= dc
+	return result
 
 
 ## Returns the damage dealt after a saving throw.
