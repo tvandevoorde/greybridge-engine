@@ -6,6 +6,7 @@
 extends SceneTree
 
 const SavingThrow = preload("res://rules_engine/core/saving_throw.gd")
+const SaveResult = preload("res://rules_engine/core/save_result.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -41,14 +42,14 @@ func _run_all_tests() -> void:
 
 
 # ---------------------------------------------------------------------------
-# Result dictionary has the expected keys
+# Result object has the expected fields
 # ---------------------------------------------------------------------------
 func _test_result_fields() -> void:
 	print("_test_result_fields")
-	var result: Dictionary = SavingThrow.resolve(14, 2, 2, true, func() -> int: return 10)
-	_check(result.has("roll"),    "result contains 'roll' key")
-	_check(result.has("total"),   "result contains 'total' key")
-	_check(result.has("success"), "result contains 'success' key")
+	var result: SaveResult = SavingThrow.resolve(14, 2, 2, true, func() -> int: return 10)
+	_check("roll" in result,    "result contains 'roll' field")
+	_check("total" in result,   "result contains 'total' field")
+	_check("success" in result, "result contains 'success' field")
 
 
 # ---------------------------------------------------------------------------
@@ -57,10 +58,10 @@ func _test_result_fields() -> void:
 func _test_basic_failure() -> void:
 	print("_test_basic_failure")
 	# Roll 8, modifier +2, not proficient, dc 14 → total 10 < 14 → fail
-	var result: Dictionary = SavingThrow.resolve(14, 2, 2, false, func() -> int: return 8)
-	_check(result["roll"] == 8,       "roll recorded as 8")
-	_check(result["total"] == 10,     "total == roll(8) + modifier(2) = 10")
-	_check(result["success"] == false, "total 10 < dc 14 → failure")
+	var result: SaveResult = SavingThrow.resolve(14, 2, 2, false, func() -> int: return 8)
+	_check(result.roll == 8,       "roll recorded as 8")
+	_check(result.total == 10,     "total == roll(8) + modifier(2) = 10")
+	_check(result.success == false, "total 10 < dc 14 → failure")
 
 
 # ---------------------------------------------------------------------------
@@ -69,10 +70,10 @@ func _test_basic_failure() -> void:
 func _test_basic_success() -> void:
 	print("_test_basic_success")
 	# Roll 15, modifier +3, not proficient, dc 14 → total 18 >= 14 → success
-	var result: Dictionary = SavingThrow.resolve(14, 3, 2, false, func() -> int: return 15)
-	_check(result["roll"] == 15,      "roll recorded as 15")
-	_check(result["total"] == 18,     "total == roll(15) + modifier(3) = 18")
-	_check(result["success"] == true, "total 18 >= dc 14 → success")
+	var result: SaveResult = SavingThrow.resolve(14, 3, 2, false, func() -> int: return 15)
+	_check(result.roll == 15,      "roll recorded as 15")
+	_check(result.total == 18,     "total == roll(15) + modifier(3) = 18")
+	_check(result.success == true, "total 18 >= dc 14 → success")
 
 
 # ---------------------------------------------------------------------------
@@ -81,9 +82,9 @@ func _test_basic_success() -> void:
 func _test_exact_dc_is_success() -> void:
 	print("_test_exact_dc_is_success")
 	# Roll 12, modifier +2, not proficient, dc 14 → total 14 == dc → success
-	var result: Dictionary = SavingThrow.resolve(14, 2, 2, false, func() -> int: return 12)
-	_check(result["total"] == 14,     "total == dc (14)")
-	_check(result["success"] == true, "total == dc → success (meet or beat)")
+	var result: SaveResult = SavingThrow.resolve(14, 2, 2, false, func() -> int: return 12)
+	_check(result.total == 14,     "total == dc (14)")
+	_check(result.success == true, "total == dc → success (meet or beat)")
 
 
 # ---------------------------------------------------------------------------
@@ -95,9 +96,9 @@ func _test_proficiency_applied() -> void:
 	# total = 10 + 1 + 2 = 13 — without proficiency this would be 11 (fail), with it 13 (fail)
 	# Use a case where proficiency makes the difference:
 	# Roll 10, modifier +1, proficiency +3, dc 14 → total 14 → success
-	var result: Dictionary = SavingThrow.resolve(14, 1, 3, true, func() -> int: return 10)
-	_check(result["total"] == 14,     "total == roll(10) + modifier(1) + proficiency(3) = 14")
-	_check(result["success"] == true, "proficiency pushes total to dc → success")
+	var result: SaveResult = SavingThrow.resolve(14, 1, 3, true, func() -> int: return 10)
+	_check(result.total == 14,     "total == roll(10) + modifier(1) + proficiency(3) = 14")
+	_check(result.success == true, "proficiency pushes total to dc → success")
 
 
 # ---------------------------------------------------------------------------
@@ -107,9 +108,9 @@ func _test_proficiency_not_applied() -> void:
 	print("_test_proficiency_not_applied")
 	# Roll 10, modifier +1, proficiency +3, is_proficient = false, dc 14
 	# total = 10 + 1 = 11 (proficiency ignored) → failure
-	var result: Dictionary = SavingThrow.resolve(14, 1, 3, false, func() -> int: return 10)
-	_check(result["total"] == 11,     "total == roll(10) + modifier(1) = 11 (no proficiency)")
-	_check(result["success"] == false, "without proficiency total 11 < dc 14 → failure")
+	var result: SaveResult = SavingThrow.resolve(14, 1, 3, false, func() -> int: return 10)
+	_check(result.total == 11,     "total == roll(10) + modifier(1) = 11 (no proficiency)")
+	_check(result.success == false, "without proficiency total 11 < dc 14 → failure")
 
 
 # ---------------------------------------------------------------------------
@@ -118,9 +119,9 @@ func _test_proficiency_not_applied() -> void:
 func _test_negative_ability_modifier() -> void:
 	print("_test_negative_ability_modifier")
 	# Roll 14, modifier -2, not proficient, dc 14 → total 12 < 14 → failure
-	var result: Dictionary = SavingThrow.resolve(14, -2, 2, false, func() -> int: return 14)
-	_check(result["total"] == 12,     "total == roll(14) + modifier(-2) = 12")
-	_check(result["success"] == false, "negative modifier causes failure against dc 14")
+	var result: SaveResult = SavingThrow.resolve(14, -2, 2, false, func() -> int: return 14)
+	_check(result.total == 12,     "total == roll(14) + modifier(-2) = 12")
+	_check(result.success == false, "negative modifier causes failure against dc 14")
 
 
 # ---------------------------------------------------------------------------
