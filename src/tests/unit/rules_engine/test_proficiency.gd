@@ -5,7 +5,7 @@
 ##   godot --headless --script ../tests/unit/rules_engine/test_proficiency.gd
 extends SceneTree
 
-const Proficiency = preload("res://rules_engine/core/proficiency.gd")
+const ProficiencyClass = preload("res://rules_engine/core/proficiency.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -47,7 +47,7 @@ func _test_bonus_table_levels_1_to_20() -> void:
 		17: 6, 18: 6, 19: 6, 20: 6,
 	}
 	for level: int in expected:
-		var got: int = Proficiency.get_bonus(level)
+		var got: int = ProficiencyClass.get_bonus(level)
 		var want: int = expected[level]
 		_check(got == want, "level %d -> proficiency bonus %d (got %d)" % [level, want, got])
 
@@ -58,10 +58,10 @@ func _test_bonus_table_levels_1_to_20() -> void:
 func _test_not_proficient_returns_zero() -> void:
 	print("_test_not_proficient_returns_zero")
 	for level: int in [1, 5, 10, 17, 20]:
-		var got: int = Proficiency.apply(level, false, false)
+		var got: int = ProficiencyClass.apply(level, false, false)
 		_check(got == 0, "level %d, not proficient -> 0 (got %d)" % [level, got])
 	# expertise flag is ignored when not proficient
-	var got_exp: int = Proficiency.apply(10, false, true)
+	var got_exp: int = ProficiencyClass.apply(10, false, true)
 	_check(got_exp == 0, "level 10, not proficient + expertise flag -> 0 (got %d)" % got_exp)
 
 
@@ -73,7 +73,7 @@ func _test_proficient_returns_full_bonus() -> void:
 	var cases: Dictionary = {1: 2, 4: 2, 5: 3, 8: 3, 9: 4, 12: 4, 13: 5, 16: 5, 17: 6, 20: 6}
 	for level: int in cases:
 		var want: int = cases[level]
-		var got: int = Proficiency.apply(level, true, false)
+		var got: int = ProficiencyClass.apply(level, true, false)
 		_check(got == want, "level %d, proficient -> %d (got %d)" % [level, want, got])
 
 
@@ -85,7 +85,7 @@ func _test_expertise_returns_double_bonus() -> void:
 	var cases: Dictionary = {1: 4, 4: 4, 5: 6, 8: 6, 9: 8, 12: 8, 13: 10, 16: 10, 17: 12, 20: 12}
 	for level: int in cases:
 		var want: int = cases[level]
-		var got: int = Proficiency.apply(level, true, true)
+		var got: int = ProficiencyClass.apply(level, true, true)
 		_check(got == want, "level %d, expertise -> %d (got %d)" % [level, want, got])
 
 
@@ -94,7 +94,7 @@ func _test_expertise_returns_double_bonus() -> void:
 # ---------------------------------------------------------------------------
 func _test_invalid_level() -> void:
 	print("_test_invalid_level")
-	_check(Proficiency.get_bonus(0) == 0, "level 0 (below min) -> 0")
-	_check(Proficiency.get_bonus(21) == 0, "level 21 (above max) -> 0")
-	_check(Proficiency.apply(0, true, false) == 0, "apply level 0, proficient -> 0")
-	_check(Proficiency.apply(21, true, true) == 0, "apply level 21, expertise -> 0")
+	_check(ProficiencyClass.get_bonus(0) == 0, "level 0 (below min) -> 0")
+	_check(ProficiencyClass.get_bonus(21) == 0, "level 21 (above max) -> 0")
+	_check(ProficiencyClass.apply(0, true, false) == 0, "apply level 0, proficient -> 0")
+	_check(ProficiencyClass.apply(21, true, true) == 0, "apply level 21, expertise -> 0")

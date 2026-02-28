@@ -9,7 +9,7 @@
 ## Concentration save DC = max(10, floor(damage / 2)).
 class_name Concentration
 
-const SavingThrow = preload("res://rules_engine/core/saving_throw.gd")
+const SavingThrowClass = preload("res://rules_engine/core/saving_throw.gd")
 
 ## Whether the actor is currently concentrating on a spell or effect.
 var is_concentrating: bool = false
@@ -37,7 +37,7 @@ func get_effect_id() -> String:
 ## Returns the concentration save DC for the given damage amount.
 ## Formula (SRD): max(10, floor(damage / 2)).
 static func compute_dc(damage: int) -> int:
-	return max(10, damage / 2)
+	return max(10, int(damage / 2.0))
 
 
 ## Resolves a concentration saving throw triggered by taking damage.
@@ -64,7 +64,7 @@ func resolve_damage_save(
 	roll_d20: Callable
 ) -> Dictionary:
 	var dc: int = compute_dc(damage)
-	var result: Dictionary = SavingThrow.resolve(
+	var result = SavingThrowClass.resolve(
 		dc, con_modifier, proficiency_bonus, is_proficient, roll_d20
 	)
 	result["dc"] = dc

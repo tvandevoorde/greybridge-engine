@@ -5,7 +5,7 @@
 ##   godot --headless --script ../tests/unit/rules_engine/test_damage_roll.gd
 extends SceneTree
 
-const DamageRoll = preload("res://rules_engine/core/damage_roll.gd")
+const DamageRollClass = preload("res://rules_engine/core/damage_roll.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -40,8 +40,8 @@ func _run_all_tests() -> void:
 # ---------------------------------------------------------------------------
 func _test_normal_returns_full_damage() -> void:
 	print("_test_normal_returns_full_damage")
-	_check(DamageRoll.apply(10, DamageRoll.NORMAL) == 10, "10 damage, normal → 10")
-	_check(DamageRoll.apply(7,  DamageRoll.NORMAL) == 7,  "7 damage, normal → 7")
+	_check(DamageRollClass.apply(10, DamageRollClass.NORMAL) == 10, "10 damage, normal → 10")
+	_check(DamageRollClass.apply(7,  DamageRollClass.NORMAL) == 7,  "7 damage, normal → 7")
 
 
 # ---------------------------------------------------------------------------
@@ -49,8 +49,8 @@ func _test_normal_returns_full_damage() -> void:
 # ---------------------------------------------------------------------------
 func _test_resistance_halves_damage() -> void:
 	print("_test_resistance_halves_damage")
-	_check(DamageRoll.apply(20, DamageRoll.RESISTANCE) == 10, "20 damage, resistance → 10")
-	_check(DamageRoll.apply(8,  DamageRoll.RESISTANCE) == 4,  "8 damage, resistance → 4")
+	_check(DamageRollClass.apply(20, DamageRollClass.RESISTANCE) == 10, "20 damage, resistance → 10")
+	_check(DamageRollClass.apply(8,  DamageRollClass.RESISTANCE) == 4,  "8 damage, resistance → 4")
 
 
 # ---------------------------------------------------------------------------
@@ -58,9 +58,9 @@ func _test_resistance_halves_damage() -> void:
 # ---------------------------------------------------------------------------
 func _test_resistance_rounds_down() -> void:
 	print("_test_resistance_rounds_down")
-	_check(DamageRoll.apply(7,  DamageRoll.RESISTANCE) == 3, "7 damage, resistance → 3 (rounds down)")
-	_check(DamageRoll.apply(1,  DamageRoll.RESISTANCE) == 0, "1 damage, resistance → 0 (rounds down)")
-	_check(DamageRoll.apply(15, DamageRoll.RESISTANCE) == 7, "15 damage, resistance → 7 (rounds down)")
+	_check(DamageRollClass.apply(7,  DamageRollClass.RESISTANCE) == 3, "7 damage, resistance → 3 (rounds down)")
+	_check(DamageRollClass.apply(1,  DamageRollClass.RESISTANCE) == 0, "1 damage, resistance → 0 (rounds down)")
+	_check(DamageRollClass.apply(15, DamageRollClass.RESISTANCE) == 7, "15 damage, resistance → 7 (rounds down)")
 
 
 # ---------------------------------------------------------------------------
@@ -68,9 +68,9 @@ func _test_resistance_rounds_down() -> void:
 # ---------------------------------------------------------------------------
 func _test_vulnerability_doubles_damage() -> void:
 	print("_test_vulnerability_doubles_damage")
-	_check(DamageRoll.apply(10, DamageRoll.VULNERABILITY) == 20, "10 damage, vulnerability → 20")
-	_check(DamageRoll.apply(7,  DamageRoll.VULNERABILITY) == 14, "7 damage, vulnerability → 14")
-	_check(DamageRoll.apply(1,  DamageRoll.VULNERABILITY) == 2,  "1 damage, vulnerability → 2")
+	_check(DamageRollClass.apply(10, DamageRollClass.VULNERABILITY) == 20, "10 damage, vulnerability → 20")
+	_check(DamageRollClass.apply(7,  DamageRollClass.VULNERABILITY) == 14, "7 damage, vulnerability → 14")
+	_check(DamageRollClass.apply(1,  DamageRollClass.VULNERABILITY) == 2,  "1 damage, vulnerability → 2")
 
 
 # ---------------------------------------------------------------------------
@@ -78,9 +78,9 @@ func _test_vulnerability_doubles_damage() -> void:
 # ---------------------------------------------------------------------------
 func _test_immunity_negates_damage() -> void:
 	print("_test_immunity_negates_damage")
-	_check(DamageRoll.apply(10,  DamageRoll.IMMUNITY) == 0, "10 damage, immunity → 0")
-	_check(DamageRoll.apply(1,   DamageRoll.IMMUNITY) == 0, "1 damage, immunity → 0")
-	_check(DamageRoll.apply(100, DamageRoll.IMMUNITY) == 0, "100 damage, immunity → 0")
+	_check(DamageRollClass.apply(10,  DamageRollClass.IMMUNITY) == 0, "10 damage, immunity → 0")
+	_check(DamageRollClass.apply(1,   DamageRollClass.IMMUNITY) == 0, "1 damage, immunity → 0")
+	_check(DamageRollClass.apply(100, DamageRollClass.IMMUNITY) == 0, "100 damage, immunity → 0")
 
 
 # ---------------------------------------------------------------------------
@@ -88,7 +88,7 @@ func _test_immunity_negates_damage() -> void:
 # ---------------------------------------------------------------------------
 func _test_zero_damage_all_modifiers() -> void:
 	print("_test_zero_damage_all_modifiers")
-	_check(DamageRoll.apply(0, DamageRoll.NORMAL)        == 0, "0 damage, normal → 0")
-	_check(DamageRoll.apply(0, DamageRoll.RESISTANCE)    == 0, "0 damage, resistance → 0")
-	_check(DamageRoll.apply(0, DamageRoll.VULNERABILITY) == 0, "0 damage, vulnerability → 0")
-	_check(DamageRoll.apply(0, DamageRoll.IMMUNITY)      == 0, "0 damage, immunity → 0")
+	_check(DamageRollClass.apply(0, DamageRollClass.NORMAL)        == 0, "0 damage, normal → 0")
+	_check(DamageRollClass.apply(0, DamageRollClass.RESISTANCE)    == 0, "0 damage, resistance → 0")
+	_check(DamageRollClass.apply(0, DamageRollClass.VULNERABILITY) == 0, "0 damage, vulnerability → 0")
+	_check(DamageRollClass.apply(0, DamageRollClass.IMMUNITY)      == 0, "0 damage, immunity → 0")

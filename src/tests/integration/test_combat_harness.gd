@@ -8,8 +8,8 @@
 ## Exit code 0 = all assertions passed; 1 = one or more assertions failed.
 extends SceneTree
 
-const DiceRoller = preload("res://rules_engine/core/dice_roller.gd")
-const AttackResolver = preload("res://rules_engine/core/attack_resolver.gd")
+const DiceRollerClass = preload("res://rules_engine/core/dice_roller.gd")
+const AttackResolverClass = preload("res://rules_engine/core/attack_resolver.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -91,8 +91,8 @@ func _make_bandit() -> Dictionary:
 ##   "loser_hp"   : int    — loser's final HP (0 or negative)
 ##   "completed"  : bool   — false only if MAX_ROUNDS was reached without a winner
 func _run_combat(seed_value: int) -> Dictionary:
-	var roller := DiceRoller.new(seed_value)
-	var resolver := AttackResolver.new()
+	var roller := DiceRollerClass.new(seed_value)
+	var resolver := AttackResolverClass.new()
 
 	var fighter := _make_fighter()
 	var bandit := _make_bandit()
@@ -128,7 +128,7 @@ func _run_combat(seed_value: int) -> Dictionary:
 
 			# Attack roll
 			var d20: int = roller.roll(20)
-			var atk: Dictionary = resolver.resolve(
+			var atk = resolver.resolve(
 				d20,
 				attacker["str_modifier"],
 				attacker["proficiency_bonus"],

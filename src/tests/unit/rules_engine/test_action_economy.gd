@@ -5,7 +5,7 @@
 ##   godot --headless --script ../tests/unit/rules_engine/test_action_economy.gd
 extends SceneTree
 
-const ActionEconomy = preload("res://rules_engine/core/action_economy.gd")
+const ActionEconomyClass = preload("res://rules_engine/core/action_economy.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -48,7 +48,7 @@ func _run_all_tests() -> void:
 # ---------------------------------------------------------------------------
 func _test_nothing_available_before_start_turn() -> void:
 	print("_test_nothing_available_before_start_turn")
-	var e := ActionEconomy.new(30)
+	var e := ActionEconomyClass.new(30)
 	_check(e.use_action() == false, "action unavailable before start_turn")
 	_check(e.use_bonus_action() == false, "bonus action unavailable before start_turn")
 	_check(e.use_reaction() == false, "reaction unavailable before start_turn")
@@ -60,7 +60,7 @@ func _test_nothing_available_before_start_turn() -> void:
 # ---------------------------------------------------------------------------
 func _test_start_turn_grants_all_slots() -> void:
 	print("_test_start_turn_grants_all_slots")
-	var e := ActionEconomy.new(30)
+	var e := ActionEconomyClass.new(30)
 	e.start_turn()
 	_check(e.is_action_available(), "action available after start_turn")
 	_check(e.is_bonus_action_available(), "bonus action available after start_turn")
@@ -73,7 +73,7 @@ func _test_start_turn_grants_all_slots() -> void:
 # ---------------------------------------------------------------------------
 func _test_action_can_be_used_once() -> void:
 	print("_test_action_can_be_used_once")
-	var e := ActionEconomy.new(30)
+	var e := ActionEconomyClass.new(30)
 	e.start_turn()
 	_check(e.use_action() == true, "first use_action succeeds")
 	_check(e.use_action() == false, "second use_action denied")
@@ -85,7 +85,7 @@ func _test_action_can_be_used_once() -> void:
 # ---------------------------------------------------------------------------
 func _test_bonus_action_can_be_used_once() -> void:
 	print("_test_bonus_action_can_be_used_once")
-	var e := ActionEconomy.new(30)
+	var e := ActionEconomyClass.new(30)
 	e.start_turn()
 	_check(e.use_bonus_action() == true, "first use_bonus_action succeeds")
 	_check(e.use_bonus_action() == false, "second use_bonus_action denied")
@@ -97,7 +97,7 @@ func _test_bonus_action_can_be_used_once() -> void:
 # ---------------------------------------------------------------------------
 func _test_reaction_can_be_used_once() -> void:
 	print("_test_reaction_can_be_used_once")
-	var e := ActionEconomy.new(30)
+	var e := ActionEconomyClass.new(30)
 	e.start_turn()
 	_check(e.use_reaction() == true, "first use_reaction succeeds")
 	_check(e.use_reaction() == false, "second use_reaction denied")
@@ -109,7 +109,7 @@ func _test_reaction_can_be_used_once() -> void:
 # ---------------------------------------------------------------------------
 func _test_movement_splits_across_turn() -> void:
 	print("_test_movement_splits_across_turn")
-	var e := ActionEconomy.new(30)
+	var e := ActionEconomyClass.new(30)
 	e.start_turn()
 	_check(e.use_movement(10) == true, "move 10 ft succeeds")
 	_check(e.movement_remaining_ft == 20, "20 ft remaining after 10 ft move")
@@ -124,7 +124,7 @@ func _test_movement_splits_across_turn() -> void:
 # ---------------------------------------------------------------------------
 func _test_movement_cannot_exceed_speed() -> void:
 	print("_test_movement_cannot_exceed_speed")
-	var e := ActionEconomy.new(30)
+	var e := ActionEconomyClass.new(30)
 	e.start_turn()
 	_check(e.use_movement(31) == false, "moving 31 ft with 30 speed denied")
 	_check(e.movement_remaining_ft == 30, "remaining unchanged after failed move")
@@ -138,7 +138,7 @@ func _test_movement_cannot_exceed_speed() -> void:
 # ---------------------------------------------------------------------------
 func _test_start_turn_resets_action() -> void:
 	print("_test_start_turn_resets_action")
-	var e := ActionEconomy.new(30)
+	var e := ActionEconomyClass.new(30)
 	e.start_turn()
 	e.use_action()
 	e.start_turn()
@@ -151,7 +151,7 @@ func _test_start_turn_resets_action() -> void:
 # ---------------------------------------------------------------------------
 func _test_start_turn_resets_bonus_action() -> void:
 	print("_test_start_turn_resets_bonus_action")
-	var e := ActionEconomy.new(30)
+	var e := ActionEconomyClass.new(30)
 	e.start_turn()
 	e.use_bonus_action()
 	e.start_turn()
@@ -164,7 +164,7 @@ func _test_start_turn_resets_bonus_action() -> void:
 # ---------------------------------------------------------------------------
 func _test_start_turn_resets_movement() -> void:
 	print("_test_start_turn_resets_movement")
-	var e := ActionEconomy.new(30)
+	var e := ActionEconomyClass.new(30)
 	e.start_turn()
 	e.use_movement(30)
 	e.start_turn()
@@ -177,7 +177,7 @@ func _test_start_turn_resets_movement() -> void:
 # ---------------------------------------------------------------------------
 func _test_start_turn_resets_reaction() -> void:
 	print("_test_start_turn_resets_reaction")
-	var e := ActionEconomy.new(30)
+	var e := ActionEconomyClass.new(30)
 	e.start_turn()
 	e.use_reaction()
 	_check(e.is_reaction_available() == false, "reaction spent")
@@ -191,7 +191,7 @@ func _test_start_turn_resets_reaction() -> void:
 # ---------------------------------------------------------------------------
 func _test_reaction_not_reset_between_others_turns() -> void:
 	print("_test_reaction_not_reset_between_others_turns")
-	var e := ActionEconomy.new(30)
+	var e := ActionEconomyClass.new(30)
 	e.start_turn()
 	e.use_reaction()
 	# Simulate other combatants' turns passing without calling start_turn()
@@ -204,7 +204,7 @@ func _test_reaction_not_reset_between_others_turns() -> void:
 # ---------------------------------------------------------------------------
 func _test_availability_helpers() -> void:
 	print("_test_availability_helpers")
-	var e := ActionEconomy.new(30)
+	var e := ActionEconomyClass.new(30)
 	e.start_turn()
 	_check(e.is_action_available() == true, "action available initially")
 	_check(e.is_bonus_action_available() == true, "bonus action available initially")
@@ -222,7 +222,7 @@ func _test_availability_helpers() -> void:
 # ---------------------------------------------------------------------------
 func _test_movement_negative_feet_rejected() -> void:
 	print("_test_movement_negative_feet_rejected")
-	var e := ActionEconomy.new(30)
+	var e := ActionEconomyClass.new(30)
 	e.start_turn()
 	_check(e.use_movement(-1) == false, "negative movement rejected")
 	_check(e.movement_remaining_ft == 30, "remaining movement unchanged after rejection")

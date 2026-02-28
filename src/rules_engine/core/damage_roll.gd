@@ -30,7 +30,7 @@ static func apply(damage: int, modifier: int) -> int:
 		IMMUNITY:
 			return 0
 		RESISTANCE:
-			return damage / 2  # int / int in GDScript 4 → truncating integer division (rounds toward zero)
+			return damage >> 1  # Bitwise right shift by 1 (equivalent to floor division by 2)
 		VULNERABILITY:
 			return damage * 2
 		_:  # NORMAL or unrecognised modifier

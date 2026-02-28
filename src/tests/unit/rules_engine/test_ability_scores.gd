@@ -8,7 +8,7 @@
 ## without modifying state, so tests verify the state is unchanged.
 extends SceneTree
 
-const AbilityScores = preload("res://rules_engine/core/ability_scores.gd")
+const AbilityScoresClass = preload("res://rules_engine/core/ability_scores.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -43,7 +43,7 @@ func _run_all_tests() -> void:
 # ---------------------------------------------------------------------------
 func _test_modifier_table() -> void:
 	print("_test_modifier_table")
-	var s := AbilityScores.new()
+	var s := AbilityScoresClass.new()
 	# Representative values from SRD score range 1–30
 	var cases: Dictionary = {
 		1: -5,
@@ -71,7 +71,7 @@ func _test_modifier_table() -> void:
 # ---------------------------------------------------------------------------
 func _test_set_score_updates_modifier() -> void:
 	print("_test_set_score_updates_modifier")
-	var s := AbilityScores.new()
+	var s := AbilityScoresClass.new()
 	s.set_score("DEX", 14)
 	_check(s.get_modifier("DEX") == 2, "DEX 14 -> modifier 2")
 	s.set_score("DEX", 8)
@@ -85,7 +85,7 @@ func _test_set_score_updates_modifier() -> void:
 # ---------------------------------------------------------------------------
 func _test_invalid_ability_key() -> void:
 	print("_test_invalid_ability_key")
-	var s := AbilityScores.new()
+	var s := AbilityScoresClass.new()
 	# set_score with unknown key must not change anything
 	s.set_score("LUCK", 15)
 	_check(s.get_score("LUCK") == 0, "get_score returns 0 after set_score with unknown key 'LUCK' is rejected")
@@ -98,7 +98,7 @@ func _test_invalid_ability_key() -> void:
 # ---------------------------------------------------------------------------
 func _test_invalid_score_out_of_range() -> void:
 	print("_test_invalid_score_out_of_range")
-	var s := AbilityScores.new()
+	var s := AbilityScoresClass.new()
 	s.set_score("STR", 10)  # baseline
 	s.set_score("STR", 0)   # below MIN_SCORE
 	_check(s.get_score("STR") == 10, "score 0 (below min) rejected, STR unchanged at 10")
@@ -115,7 +115,7 @@ func _test_invalid_score_out_of_range() -> void:
 # ---------------------------------------------------------------------------
 func _test_to_dict() -> void:
 	print("_test_to_dict")
-	var s := AbilityScores.new()
+	var s := AbilityScoresClass.new()
 	s.set_score("STR", 16)
 	s.set_score("CHA", 8)
 	var d: Dictionary = s.to_dict()
@@ -132,7 +132,7 @@ func _test_to_dict() -> void:
 # ---------------------------------------------------------------------------
 func _test_from_dict() -> void:
 	print("_test_from_dict")
-	var s := AbilityScores.new()
+	var s := AbilityScoresClass.new()
 	s.from_dict({"STR": 18, "DEX": 14, "CON": 12, "INT": 10, "WIS": 8, "CHA": 15})
 	_check(s.get_score("STR") == 18, "from_dict STR == 18")
 	_check(s.get_score("CHA") == 15, "from_dict CHA == 15")

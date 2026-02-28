@@ -5,7 +5,7 @@
 ##   godot --headless --script ../tests/unit/rules_engine/test_dice_roller.gd
 extends SceneTree
 
-const DiceRoller = preload("res://rules_engine/core/dice_roller.gd")
+const DiceRollerClass = preload("res://rules_engine/core/dice_roller.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -45,8 +45,8 @@ func _run_all_tests() -> void:
 # ---------------------------------------------------------------------------
 func _test_valid_dice_ranges() -> void:
 	print("_test_valid_dice_ranges")
-	var roller := DiceRoller.new(42)
-	for faces: int in DiceRoller.VALID_DICE:
+	var roller := DiceRollerClass.new(42)
+	for faces: int in DiceRollerClass.VALID_DICE:
 		var in_range := true
 		for _i in 50:
 			var result: int = roller.roll(faces)
@@ -61,7 +61,7 @@ func _test_valid_dice_ranges() -> void:
 # ---------------------------------------------------------------------------
 func _test_invalid_die_faces() -> void:
 	print("_test_invalid_die_faces")
-	var roller := DiceRoller.new(0)
+	var roller := DiceRollerClass.new(0)
 	_check(roller.roll(7) == 0, "d7 (invalid) returns 0")
 	_check(roller.roll(2) == 0, "d2 (invalid) returns 0")
 	_check(roller.roll(100) == 0, "d100 (invalid) returns 0")
@@ -72,8 +72,8 @@ func _test_invalid_die_faces() -> void:
 # ---------------------------------------------------------------------------
 func _test_deterministic_seed() -> void:
 	print("_test_deterministic_seed")
-	var r1 := DiceRoller.new(1234)
-	var r2 := DiceRoller.new(1234)
+	var r1 := DiceRollerClass.new(1234)
+	var r2 := DiceRollerClass.new(1234)
 	var match_all := true
 	for _i in 20:
 		if r1.roll(20) != r2.roll(20):
@@ -81,8 +81,8 @@ func _test_deterministic_seed() -> void:
 			break
 	_check(match_all, "two rollers with the same seed produce identical sequences")
 
-	var r3 := DiceRoller.new(1234)
-	var r4 := DiceRoller.new(5678)
+	var r3 := DiceRollerClass.new(1234)
+	var r4 := DiceRollerClass.new(5678)
 	var differs := false
 	for _i in 20:
 		if r3.roll(20) != r4.roll(20):
@@ -96,7 +96,7 @@ func _test_deterministic_seed() -> void:
 # ---------------------------------------------------------------------------
 func _test_roll_expression() -> void:
 	print("_test_roll_expression")
-	var roller := DiceRoller.new(99)
+	var roller := DiceRollerClass.new(99)
 	# 1d6+0 must be in [1, 6]
 	var r1: int = roller.roll_expression(1, 6)
 	_check(r1 >= 1 and r1 <= 6, "1d6 result in [1, 6] (got %d)" % r1)
@@ -107,8 +107,8 @@ func _test_roll_expression() -> void:
 	var r3: int = roller.roll_expression(4, 4, -2)
 	_check(r3 >= 2 and r3 <= 14, "4d4-2 result in [2, 14] (got %d)" % r3)
 	# Determinism: same seed + same expression = same result.
-	var ra := DiceRoller.new(7).roll_expression(3, 8, 1)
-	var rb := DiceRoller.new(7).roll_expression(3, 8, 1)
+	var ra := DiceRollerClass.new(7).roll_expression(3, 8, 1)
+	var rb := DiceRollerClass.new(7).roll_expression(3, 8, 1)
 	_check(ra == rb, "roll_expression is deterministic for same seed (got %d)" % ra)
 
 
@@ -117,7 +117,7 @@ func _test_roll_expression() -> void:
 # ---------------------------------------------------------------------------
 func _test_roll_expression_invalid_count() -> void:
 	print("_test_roll_expression_invalid_count")
-	var roller := DiceRoller.new(0)
+	var roller := DiceRollerClass.new(0)
 	_check(roller.roll_expression(0, 6) == 0, "count 0 returns 0")
 	_check(roller.roll_expression(-1, 6) == 0, "count -1 returns 0")
 
@@ -127,7 +127,7 @@ func _test_roll_expression_invalid_count() -> void:
 # ---------------------------------------------------------------------------
 func _test_roll_string_basic() -> void:
 	print("_test_roll_string_basic")
-	var roller := DiceRoller.new(55)
+	var roller := DiceRollerClass.new(55)
 	var r1: int = roller.roll_string("2d6+3")
 	_check(r1 >= 5 and r1 <= 15, "2d6+3 in [5, 15] (got %d)" % r1)
 	var r2: int = roller.roll_string("1d20")
@@ -141,7 +141,7 @@ func _test_roll_string_basic() -> void:
 # ---------------------------------------------------------------------------
 func _test_roll_string_implicit_count() -> void:
 	print("_test_roll_string_implicit_count")
-	var roller := DiceRoller.new(12)
+	var roller := DiceRollerClass.new(12)
 	var r: int = roller.roll_string("d12")
 	_check(r >= 1 and r <= 12, "d12 (no count) in [1, 12] (got %d)" % r)
 
@@ -151,7 +151,7 @@ func _test_roll_string_implicit_count() -> void:
 # ---------------------------------------------------------------------------
 func _test_roll_string_negative_modifier() -> void:
 	print("_test_roll_string_negative_modifier")
-	var roller := DiceRoller.new(3)
+	var roller := DiceRollerClass.new(3)
 	var r: int = roller.roll_string("1d4-1")
 	_check(r >= 0 and r <= 3, "1d4-1 in [0, 3] (got %d)" % r)
 
@@ -161,7 +161,7 @@ func _test_roll_string_negative_modifier() -> void:
 # ---------------------------------------------------------------------------
 func _test_roll_string_invalid() -> void:
 	print("_test_roll_string_invalid")
-	var roller := DiceRoller.new(0)
+	var roller := DiceRollerClass.new(0)
 	_check(roller.roll_string("fireball") == 0, "'fireball' returns 0")
 	_check(roller.roll_string("") == 0, "empty string returns 0")
 	_check(roller.roll_string("2+3") == 0, "'2+3' (no 'd') returns 0")
@@ -174,18 +174,18 @@ func _test_advantage_is_max() -> void:
 	print("_test_advantage_is_max")
 	# Verify over many iterations that the advantage result is always >= each
 	# individual roll from the same seed (by checking statistical properties).
-	var always_ge_normal := true
+	var _always_ge_normal := true
 	# Compare straight roll vs advantage across 200 samples.
 	var sum_adv: int = 0
 	var sum_straight: int = 0
 	for _i in 200:
-		var adv_roller := DiceRoller.new(_i)
+		var adv_roller := DiceRollerClass.new(_i)
 		sum_adv += adv_roller.roll_advantage()
-		var straight_roller := DiceRoller.new(_i)
+		var straight_roller := DiceRollerClass.new(_i)
 		sum_straight += straight_roller.roll(20)
 	_check(sum_adv >= sum_straight, "advantage sum (%d) >= straight sum (%d) over 200 samples" % [sum_adv, sum_straight])
 	# Verify the result is always within [1, 20].
-	var roller := DiceRoller.new(77)
+	var roller := DiceRollerClass.new(77)
 	var in_range := true
 	for _i in 50:
 		var r: int = roller.roll_advantage()
@@ -203,13 +203,13 @@ func _test_disadvantage_is_min() -> void:
 	var sum_dis: int = 0
 	var sum_straight: int = 0
 	for _i in 200:
-		var dis_roller := DiceRoller.new(_i)
+		var dis_roller := DiceRollerClass.new(_i)
 		sum_dis += dis_roller.roll_disadvantage()
-		var straight_roller := DiceRoller.new(_i)
+		var straight_roller := DiceRollerClass.new(_i)
 		sum_straight += straight_roller.roll(20)
 	_check(sum_dis <= sum_straight, "disadvantage sum (%d) <= straight sum (%d) over 200 samples" % [sum_dis, sum_straight])
 	# Verify the result is always within [1, 20].
-	var roller := DiceRoller.new(88)
+	var roller := DiceRollerClass.new(88)
 	var in_range := true
 	for _i in 50:
 		var r: int = roller.roll_disadvantage()

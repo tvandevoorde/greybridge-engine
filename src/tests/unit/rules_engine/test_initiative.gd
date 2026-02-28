@@ -5,8 +5,8 @@
 ##   godot --headless --script ../tests/unit/rules_engine/test_initiative.gd
 extends SceneTree
 
-const DiceRoller = preload("res://rules_engine/core/dice_roller.gd")
-const InitiativeRoller = preload("res://rules_engine/core/initiative.gd")
+const DiceRollerClass = preload("res://rules_engine/core/dice_roller.gd")
+const InitiativeRollerClass = preload("res://rules_engine/core/initiative.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -45,8 +45,8 @@ func _run_all_tests() -> void:
 # ---------------------------------------------------------------------------
 func _test_result_keys_present() -> void:
 	print("_test_result_keys_present")
-	var roller := DiceRoller.new(42)
-	var ir := InitiativeRoller.new()
+	var roller := DiceRollerClass.new(42)
+	var ir := InitiativeRollerClass.new()
 	var combatants: Array = [{"id": "hero", "dex_score": 14}]
 	var results: Array = ir.roll_for_combatants(combatants, roller)
 	_check(results.size() == 1, "one result for one combatant")
@@ -63,8 +63,8 @@ func _test_result_keys_present() -> void:
 # ---------------------------------------------------------------------------
 func _test_total_equals_roll_plus_modifier() -> void:
 	print("_test_total_equals_roll_plus_modifier")
-	var roller := DiceRoller.new(0)
-	var ir := InitiativeRoller.new()
+	var roller := DiceRollerClass.new(0)
+	var ir := InitiativeRollerClass.new()
 	var combatants: Array = [
 		{"id": "a", "dex_score": 14},
 		{"id": "b", "dex_score": 8},
@@ -83,8 +83,8 @@ func _test_total_equals_roll_plus_modifier() -> void:
 # ---------------------------------------------------------------------------
 func _test_dex_modifier_derived_correctly() -> void:
 	print("_test_dex_modifier_derived_correctly")
-	var roller := DiceRoller.new(1)
-	var ir := InitiativeRoller.new()
+	var roller := DiceRollerClass.new(1)
+	var ir := InitiativeRollerClass.new()
 	# DEX 10 -> mod 0, DEX 14 -> mod +2, DEX 8 -> mod -1, DEX 20 -> mod +5
 	var combatants: Array = [
 		{"id": "dex10", "dex_score": 10},
@@ -107,7 +107,7 @@ func _test_dex_modifier_derived_correctly() -> void:
 # ---------------------------------------------------------------------------
 func _test_sorted_descending_by_total() -> void:
 	print("_test_sorted_descending_by_total")
-	var ir := InitiativeRoller.new()
+	var ir := InitiativeRollerClass.new()
 	# Build pre-rolled results with known totals and sort them directly.
 	var raw: Array = [
 		{"id": "c", "roll": 5,  "modifier": 0, "total": 5,  "dex_score": 10},
@@ -130,7 +130,7 @@ func _test_sorted_descending_by_total() -> void:
 # ---------------------------------------------------------------------------
 func _test_tie_broken_by_dex_score() -> void:
 	print("_test_tie_broken_by_dex_score")
-	var ir := InitiativeRoller.new()
+	var ir := InitiativeRollerClass.new()
 	var raw: Array = [
 		{"id": "low_dex",  "roll": 10, "modifier": 0, "total": 10, "dex_score": 10},
 		{"id": "high_dex", "roll": 8,  "modifier": 2, "total": 10, "dex_score": 14},
@@ -145,7 +145,7 @@ func _test_tie_broken_by_dex_score() -> void:
 # ---------------------------------------------------------------------------
 func _test_tie_fallback_by_id() -> void:
 	print("_test_tie_fallback_by_id")
-	var ir := InitiativeRoller.new()
+	var ir := InitiativeRollerClass.new()
 	var raw: Array = [
 		{"id": "goblin_b", "roll": 10, "modifier": 0, "total": 10, "dex_score": 10},
 		{"id": "goblin_a", "roll": 10, "modifier": 0, "total": 10, "dex_score": 10},
@@ -162,8 +162,8 @@ func _test_tie_fallback_by_id() -> void:
 # ---------------------------------------------------------------------------
 func _test_single_combatant() -> void:
 	print("_test_single_combatant")
-	var roller := DiceRoller.new(7)
-	var ir := InitiativeRoller.new()
+	var roller := DiceRollerClass.new(7)
+	var ir := InitiativeRollerClass.new()
 	var combatants: Array = [{"id": "solo", "dex_score": 12}]
 	var results: Array = ir.roll_for_combatants(combatants, roller)
 	_check(results.size() == 1, "single combatant returns one result")
@@ -177,8 +177,8 @@ func _test_single_combatant() -> void:
 # ---------------------------------------------------------------------------
 func _test_empty_combatants() -> void:
 	print("_test_empty_combatants")
-	var roller := DiceRoller.new(0)
-	var ir := InitiativeRoller.new()
+	var roller := DiceRollerClass.new(0)
+	var ir := InitiativeRollerClass.new()
 	var results: Array = ir.roll_for_combatants([], roller)
 	_check(results.size() == 0, "empty input returns empty array")
 
@@ -188,7 +188,7 @@ func _test_empty_combatants() -> void:
 # ---------------------------------------------------------------------------
 func _test_sort_results_standalone() -> void:
 	print("_test_sort_results_standalone")
-	var ir := InitiativeRoller.new()
+	var ir := InitiativeRollerClass.new()
 	# Mixed scenario: different totals, one tie broken by DEX, one by id
 	var raw: Array = [
 		{"id": "z_char", "roll": 5,  "modifier": 3, "total": 8,  "dex_score": 16},
@@ -206,8 +206,8 @@ func _test_sort_results_standalone() -> void:
 # ---------------------------------------------------------------------------
 func _test_negative_dex_modifier() -> void:
 	print("_test_negative_dex_modifier")
-	var roller := DiceRoller.new(5)
-	var ir := InitiativeRoller.new()
+	var roller := DiceRollerClass.new(5)
+	var ir := InitiativeRollerClass.new()
 	var combatants: Array = [{"id": "slow", "dex_score": 6}]
 	var results: Array = ir.roll_for_combatants(combatants, roller)
 	_check(results[0]["modifier"] == -2, "DEX 6 -> modifier -2")
