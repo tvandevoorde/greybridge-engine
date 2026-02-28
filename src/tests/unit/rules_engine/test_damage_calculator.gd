@@ -43,7 +43,7 @@ func _run_all_tests() -> void:
 func _test_result_keys_present() -> void:
 	print("_test_result_keys_present")
 	var roller := DiceRollerClass.new(1)
-	var result: Dictionary = DamageCalculatorClass.calculate(1, 6, "slashing", roller)
+	var result = DamageCalculatorClass.calculate(1, 6, "slashing", roller)
 	_check(result.has("amount"), "result has 'amount' key")
 	_check(result.has("damage_type"), "result has 'damage_type' key")
 	_check(result.has("roll"), "result has 'roll' key")
@@ -59,7 +59,7 @@ func _test_roll_in_valid_range() -> void:
 	var in_range := true
 	for test_seed: int in range(0, 50):
 		var roller := DiceRollerClass.new(test_seed)
-		var result: Dictionary = DamageCalculatorClass.calculate(1, 8, "piercing", roller)
+		var result = DamageCalculatorClass.calculate(1, 8, "piercing", roller)
 		if result["roll"] < 1 or result["roll"] > 8:
 			in_range = false
 			break
@@ -82,13 +82,13 @@ func _test_roll_in_valid_range() -> void:
 func _test_ability_modifier_added() -> void:
 	print("_test_ability_modifier_added")
 	var roller := DiceRollerClass.new(42)
-	var result: Dictionary = DamageCalculatorClass.calculate(1, 8, "slashing", roller, 3)
+	var result = DamageCalculatorClass.calculate(1, 8, "slashing", roller, 3)
 	_check(result["amount"] == result["roll"] + 3, "amount == roll + 3 with modifier +3")
 	_check(result["modifier"] == 3, "modifier stored as 3")
 
 	# Negative modifier: roll + (-2)
 	var roller2 := DiceRollerClass.new(42)
-	var result2: Dictionary = DamageCalculatorClass.calculate(1, 8, "slashing", roller2, -2)
+	var result2 = DamageCalculatorClass.calculate(1, 8, "slashing", roller2, -2)
 	var expected: int = maxi(0, result2["roll"] - 2)
 	_check(result2["amount"] == expected, "amount == max(0, roll - 2) with modifier -2")
 	_check(result2["modifier"] == -2, "modifier stored as -2")
@@ -101,7 +101,7 @@ func _test_negative_modifier_does_not_go_below_zero() -> void:
 	print("_test_negative_modifier_does_not_go_below_zero")
 	# Use a very large negative modifier to force amount below zero
 	var roller := DiceRollerClass.new(0)
-	var result: Dictionary = DamageCalculatorClass.calculate(1, 4, "cold", roller, -100)
+	var result = DamageCalculatorClass.calculate(1, 4, "cold", roller, -100)
 	_check(result["amount"] >= 0, "amount never negative (got %d)" % result["amount"])
 	_check(result["amount"] == 0, "amount clamped to 0 when roll + modifier < 0")
 
@@ -114,7 +114,7 @@ func _test_damage_type_stored() -> void:
 	var roller := DiceRollerClass.new(7)
 	var types: Array[String] = ["slashing", "fire", "cold", "necrotic", "radiant"]
 	for dtype: String in types:
-		var result: Dictionary = DamageCalculatorClass.calculate(1, 6, dtype, roller)
+		var result = DamageCalculatorClass.calculate(1, 6, dtype, roller)
 		_check(result["damage_type"] == dtype, "damage_type stored as '%s'" % dtype)
 
 
@@ -124,9 +124,9 @@ func _test_damage_type_stored() -> void:
 func _test_deterministic_with_seed() -> void:
 	print("_test_deterministic_with_seed")
 	var roller1 := DiceRollerClass.new(999)
-	var result1: Dictionary = DamageCalculatorClass.calculate(2, 6, "bludgeoning", roller1, 4)
+	var result1 = DamageCalculatorClass.calculate(2, 6, "bludgeoning", roller1, 4)
 	var roller2 := DiceRollerClass.new(999)
-	var result2: Dictionary = DamageCalculatorClass.calculate(2, 6, "bludgeoning", roller2, 4)
+	var result2 = DamageCalculatorClass.calculate(2, 6, "bludgeoning", roller2, 4)
 	_check(result1["amount"] == result2["amount"], "same seed produces same amount (%d)" % result1["amount"])
 	_check(result1["roll"] == result2["roll"], "same seed produces same roll (%d)" % result1["roll"])
 
@@ -137,6 +137,6 @@ func _test_deterministic_with_seed() -> void:
 func _test_zero_modifier_default() -> void:
 	print("_test_zero_modifier_default")
 	var roller := DiceRollerClass.new(5)
-	var result: Dictionary = DamageCalculatorClass.calculate(1, 6, "fire", roller)
+	var result = DamageCalculatorClass.calculate(1, 6, "fire", roller)
 	_check(result["modifier"] == 0, "default modifier is 0")
 	_check(result["amount"] == result["roll"], "amount equals roll when modifier is 0")
