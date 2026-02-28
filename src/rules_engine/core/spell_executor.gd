@@ -28,6 +28,8 @@ class_name SpellExecutor
 
 const AttackResolverClass = preload("res://rules_engine/core/attack_resolver.gd")
 const SavingThrowClass = preload("res://rules_engine/core/saving_throw.gd")
+const DiceRollerClass = preload("res://rules_engine/core/dice_roller.gd")
+
 
 var _attack_resolver: AttackResolver
 
@@ -58,7 +60,7 @@ func execute_attack(
 	ability_modifier: int,
 	proficiency_bonus: int,
 	target_ac: int,
-	roller: DiceRoller
+	roller: DiceRollerClass
 ) -> Dictionary:
 	var attack = _attack_resolver.resolve(
 		d20_roll, ability_modifier, proficiency_bonus, target_ac
@@ -97,7 +99,7 @@ func execute_saving_throw(
 	ability_modifier: int,
 	proficiency_bonus: int,
 	is_proficient: bool,
-	roller: DiceRoller
+	roller: DiceRollerClass
 ) -> Dictionary:
 	var save = SavingThrowClass.resolve(
 		effect["dc"], ability_modifier, proficiency_bonus, is_proficient, roll_d20
@@ -120,7 +122,7 @@ func execute_saving_throw(
 ##
 ## Returns a Dictionary:
 ##   "amount" : int — hit points restored
-func execute_healing(effect: Dictionary, roller: DiceRoller) -> Dictionary:
+func execute_healing(effect: Dictionary, roller: DiceRollerClass) -> Dictionary:
 	var amount: int = roller.roll_expression(
 		effect["dice_count"], effect["dice_faces"], effect.get("modifier", 0)
 	)
@@ -135,6 +137,6 @@ static func concentration_dc(damage: int) -> int:
 
 ## Internal helper — roll damage for an effect.
 ## On a critical hit the SRD doubles the number of dice (modifier is not doubled).
-func _roll_damage(effect: Dictionary, roller: DiceRoller, is_critical: bool) -> int:
+func _roll_damage(effect: Dictionary, roller: DiceRollerClass, is_critical: bool) -> int:
 	var count: int = effect["dice_count"] * 2 if is_critical else effect["dice_count"]
 	return roller.roll_expression(count, effect["dice_faces"], effect.get("damage_modifier", 0))
