@@ -47,7 +47,7 @@ func _run_all_tests() -> void:
 func _test_natural_20_is_critical_hit() -> void:
 	print("_test_natural_20_is_critical_hit")
 	var r := AttackResolverClass.new()
-	var result: AttackResultClass = r.resolve(20, 0, 0, 30)
+	var result = r.resolve(20, 0, 0, 30)
 	_check(result.critical == true, "natural 20 sets critical flag")
 	_check(result.hit == true, "natural 20 always hits (even AC 30)")
 
@@ -59,7 +59,7 @@ func _test_natural_1_is_automatic_miss() -> void:
 	print("_test_natural_1_is_automatic_miss")
 	var r := AttackResolverClass.new()
 	# Even with huge bonuses the natural 1 must miss
-	var result: AttackResultClass = r.resolve(1, 10, 10, 1)
+	var result = r.resolve(1, 10, 10, 1)
 	_check(result.hit == false, "natural 1 always misses")
 	_check(result.critical == false, "natural 1 is not a critical")
 
@@ -71,7 +71,7 @@ func _test_normal_hit_meets_ac() -> void:
 	print("_test_normal_hit_meets_ac")
 	var r := AttackResolverClass.new()
 	# roll 10 + modifier 3 + proficiency 2 = 15 vs AC 15 -> hit
-	var result: AttackResultClass = r.resolve(10, 3, 2, 15)
+	var result = r.resolve(10, 3, 2, 15)
 	_check(result.hit == true, "total 15 hits AC 15")
 	_check(result.critical == false, "non-20 roll is not critical")
 	_check(result.total == 15, "total is 10 + 3 + 2 = 15")
@@ -85,7 +85,7 @@ func _test_normal_miss_below_ac() -> void:
 	print("_test_normal_miss_below_ac")
 	var r := AttackResolverClass.new()
 	# roll 10 + modifier 0 + proficiency 0 = 10 vs AC 11 -> miss
-	var result: AttackResultClass = r.resolve(10, 0, 0, 11)
+	var result = r.resolve(10, 0, 0, 11)
 	_check(result.hit == false, "total 10 misses AC 11")
 
 
@@ -96,11 +96,11 @@ func _test_ability_modifier_affects_total() -> void:
 	print("_test_ability_modifier_affects_total")
 	var r := AttackResolverClass.new()
 	# Positive modifier
-	var pos: AttackResultClass = r.resolve(8, 4, 0, 12)
+	var pos = r.resolve(8, 4, 0, 12)
 	_check(pos.total == 12, "roll 8 + modifier 4 = 12")
 	_check(pos.hit == true, "total 12 hits AC 12")
 	# Negative modifier
-	var neg: AttackResultClass = r.resolve(8, -2, 0, 7)
+	var neg = r.resolve(8, -2, 0, 7)
 	_check(neg.total == 6, "roll 8 + modifier -2 = 6")
 	_check(neg.hit == false, "total 6 misses AC 7")
 
@@ -112,10 +112,10 @@ func _test_proficiency_bonus_affects_total() -> void:
 	print("_test_proficiency_bonus_affects_total")
 	var r := AttackResolverClass.new()
 	# Without proficiency: roll 9 + 0 + 0 = 9 vs AC 10 -> miss
-	var no_prof: AttackResultClass = r.resolve(9, 0, 0, 10)
+	var no_prof = r.resolve(9, 0, 0, 10)
 	_check(no_prof.hit == false, "roll 9 misses AC 10 without proficiency")
 	# With proficiency +2: 9 + 0 + 2 = 11 vs AC 10 -> hit
-	var with_prof: AttackResultClass = r.resolve(9, 0, 2, 10)
+	var with_prof = r.resolve(9, 0, 2, 10)
 	_check(with_prof.hit == true, "roll 9 + proficiency 2 hits AC 10")
 	_check(with_prof.total == 11, "total includes proficiency bonus")
 
@@ -126,10 +126,10 @@ func _test_proficiency_bonus_affects_total() -> void:
 func _test_melee_uses_str_modifier() -> void:
 	print("_test_melee_uses_str_modifier")
 	# STR 16 -> modifier +3; roll 10 + 3 + 2 = 15 vs AC 14 -> hit
-	var r := AttackResolverClass.new()
+	var r = AttackResolverClass.new()
 	var str_modifier: int = 3   # represents STR 16
 	var proficiency: int = 2
-	var result: AttackResultClass = r.resolve(10, str_modifier, proficiency, 14)
+	var result = r.resolve(10, str_modifier, proficiency, 14)
 	_check(result.hit == true, "melee (STR +3, prof +2): roll 10 hits AC 14")
 	_check(result.total == 15, "melee total = 10 + 3 + 2 = 15")
 
@@ -140,10 +140,10 @@ func _test_melee_uses_str_modifier() -> void:
 func _test_ranged_uses_dex_modifier() -> void:
 	print("_test_ranged_uses_dex_modifier")
 	# DEX 14 -> modifier +2; roll 10 + 2 + 2 = 14 vs AC 15 -> miss
-	var r := AttackResolverClass.new()
+	var r = AttackResolverClass.new()
 	var dex_modifier: int = 2   # represents DEX 14
 	var proficiency: int = 2
-	var result: AttackResultClass = r.resolve(10, dex_modifier, proficiency, 15)
+	var result = r.resolve(10, dex_modifier, proficiency, 15)
 	_check(result.hit == false, "ranged (DEX +2, prof +2): roll 10 misses AC 15")
 	_check(result.total == 14, "ranged total = 10 + 2 + 2 = 14")
 
@@ -153,8 +153,8 @@ func _test_ranged_uses_dex_modifier() -> void:
 # ---------------------------------------------------------------------------
 func _test_result_keys_present() -> void:
 	print("_test_result_keys_present")
-	var r := AttackResolverClass.new()
-	var result: AttackResultClass = r.resolve(15, 2, 2, 12)
+	var r = AttackResolverClass.new()
+	var result = r.resolve(15, 2, 2, 12)
 	_check("hit" in result,      "result has 'hit' field")
 	_check("critical" in result, "result has 'critical' field")
 	_check("roll" in result,     "result has 'roll' field")
@@ -167,9 +167,9 @@ func _test_result_keys_present() -> void:
 # ---------------------------------------------------------------------------
 func _test_critical_does_not_require_meeting_ac() -> void:
 	print("_test_critical_does_not_require_meeting_ac")
-	var r := AttackResolverClass.new()
+	var r = AttackResolverClass.new()
 	# total = 20 + (-5) + 0 = 15 vs AC 25 — would normally miss, but nat 20 hits
-	var result: AttackResultClass = r.resolve(20, -5, 0, 25)
+	var result = r.resolve(20, -5, 0, 25)
 	_check(result.hit == true, "natural 20 hits AC 25 despite low total")
 	_check(result.critical == true, "critical flag set on natural 20")
 
@@ -179,8 +179,8 @@ func _test_critical_does_not_require_meeting_ac() -> void:
 # ---------------------------------------------------------------------------
 func _test_auto_miss_ignores_high_total() -> void:
 	print("_test_auto_miss_ignores_high_total")
-	var r := AttackResolverClass.new()
+	var r = AttackResolverClass.new()
 	# total = 1 + 10 + 10 = 21 vs AC 1 — would hit, but nat 1 always misses
-	var result: AttackResultClass = r.resolve(1, 10, 10, 1)
+	var result = r.resolve(1, 10, 10, 1)
 	_check(result.hit == false, "natural 1 misses AC 1 despite high total")
 	_check(result.critical == false, "no critical on natural 1")
