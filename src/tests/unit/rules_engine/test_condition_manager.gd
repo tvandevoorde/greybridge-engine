@@ -272,10 +272,10 @@ func _test_no_conditions_no_effects() -> void:
 # ---------------------------------------------------------------------------
 func _test_condition_definitions_present() -> void:
 	print("_test_condition_definitions_present")
-	_check(Condition.DEFINITIONS.has(Condition.ID_PRONE), "DEFINITIONS contains prone")
-	_check(Condition.DEFINITIONS.has(Condition.ID_GRAPPLED), "DEFINITIONS contains grappled")
-	_check(Condition.DEFINITIONS.has(Condition.ID_POISONED), "DEFINITIONS contains poisoned")
-	var prone_def: Dictionary = Condition.get_definition(Condition.ID_PRONE)
+	_check(ConditionClass.DEFINITIONS.has(ConditionClass.ID_PRONE), "DEFINITIONS contains prone")
+	_check(ConditionClass.DEFINITIONS.has(ConditionClass.ID_GRAPPLED), "DEFINITIONS contains grappled")
+	_check(ConditionClass.DEFINITIONS.has(ConditionClass.ID_POISONED), "DEFINITIONS contains poisoned")
+	var prone_def: Dictionary = ConditionClass.get_definition(ConditionClass.ID_PRONE)
 	_check(prone_def.has("attack_disadvantage"), "prone definition has attack_disadvantage key")
 	_check(prone_def.has("ability_check_disadvantage"), "prone definition has ability_check_disadvantage key")
 	_check(prone_def.has("speed_zero"), "prone definition has speed_zero key")
