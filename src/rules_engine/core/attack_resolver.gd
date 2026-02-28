@@ -14,8 +14,6 @@
 ##   damage   : int   — damage dealt (0 until resolved by the caller)
 class_name AttackResolver
 
-const AttackResultClass = preload("res://rules_engine/core/attack_result.gd")
-
 
 ## Resolve an attack roll against a target AC.
 ##
@@ -33,7 +31,7 @@ func resolve(
 	proficiency_bonus: int,
 	target_ac: int
 ) -> AttackResult:
-	var result := AttackResultClass.new()
+	var result := AttackResult.new()
 	result.critical = d20_roll == 20
 	var auto_miss: bool = d20_roll == 1
 	result.total = d20_roll + ability_modifier + proficiency_bonus
