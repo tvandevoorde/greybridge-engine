@@ -31,28 +31,76 @@ jobs:
 
       - name: Unit tests — ability_scores
         working-directory: src
-        run: godot --headless --script ../tests/unit/rules_engine/test_ability_scores.gd
+        run: godot --headless --script ./src/tests/unit/rules_engine/test_ability_scores.gd
+
+      - name: Unit tests — action_economy
+        working-directory: src
+        run: godot --headless --script ./src/tests/unit/rules_engine/test_action_economy.gd
+
+      - name: Unit tests — armor_class
+        working-directory: src
+        run: godot --headless --script ./src/tests/unit/rules_engine/test_armor_class.gd
 
       - name: Unit tests — attack_resolver
         working-directory: src
-        run: godot --headless --script ../tests/unit/rules_engine/test_attack_resolver.gd
+        run: godot --headless --script ./src/tests/unit/rules_engine/test_attack_resolver.gd
+
+      - name: Unit tests — combat_results
+        working-directory: src
+        run: godot --headless --script ./src/tests/unit/rules_engine/test_combat_results.gd
+
+      - name: Unit tests — concentration
+        working-directory: src
+        run: godot --headless --script ./src/tests/unit/rules_engine/test_concentration.gd
+
+      - name: Unit tests — condition_manager
+        working-directory: src
+        run: godot --headless --script ./src/tests/unit/rules_engine/test_condition_manager.gd
+
+      - name: Unit tests — damage_calculator
+        working-directory: src
+        run: godot --headless --script ./src/tests/unit/rules_engine/test_damage_calculator.gd
+
+      - name: Unit tests — damage_roll
+        working-directory: src
+        run: godot --headless --script ./src/tests/unit/rules_engine/test_damage_roll.gd
+
+      - name: Unit tests — death_saving_throw
+        working-directory: src
+        run: godot --headless --script ./src/tests/unit/rules_engine/test_death_saving_throw.gd
 
       - name: Unit tests — dice_roller
         working-directory: src
-        run: godot --headless --script ../tests/unit/rules_engine/test_dice_roller.gd
+        run: godot --headless --script ./src/tests/unit/rules_engine/test_dice_roller.gd
+
+      - name: Unit tests — hit_points
+        working-directory: src
+        run: godot --headless --script ./src/tests/unit/rules_engine/test_hit_points.gd
+
+      - name: Unit tests — initiative
+        working-directory: src
+        run: godot --headless --script ./src/tests/unit/rules_engine/test_initiative.gd
+
+      - name: Unit tests — opportunity_attack
+        working-directory: src
+        run: godot --headless --script ./src/tests/unit/rules_engine/test_opportunity_attack.gd
 
       - name: Unit tests — proficiency
         working-directory: src
-        run: godot --headless --script ../tests/unit/rules_engine/test_proficiency.gd
+        run: godot --headless --script ./src/tests/unit/rules_engine/test_proficiency.gd
 
       - name: Unit tests — saving_throw
         working-directory: src
-        run: godot --headless --script ../tests/unit/rules_engine/test_saving_throw.gd
+        run: godot --headless --script ./src/tests/unit/rules_engine/test_saving_throw.gd
 
       - name: Unit tests — skill_check
         working-directory: src
-        run: godot --headless --script ../tests/unit/rules_engine/test_skill_check.gd
+        run: godot --headless --script ./src/tests/unit/rules_engine/test_skill_check.gd
+
+      - name: Unit tests — spell_executor
+        working-directory: src
+        run: godot --headless --script ./src/tests/unit/rules_engine/test_spell_executor.gd
 
       - name: Integration test — combat harness
         working-directory: src
-        run: godot --headless --script ../tests/integration/test_combat_harness.gd
+        run: godot --headless --script ./src/tests/integration/test_combat_harness.gd
