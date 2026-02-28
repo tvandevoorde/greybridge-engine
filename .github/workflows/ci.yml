@@ -35,7 +35,7 @@ jobs:
 
       - name: Unit tests — action_economy
         working-directory: src
-        run: godot --headless --script ./s/tests/unit/rules_engine/test_action_economy.gd
+        run: godot --headless --script ./tests/unit/rules_engine/test_action_economy.gd
 
       - name: Unit tests — armor_class
         working-directory: src
