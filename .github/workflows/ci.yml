@@ -53,6 +53,10 @@ jobs:
         working-directory: src
         run: godot --headless --script ../tests/unit/rules_engine/test_skill_check.gd
 
+      - name: Unit tests — movement_system
+        working-directory: src
+        run: godot --headless --script ../tests/unit/rules_engine/test_movement_system.gd
+
       - name: Integration test — combat harness
         working-directory: src
         run: godot --headless --script ../tests/integration/test_combat_harness.gd
