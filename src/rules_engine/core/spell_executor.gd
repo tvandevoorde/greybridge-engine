@@ -26,14 +26,14 @@
 ##   var dc := SpellExecutor.concentration_dc(18)   # → 10  (max(10, floor(18/2)) = max(10, 9) = 10)
 class_name SpellExecutor
 
-const AttackResolver = preload("res://rules_engine/core/attack_resolver.gd")
-const SavingThrow = preload("res://rules_engine/core/saving_throw.gd")
+const AttackResolverClass = preload("res://rules_engine/core/attack_resolver.gd")
+const SavingThrowClass = preload("res://rules_engine/core/saving_throw.gd")
 
 var _attack_resolver: AttackResolver
 
 
 func _init() -> void:
-	_attack_resolver = AttackResolver.new()
+	_attack_resolver = AttackResolverClass.new()
 
 
 ## Execute an attack spell effect against a target.
@@ -60,7 +60,7 @@ func execute_attack(
 	target_ac: int,
 	roller: DiceRoller
 ) -> Dictionary:
-	var attack: Dictionary = _attack_resolver.resolve(
+	var attack = _attack_resolver.resolve(
 		d20_roll, ability_modifier, proficiency_bonus, target_ac
 	)
 	var damage: int = 0
@@ -99,11 +99,11 @@ func execute_saving_throw(
 	is_proficient: bool,
 	roller: DiceRoller
 ) -> Dictionary:
-	var save: Dictionary = SavingThrow.resolve(
+	var save = SavingThrowClass.resolve(
 		effect["dc"], ability_modifier, proficiency_bonus, is_proficient, roll_d20
 	)
 	var raw_damage: int = _roll_damage(effect, roller, false)
-	var damage: int = SavingThrow.apply_damage(raw_damage, save["success"], effect["half_on_success"])
+	var damage: int = SavingThrowClass.apply_damage(raw_damage, save["success"], effect["half_on_success"])
 	return {
 		"roll": save["roll"],
 		"total": save["total"],
@@ -130,7 +130,7 @@ func execute_healing(effect: Dictionary, roller: DiceRoller) -> Dictionary:
 ## Return the concentration save DC for the given damage amount.
 ## SRD formula: DC = max(10, floor(damage / 2)).
 static func concentration_dc(damage: int) -> int:
-	return maxi(10, damage / 2)
+	return maxi(10, int(damage / 2.0))
 
 
 ## Internal helper — roll damage for an effect.
