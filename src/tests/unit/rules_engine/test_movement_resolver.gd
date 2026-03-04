@@ -5,8 +5,8 @@
 ##   godot --headless --script ../tests/unit/rules_engine/test_movement_resolver.gd
 extends SceneTree
 
-const CombatGrid = preload("res://rules_engine/core/combat_grid.gd")
-const MovementResolver = preload("res://rules_engine/core/movement_resolver.gd")
+const CombatGridClass = preload("res://rules_engine/core/combat_grid.gd")
+const MovementResolverClass = preload("res://rules_engine/core/movement_resolver.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -51,8 +51,8 @@ func _run_all_tests() -> void:
 # ---------------------------------------------------------------------------
 func _test_empty_path_succeeds_with_zero_cost() -> void:
 	print("_test_empty_path_succeeds_with_zero_cost")
-	var resolver := MovementResolver.new()
-	var grid := CombatGrid.new()
+	var resolver := MovementResolverClass.new()
+	var grid := CombatGridClass.new()
 	grid.place_combatant("a", Vector2i(0, 0))
 	var result: Dictionary = resolver.resolve([], Vector2i(0, 0), 30, grid, "a", [])
 	_check(result["success"] == true, "empty path succeeds")
@@ -68,8 +68,8 @@ func _test_empty_path_succeeds_with_zero_cost() -> void:
 # ---------------------------------------------------------------------------
 func _test_single_step_deducts_five_feet() -> void:
 	print("_test_single_step_deducts_five_feet")
-	var resolver := MovementResolver.new()
-	var grid := CombatGrid.new()
+	var resolver := MovementResolverClass.new()
+	var grid := CombatGridClass.new()
 	grid.place_combatant("a", Vector2i(0, 0))
 	var result: Dictionary = resolver.resolve(
 		[Vector2i(1, 0)], Vector2i(0, 0), 30, grid, "a", []
@@ -81,8 +81,8 @@ func _test_single_step_deducts_five_feet() -> void:
 
 func _test_multi_step_deducts_correct_cost() -> void:
 	print("_test_multi_step_deducts_correct_cost")
-	var resolver := MovementResolver.new()
-	var grid := CombatGrid.new()
+	var resolver := MovementResolverClass.new()
+	var grid := CombatGridClass.new()
 	grid.place_combatant("a", Vector2i(0, 0))
 	var path: Array = [Vector2i(1, 0), Vector2i(2, 0), Vector2i(3, 0)]
 	var result: Dictionary = resolver.resolve(path, Vector2i(0, 0), 30, grid, "a", [])
@@ -96,7 +96,7 @@ func _test_multi_step_deducts_correct_cost() -> void:
 # ---------------------------------------------------------------------------
 func _test_diagonal_step_costs_five_feet() -> void:
 	print("_test_diagonal_step_costs_five_feet")
-	var resolver := MovementResolver.new()
+	var resolver := MovementResolverClass.new()
 	var grid := CombatGrid.new()
 	grid.place_combatant("a", Vector2i(0, 0))
 	var result: Dictionary = resolver.resolve(
@@ -111,8 +111,8 @@ func _test_diagonal_step_costs_five_feet() -> void:
 # ---------------------------------------------------------------------------
 func _test_exact_budget_path_succeeds() -> void:
 	print("_test_exact_budget_path_succeeds")
-	var resolver := MovementResolver.new()
-	var grid := CombatGrid.new()
+	var resolver := MovementResolverClass.new()
+	var grid := CombatGridClass.new()
 	grid.place_combatant("a", Vector2i(0, 0))
 	# 6 steps = 30 ft = exactly the budget
 	var path: Array = [
@@ -126,8 +126,8 @@ func _test_exact_budget_path_succeeds() -> void:
 
 func _test_path_exceeding_budget_fails() -> void:
 	print("_test_path_exceeding_budget_fails")
-	var resolver := MovementResolver.new()
-	var grid := CombatGrid.new()
+	var resolver := MovementResolverClass.new()
+	var grid := CombatGridClass.new()
 	grid.place_combatant("a", Vector2i(0, 0))
 	# 7 steps = 35 ft > 30 ft budget
 	var path: Array = [
@@ -144,8 +144,8 @@ func _test_path_exceeding_budget_fails() -> void:
 
 func _test_partial_budget_prevents_second_step() -> void:
 	print("_test_partial_budget_prevents_second_step")
-	var resolver := MovementResolver.new()
-	var grid := CombatGrid.new()
+	var resolver := MovementResolverClass.new()
+	var grid := CombatGridClass.new()
 	grid.place_combatant("a", Vector2i(0, 0))
 	# Only 5 ft remaining — second step should be denied
 	var result: Dictionary = resolver.resolve(
@@ -161,8 +161,8 @@ func _test_partial_budget_prevents_second_step() -> void:
 # ---------------------------------------------------------------------------
 func _test_path_blocked_by_occupied_tile() -> void:
 	print("_test_path_blocked_by_occupied_tile")
-	var resolver := MovementResolver.new()
-	var grid := CombatGrid.new()
+	var resolver := MovementResolverClass.new()
+	var grid := CombatGridClass.new()
 	grid.place_combatant("a", Vector2i(0, 0))
 	grid.place_combatant("blocker", Vector2i(2, 0))
 	var path: Array = [Vector2i(1, 0), Vector2i(2, 0), Vector2i(3, 0)]
@@ -175,8 +175,8 @@ func _test_path_blocked_by_occupied_tile() -> void:
 
 func _test_path_blocked_at_first_tile() -> void:
 	print("_test_path_blocked_at_first_tile")
-	var resolver := MovementResolver.new()
-	var grid := CombatGrid.new()
+	var resolver := MovementResolverClass.new()
+	var grid := CombatGridClass.new()
 	grid.place_combatant("a", Vector2i(0, 0))
 	grid.place_combatant("wall", Vector2i(1, 0))
 	var result: Dictionary = resolver.resolve(
@@ -192,8 +192,8 @@ func _test_path_blocked_at_first_tile() -> void:
 # ---------------------------------------------------------------------------
 func _test_oa_triggers_when_leaving_hostile_reach() -> void:
 	print("_test_oa_triggers_when_leaving_hostile_reach")
-	var resolver := MovementResolver.new()
-	var grid := CombatGrid.new()
+	var resolver := MovementResolverClass.new()
+	var grid := CombatGridClass.new()
 	grid.place_combatant("mover",  Vector2i(1, 0))
 	grid.place_combatant("hostile", Vector2i(0, 0))  # adjacent (reach 5 ft)
 	# Mover steps from (1,0) to (2,0): leaves hostile's 5 ft reach
@@ -211,8 +211,8 @@ func _test_oa_triggers_when_leaving_hostile_reach() -> void:
 
 func _test_no_oa_when_staying_within_reach() -> void:
 	print("_test_no_oa_when_staying_within_reach")
-	var resolver := MovementResolver.new()
-	var grid := CombatGrid.new()
+	var resolver := MovementResolverClass.new()
+	var grid := CombatGridClass.new()
 	grid.place_combatant("mover",  Vector2i(1, 0))
 	grid.place_combatant("hostile", Vector2i(0, 0))  # 5 ft away
 	# Hostile has 10 ft reach — mover steps to (2,0) which is still within 10 ft
@@ -226,8 +226,8 @@ func _test_no_oa_when_staying_within_reach() -> void:
 
 func _test_no_oa_when_hostile_not_on_grid() -> void:
 	print("_test_no_oa_when_hostile_not_on_grid")
-	var resolver := MovementResolver.new()
-	var grid := CombatGrid.new()
+	var resolver := MovementResolverClass.new()
+	var grid := CombatGridClass.new()
 	grid.place_combatant("mover", Vector2i(0, 0))
 	# Hostile listed but NOT placed on the grid
 	var hostiles: Array = [{"id": "ghost", "reach_ft": 5}]
@@ -239,8 +239,8 @@ func _test_no_oa_when_hostile_not_on_grid() -> void:
 
 func _test_oa_triggers_only_on_exit_step() -> void:
 	print("_test_oa_triggers_only_on_exit_step")
-	var resolver := MovementResolver.new()
-	var grid := CombatGrid.new()
+	var resolver := MovementResolverClass.new()
+	var grid := CombatGridClass.new()
 	grid.place_combatant("mover",  Vector2i(1, 0))
 	grid.place_combatant("hostile", Vector2i(0, 0))
 	# 3-step path; only step (1,0)->(2,0) exits the 5 ft reach
@@ -253,8 +253,8 @@ func _test_oa_triggers_only_on_exit_step() -> void:
 
 func _test_oa_from_multiple_hostiles() -> void:
 	print("_test_oa_from_multiple_hostiles")
-	var resolver := MovementResolver.new()
-	var grid := CombatGrid.new()
+	var resolver := MovementResolverClass.new()
+	var grid := CombatGridClass.new()
 	# hostile1(0,0) and hostile2(0,1) are both adjacent to mover(1,0).
 	# Destination (2,0): Chebyshev from (0,0)=10 ft and from (0,1)=10 ft — outside 5 ft reach.
 	grid.place_combatant("mover",    Vector2i(1, 0))
@@ -275,8 +275,8 @@ func _test_oa_from_multiple_hostiles() -> void:
 # ---------------------------------------------------------------------------
 func _test_result_keys_always_present() -> void:
 	print("_test_result_keys_always_present")
-	var resolver := MovementResolver.new()
-	var grid := CombatGrid.new()
+	var resolver := MovementResolverClass.new()
+	var grid := CombatGridClass.new()
 	grid.place_combatant("a", Vector2i(0, 0))
 	var result: Dictionary = resolver.resolve([], Vector2i(0, 0), 30, grid, "a", [])
 	_check(result.has("success"), "result has 'success'")
@@ -292,4 +292,4 @@ func _test_result_keys_always_present() -> void:
 # ---------------------------------------------------------------------------
 func _test_feet_per_tile_constant() -> void:
 	print("_test_feet_per_tile_constant")
-	_check(MovementResolver.FEET_PER_TILE == 5, "1 tile equals 5 feet")
+	_check(MovementResolverClass.FEET_PER_TILE == 5, "1 tile equals 5 feet")
