@@ -54,7 +54,7 @@ func _test_empty_path_succeeds_with_zero_cost() -> void:
 	var resolver := MovementResolverClass.new()
 	var grid := CombatGridClass.new()
 	grid.place_combatant("a", Vector2i(0, 0))
-	var result: Dictionary = resolver.resolve([], Vector2i(0, 0), 30, grid, "a", [])
+	var result = resolver.resolve([], Vector2i(0, 0), 30, grid, "a", [])
 	_check(result["success"] == true, "empty path succeeds")
 	_check(result["tiles_moved"] == 0, "zero tiles moved")
 	_check(result["cost_ft"] == 0, "zero ft cost")
@@ -71,7 +71,7 @@ func _test_single_step_deducts_five_feet() -> void:
 	var resolver := MovementResolverClass.new()
 	var grid := CombatGridClass.new()
 	grid.place_combatant("a", Vector2i(0, 0))
-	var result: Dictionary = resolver.resolve(
+	var result = resolver.resolve(
 		[Vector2i(1, 0)], Vector2i(0, 0), 30, grid, "a", []
 	)
 	_check(result["success"] == true, "single step succeeds")
@@ -85,7 +85,7 @@ func _test_multi_step_deducts_correct_cost() -> void:
 	var grid := CombatGridClass.new()
 	grid.place_combatant("a", Vector2i(0, 0))
 	var path: Array = [Vector2i(1, 0), Vector2i(2, 0), Vector2i(3, 0)]
-	var result: Dictionary = resolver.resolve(path, Vector2i(0, 0), 30, grid, "a", [])
+	var result = resolver.resolve(path, Vector2i(0, 0), 30, grid, "a", [])
 	_check(result["success"] == true, "3-step path succeeds")
 	_check(result["tiles_moved"] == 3, "3 tiles moved")
 	_check(result["cost_ft"] == 15, "costs 15 ft")
@@ -99,7 +99,7 @@ func _test_diagonal_step_costs_five_feet() -> void:
 	var resolver := MovementResolverClass.new()
 	var grid := CombatGrid.new()
 	grid.place_combatant("a", Vector2i(0, 0))
-	var result: Dictionary = resolver.resolve(
+	var result = resolver.resolve(
 		[Vector2i(1, 1)], Vector2i(0, 0), 30, grid, "a", []
 	)
 	_check(result["success"] == true, "diagonal step succeeds")
@@ -119,7 +119,7 @@ func _test_exact_budget_path_succeeds() -> void:
 		Vector2i(1, 0), Vector2i(2, 0), Vector2i(3, 0),
 		Vector2i(4, 0), Vector2i(5, 0), Vector2i(6, 0)
 	]
-	var result: Dictionary = resolver.resolve(path, Vector2i(0, 0), 30, grid, "a", [])
+	var result = resolver.resolve(path, Vector2i(0, 0), 30, grid, "a", [])
 	_check(result["success"] == true, "path costing exactly 30 ft succeeds with 30 ft budget")
 	_check(result["cost_ft"] == 30, "cost is 30 ft")
 
@@ -134,7 +134,7 @@ func _test_path_exceeding_budget_fails() -> void:
 		Vector2i(1, 0), Vector2i(2, 0), Vector2i(3, 0),
 		Vector2i(4, 0), Vector2i(5, 0), Vector2i(6, 0), Vector2i(7, 0)
 	]
-	var result: Dictionary = resolver.resolve(path, Vector2i(0, 0), 30, grid, "a", [])
+	var result = resolver.resolve(path, Vector2i(0, 0), 30, grid, "a", [])
 	_check(result["success"] == false, "path exceeding budget fails")
 	_check(result["reason"] == "insufficient_movement", "reason is insufficient_movement")
 	_check(result["blocked_at"] == Vector2i(7, 0), "blocked_at points to over-budget tile")
@@ -148,7 +148,7 @@ func _test_partial_budget_prevents_second_step() -> void:
 	var grid := CombatGridClass.new()
 	grid.place_combatant("a", Vector2i(0, 0))
 	# Only 5 ft remaining — second step should be denied
-	var result: Dictionary = resolver.resolve(
+	var result = resolver.resolve(
 		[Vector2i(1, 0), Vector2i(2, 0)], Vector2i(0, 0), 5, grid, "a", []
 	)
 	_check(result["success"] == false, "second step denied when budget is 5 ft")
@@ -166,7 +166,7 @@ func _test_path_blocked_by_occupied_tile() -> void:
 	grid.place_combatant("a", Vector2i(0, 0))
 	grid.place_combatant("blocker", Vector2i(2, 0))
 	var path: Array = [Vector2i(1, 0), Vector2i(2, 0), Vector2i(3, 0)]
-	var result: Dictionary = resolver.resolve(path, Vector2i(0, 0), 30, grid, "a", [])
+	var result = resolver.resolve(path, Vector2i(0, 0), 30, grid, "a", [])
 	_check(result["success"] == false, "path blocked by occupied tile fails")
 	_check(result["reason"] == "tile_occupied", "reason is tile_occupied")
 	_check(result["blocked_at"] == Vector2i(2, 0), "blocked_at is the occupied tile")
@@ -179,7 +179,7 @@ func _test_path_blocked_at_first_tile() -> void:
 	var grid := CombatGridClass.new()
 	grid.place_combatant("a", Vector2i(0, 0))
 	grid.place_combatant("wall", Vector2i(1, 0))
-	var result: Dictionary = resolver.resolve(
+	var result = resolver.resolve(
 		[Vector2i(1, 0)], Vector2i(0, 0), 30, grid, "a", []
 	)
 	_check(result["success"] == false, "first tile occupied blocks immediately")
@@ -198,12 +198,12 @@ func _test_oa_triggers_when_leaving_hostile_reach() -> void:
 	grid.place_combatant("hostile", Vector2i(0, 0))  # adjacent (reach 5 ft)
 	# Mover steps from (1,0) to (2,0): leaves hostile's 5 ft reach
 	var hostiles: Array = [{"id": "hostile", "reach_ft": 5}]
-	var result: Dictionary = resolver.resolve(
+	var result = resolver.resolve(
 		[Vector2i(2, 0)], Vector2i(1, 0), 30, grid, "mover", hostiles
 	)
 	_check(result["success"] == true, "path succeeds")
 	_check(result["oa_triggers"].size() == 1, "one OA trigger")
-	var trigger: Dictionary = result["oa_triggers"][0]
+	var trigger = result["oa_triggers"][0]
 	_check(trigger["from"] == Vector2i(1, 0), "OA trigger from is departure tile")
 	_check(trigger["to"] == Vector2i(2, 0), "OA trigger to is arrival tile")
 	_check(trigger["threatening_id"] == "hostile", "threatening_id is hostile combatant")
@@ -217,7 +217,7 @@ func _test_no_oa_when_staying_within_reach() -> void:
 	grid.place_combatant("hostile", Vector2i(0, 0))  # 5 ft away
 	# Hostile has 10 ft reach — mover steps to (2,0) which is still within 10 ft
 	var hostiles: Array = [{"id": "hostile", "reach_ft": 10}]
-	var result: Dictionary = resolver.resolve(
+	var result = resolver.resolve(
 		[Vector2i(2, 0)], Vector2i(1, 0), 30, grid, "mover", hostiles
 	)
 	_check(result["success"] == true, "path succeeds")
@@ -231,7 +231,7 @@ func _test_no_oa_when_hostile_not_on_grid() -> void:
 	grid.place_combatant("mover", Vector2i(0, 0))
 	# Hostile listed but NOT placed on the grid
 	var hostiles: Array = [{"id": "ghost", "reach_ft": 5}]
-	var result: Dictionary = resolver.resolve(
+	var result = resolver.resolve(
 		[Vector2i(1, 0)], Vector2i(0, 0), 30, grid, "mover", hostiles
 	)
 	_check(result["oa_triggers"].size() == 0, "no OA when hostile has no grid position")
@@ -246,7 +246,7 @@ func _test_oa_triggers_only_on_exit_step() -> void:
 	# 3-step path; only step (1,0)->(2,0) exits the 5 ft reach
 	var path: Array = [Vector2i(2, 0), Vector2i(3, 0), Vector2i(4, 0)]
 	var hostiles: Array = [{"id": "hostile", "reach_ft": 5}]
-	var result: Dictionary = resolver.resolve(path, Vector2i(1, 0), 30, grid, "mover", hostiles)
+	var result = resolver.resolve(path, Vector2i(1, 0), 30, grid, "mover", hostiles)
 	_check(result["oa_triggers"].size() == 1, "OA triggers exactly once (only on exit step)")
 	_check(result["oa_triggers"][0]["from"] == Vector2i(1, 0), "exit from tile (1,0)")
 
@@ -264,7 +264,7 @@ func _test_oa_from_multiple_hostiles() -> void:
 		{"id": "hostile1", "reach_ft": 5},
 		{"id": "hostile2", "reach_ft": 5}
 	]
-	var result: Dictionary = resolver.resolve(
+	var result = resolver.resolve(
 		[Vector2i(2, 0)], Vector2i(1, 0), 30, grid, "mover", hostiles
 	)
 	_check(result["oa_triggers"].size() == 2, "OA triggers from two hostile combatants")
@@ -278,7 +278,7 @@ func _test_result_keys_always_present() -> void:
 	var resolver := MovementResolverClass.new()
 	var grid := CombatGridClass.new()
 	grid.place_combatant("a", Vector2i(0, 0))
-	var result: Dictionary = resolver.resolve([], Vector2i(0, 0), 30, grid, "a", [])
+	var result = resolver.resolve([], Vector2i(0, 0), 30, grid, "a", [])
 	_check(result.has("success"), "result has 'success'")
 	_check(result.has("tiles_moved"), "result has 'tiles_moved'")
 	_check(result.has("cost_ft"), "result has 'cost_ft'")
