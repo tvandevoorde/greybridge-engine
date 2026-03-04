@@ -97,7 +97,7 @@ func _test_multi_step_deducts_correct_cost() -> void:
 func _test_diagonal_step_costs_five_feet() -> void:
 	print("_test_diagonal_step_costs_five_feet")
 	var resolver := MovementResolverClass.new()
-	var grid := CombatGrid.new()
+	var grid := CombatGridClass.new()
 	grid.place_combatant("a", Vector2i(0, 0))
 	var result = resolver.resolve(
 		[Vector2i(1, 1)], Vector2i(0, 0), 30, grid, "a", []
