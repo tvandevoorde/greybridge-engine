@@ -29,7 +29,7 @@ static func resolve(
 	proficiency_bonus: int,
 	is_proficient: bool,
 	roll_d20: Callable
-) -> SaveResult:
+) -> SaveResultClass:
 	var roll: int = roll_d20.call()
 	var bonus: int = ability_modifier + (proficiency_bonus if is_proficient else 0)
 	var result := SaveResultClass.new()
@@ -44,5 +44,5 @@ static func resolve(
 ## A failed save always delivers the full damage amount.
 static func apply_damage(damage: int, success: bool, half_on_success: bool) -> int:
 	if success and half_on_success:
-		return damage / 2  # int / int in GDScript 4 → truncating integer division (rounds toward zero)
+		return int(damage / 2.0)  # Use floating-point division then convert to int to ensure proper rounding
 	return damage

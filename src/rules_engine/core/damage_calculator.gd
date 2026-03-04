@@ -14,6 +14,8 @@
 ##   "modifier"    : int    — ability modifier that was applied
 class_name DamageCalculator
 
+const DiceRollerClass = preload("res://rules_engine/core/dice_roller.gd")
+
 ## Valid D&D 5e SRD damage types.
 const DAMAGE_TYPES: Array[String] = [
 	"acid",
@@ -47,7 +49,7 @@ static func calculate(
 	dice_count: int,
 	dice_faces: int,
 	damage_type: String,
-	roller: DiceRoller,
+	roller: DiceRollerClass,
 	ability_modifier: int = 0,
 ) -> Dictionary:
 	var roll: int = roller.roll_expression(dice_count, dice_faces)

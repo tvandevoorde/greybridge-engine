@@ -7,6 +7,7 @@
 ## (lexicographic ascending) for full determinism.
 class_name InitiativeRoller
 
+const DiceRollerClass = preload("res://rules_engine/core/dice_roller.gd")
 
 ## Roll initiative for all combatants and return them sorted in descending order.
 ##
@@ -23,7 +24,7 @@ class_name InitiativeRoller
 ##   "modifier" : int    — DEX modifier applied
 ##   "total"    : int    — roll + modifier (the initiative value)
 ##   "dex_score": int    — DEX score used for tie-breaking
-func roll_for_combatants(combatants: Array, roller: DiceRoller) -> Array:
+func roll_for_combatants(combatants: Array, roller: DiceRollerClass) -> Array:
 	var results: Array = []
 	for c in combatants:
 		var dex_score: int = c["dex_score"]
