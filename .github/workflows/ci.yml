@@ -103,11 +103,11 @@ jobs:
 
       - name: Unit tests — combat_grid
         working-directory: src
-        run: godot --headless --script ../tests/unit/rules_engine/test_combat_grid.gd
+        run: godot --headless --script ./tests/unit/rules_engine/test_combat_grid.gd
 
       - name: Unit tests — movement_resolver
         working-directory: src
-        run: godot --headless --script ../tests/unit/rules_engine/test_movement_resolver.gd
+        run: godot --headless --script ./tests/unit/rules_engine/test_movement_resolver.gd
 
       - name: Integration test — combat harness
         working-directory: src
