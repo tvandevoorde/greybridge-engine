@@ -31,7 +31,7 @@ const SavingThrowClass = preload("res://rules_engine/core/saving_throw.gd")
 const DiceRollerClass = preload("res://rules_engine/core/dice_roller.gd")
 
 
-var _attack_resolver: AttackResolver
+var _attack_resolver: AttackResolverClass
 
 
 func _init() -> void:
