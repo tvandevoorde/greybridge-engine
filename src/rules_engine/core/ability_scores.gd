@@ -46,6 +46,9 @@ func set_score(ability: String, score: int) -> void:
 ## Formula: floor((score - 10) / 2).
 ## Modifier is always up to date because it is computed from the stored score.
 func get_modifier(ability: String) -> int:
+	if not _scores.has(ability):
+		push_error("AbilityScores: unknown ability '%s'" % ability)
+		return 0
 	var score: int = get_score(ability)
 	return floori((score - 10) / 2.0)
 
