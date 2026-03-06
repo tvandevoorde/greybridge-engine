@@ -32,7 +32,7 @@ func resolve(
 	ability_modifier: int,
 	proficiency_bonus: int,
 	target_ac: int
-) -> AttackResult:
+) -> AttackResultClass:
 	var result := AttackResultClass.new()
 	result.critical = d20_roll == 20
 	var auto_miss: bool = d20_roll == 1
