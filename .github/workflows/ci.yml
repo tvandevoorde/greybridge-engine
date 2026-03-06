@@ -109,6 +109,14 @@ jobs:
         working-directory: src
         run: godot --headless --script ./tests/unit/rules_engine/test_movement_resolver.gd
 
+      - name: Unit tests — combat_action
+        working-directory: src
+        run: godot --headless --script ./tests/unit/rules_engine/test_combat_action.gd
+
       - name: Integration test — combat harness
         working-directory: src
         run: godot --headless --script ./tests/integration/test_combat_harness.gd
+
+      - name: Unit tests — combat_action_menu
+        working-directory: src
+        run: godot --headless --script ./tests/unit/ui/test_combat_action_menu.gd
