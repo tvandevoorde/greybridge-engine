@@ -8,6 +8,7 @@ class_name OverworldController
 extends Node
 
 const CombatInitializerClass = preload("res://combat_runtime/combat_initializer.gd")
+const DiceRollerClass = preload("res://rules_engine/core/dice_roller.gd")
 
 ## Emitted when the controls_locked state changes.
 signal controls_locked_changed(locked: bool)
@@ -40,7 +41,7 @@ func unlock_controls() -> void:
 ## actors    : Array of actor Dictionaries, each with "id" and "dex_score".
 ## positions : Dictionary mapping actor id (String) → Vector2i starting grid position.
 ## roller    : DiceRoller instance (inject a seeded roller for deterministic tests).
-func start_combat(actors: Array, positions: Dictionary, roller: DiceRoller) -> void:
+func start_combat(actors: Array, positions: Dictionary, roller: DiceRollerClass) -> void:
 	lock_controls()
 	var initializer := CombatInitializerClass.new()
 	var result: Dictionary = initializer.initialize(actors, positions, roller)

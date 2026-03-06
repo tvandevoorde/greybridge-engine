@@ -148,3 +148,7 @@ jobs:
       - name: Unit tests — combat_action_menu
         working-directory: src
         run: godot --headless --script ./tests/unit/ui/test_combat_action_menu.gd
+
+      - name: Unit tests — condition_display
+        working-directory: src
+        run: godot --headless --script ./tests/unit/ui/test_condition_display.gd

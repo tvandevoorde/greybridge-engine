@@ -9,6 +9,7 @@ class_name CombatInitializer
 extends Node
 
 const InitiativeRollerClass = preload("res://rules_engine/core/initiative.gd")
+const DiceRollerClass = preload("res://rules_engine/core/dice_roller.gd")
 
 ## Emitted once initiative is rolled and the turn order is determined.
 ## turn_order : Array of Dictionaries (initiative results, sorted descending).
@@ -30,7 +31,7 @@ signal combat_ready(turn_order: Array, positions: Dictionary)
 ## Returns a Dictionary:
 ##   "turn_order" : Array      — sorted initiative results (highest total first)
 ##   "positions"  : Dictionary — actor id → Vector2i grid position (preserved from input)
-func initialize(actors: Array, positions: Dictionary, roller: DiceRoller) -> Dictionary:
+func initialize(actors: Array, positions: Dictionary, roller: DiceRollerClass) -> Dictionary:
 	var ir := InitiativeRollerClass.new()
 	var turn_order: Array = ir.roll_for_combatants(actors, roller)
 	var result: Dictionary = {

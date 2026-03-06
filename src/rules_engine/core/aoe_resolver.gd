@@ -20,6 +20,7 @@ class_name AoEResolver
 
 const AoETemplateClass = preload("res://rules_engine/core/aoe_template.gd")
 const SpellExecutorClass = preload("res://rules_engine/core/spell_executor.gd")
+const DiceRollerClass = preload("res://rules_engine/core/dice_roller.gd")
 
 var _executor: SpellExecutorClass
 
@@ -51,7 +52,7 @@ func resolve_area(
 	template: Dictionary,
 	actors: Array,
 	effect: Dictionary,
-	roller: DiceRoller,
+	roller: DiceRollerClass,
 	roll_d20_fn: Callable
 ) -> Array:
 	var affected_tiles: Array[Vector2i] = AoETemplateClass.get_affected_tiles(template)
