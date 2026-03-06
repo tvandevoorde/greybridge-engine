@@ -123,7 +123,7 @@ jobs:
 
       - name: Unit tests — combat_camera_controller
         working-directory: src
-        run: godot --headless --script ../tests/unit/combat_runtime/test_combat_camera_controller.gd
+        run: godot --headless --script ./tests/unit/combat_runtime/test_combat_camera_controller.gd
 
       - name: Integration test — combat harness
         working-directory: src

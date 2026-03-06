@@ -8,7 +8,7 @@
 ## Exit code 0 = all assertions passed; 1 = one or more assertions failed.
 extends SceneTree
 
-const CombatCameraController = preload("res://combat_runtime/combat_camera_controller.gd")
+const CombatCameraControllerClass = preload("res://combat_runtime/combat_camera_controller.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -44,7 +44,7 @@ func _run_all_tests() -> void:
 # ---------------------------------------------------------------------------
 func _test_on_turn_started_emits_focus_and_highlight() -> void:
 	print("_test_on_turn_started_emits_focus_and_highlight")
-	var ctrl := CombatCameraController.new()
+	var ctrl := CombatCameraControllerClass.new()
 
 	var focus_positions: Array[Vector2] = []
 	var highlighted_ids: Array[String] = []
@@ -67,7 +67,7 @@ func _test_on_turn_started_emits_focus_and_highlight() -> void:
 # ---------------------------------------------------------------------------
 func _test_on_turn_started_updates_state() -> void:
 	print("_test_on_turn_started_updates_state")
-	var ctrl := CombatCameraController.new()
+	var ctrl := CombatCameraControllerClass.new()
 
 	ctrl.on_turn_started("bandit", Vector2(32.0, 64.0))
 
@@ -84,7 +84,7 @@ func _test_on_turn_started_updates_state() -> void:
 # ---------------------------------------------------------------------------
 func _test_on_attack_declared_emits_target_focus() -> void:
 	print("_test_on_attack_declared_emits_target_focus")
-	var ctrl := CombatCameraController.new()
+	var ctrl := CombatCameraControllerClass.new()
 
 	ctrl.on_turn_started("hero", Vector2(0.0, 0.0))
 
@@ -105,7 +105,7 @@ func _test_on_attack_declared_emits_target_focus() -> void:
 # ---------------------------------------------------------------------------
 func _test_on_attack_resolved_returns_to_active_position() -> void:
 	print("_test_on_attack_resolved_returns_to_active_position")
-	var ctrl := CombatCameraController.new()
+	var ctrl := CombatCameraControllerClass.new()
 
 	ctrl.on_turn_started("hero", Vector2(50.0, 75.0))
 	ctrl.on_attack_declared(Vector2(400.0, 400.0))
@@ -127,7 +127,7 @@ func _test_on_attack_resolved_returns_to_active_position() -> void:
 # ---------------------------------------------------------------------------
 func _test_on_attack_resolved_emits_focus_returned() -> void:
 	print("_test_on_attack_resolved_emits_focus_returned")
-	var ctrl := CombatCameraController.new()
+	var ctrl := CombatCameraControllerClass.new()
 
 	ctrl.on_turn_started("hero", Vector2(10.0, 20.0))
 
@@ -148,7 +148,7 @@ func _test_on_attack_resolved_emits_focus_returned() -> void:
 # ---------------------------------------------------------------------------
 func _test_default_attack_focus_duration() -> void:
 	print("_test_default_attack_focus_duration")
-	var ctrl := CombatCameraController.new()
+	var ctrl := CombatCameraControllerClass.new()
 	_check(ctrl.attack_focus_duration == 0.8,
 		"default attack_focus_duration is 0.8")
 	ctrl.free()
@@ -159,7 +159,7 @@ func _test_default_attack_focus_duration() -> void:
 # ---------------------------------------------------------------------------
 func _test_successive_turns_update_active_state() -> void:
 	print("_test_successive_turns_update_active_state")
-	var ctrl := CombatCameraController.new()
+	var ctrl := CombatCameraControllerClass.new()
 
 	ctrl.on_turn_started("hero", Vector2(0.0, 0.0))
 	ctrl.on_turn_started("bandit", Vector2(256.0, 128.0))
