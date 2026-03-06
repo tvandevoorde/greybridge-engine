@@ -7,7 +7,7 @@
 class_name OverworldController
 extends Node
 
-const CombatInitializer = preload("res://combat_runtime/combat_initializer.gd")
+const CombatInitializerClass = preload("res://combat_runtime/combat_initializer.gd")
 
 ## Emitted when the controls_locked state changes.
 signal controls_locked_changed(locked: bool)
@@ -42,7 +42,7 @@ func unlock_controls() -> void:
 ## roller    : DiceRoller instance (inject a seeded roller for deterministic tests).
 func start_combat(actors: Array, positions: Dictionary, roller: DiceRoller) -> void:
 	lock_controls()
-	var initializer := CombatInitializer.new()
+	var initializer := CombatInitializerClass.new()
 	var result: Dictionary = initializer.initialize(actors, positions, roller)
 	initializer.free()
 	combat_ready.emit(result["turn_order"], result["positions"])
