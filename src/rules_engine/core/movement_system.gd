@@ -32,6 +32,7 @@ class_name MovementSystem
 
 const OpportunityAttack = preload("res://rules_engine/core/opportunity_attack.gd")
 const AttackResolver = preload("res://rules_engine/core/attack_resolver.gd")
+const ActionEconomyClass = preload("res://rules_engine/core/action_economy.gd")
 
 ## Standard melee reach per 5e SRD: 5 feet (one grid tile).
 const DEFAULT_MELEE_REACH_FT: int = 5
@@ -71,7 +72,7 @@ func is_within_reach(
 ##
 ## Returns a Dictionary (see class-level doc for keys).
 func process_leave_reach(
-	attacker_economy: ActionEconomy,
+	attacker_economy: ActionEconomyClass,
 	d20_roll: int,
 	str_modifier: int,
 	proficiency_bonus: int,

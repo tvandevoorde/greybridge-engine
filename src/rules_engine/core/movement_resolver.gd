@@ -35,6 +35,8 @@
 ##                              hostile's melee reach at that step.
 class_name MovementResolver
 
+const CombatGridClass = preload("res://rules_engine/core/combat_grid.gd")
+
 const FEET_PER_TILE: int = 5
 
 
@@ -55,7 +57,7 @@ func resolve(
 	path: Array,
 	start: Vector2i,
 	movement_remaining_ft: int,
-	grid: CombatGrid,
+	grid: CombatGridClass,
 	mover_id: String,
 	hostiles: Array
 ) -> Dictionary:
@@ -95,7 +97,7 @@ func resolve(
 		# a hostile's melee reach, moving to (`next`) which is outside that reach.
 		for hostile in hostiles:
 			var hostile_pos: Vector2i = grid.get_position(hostile["id"])
-			if hostile_pos == CombatGrid.INVALID_POSITION:
+			if hostile_pos == CombatGridClass.INVALID_POSITION:
 				continue
 			if grid.is_within_reach(hostile_pos, current, hostile["reach_ft"]) \
 					and not grid.is_within_reach(hostile_pos, next, hostile["reach_ft"]):
