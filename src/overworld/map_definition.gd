@@ -18,6 +18,10 @@ var collision_layer: int = 1
 ## Interaction/trigger layer bitmask for this map.
 var interaction_layer: int = 2
 
+## Raw transition point Dictionaries for this map (parsed from JSON).
+## Pass to MapTransitionController.load_transitions() to activate them.
+var transitions: Array = []
+
 const MapDefinitionClass = preload("res://overworld/map_definition.gd")
 
 
@@ -34,6 +38,7 @@ static func from_dict(data: Dictionary):
 	def.spawn_point = Vector2i(int(sp.get("x", 0)), int(sp.get("y", 0)))
 	def.collision_layer = int(data.get("collision_layer", 1))
 	def.interaction_layer = int(data.get("interaction_layer", 2))
+	def.transitions = data.get("transitions", [])
 	return def
 
 
