@@ -47,5 +47,8 @@
       [null, null, null, null, null, null, null, null, null, null],
       [null, null, null, null, null, null, null, null, null, null]
     ]
-  }
+  },
+  "doors": [
+    {"position": {"x": 4, "y": 3}, "is_open": false}
+  ]
 }
