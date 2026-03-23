@@ -51,6 +51,10 @@ func _run_all_tests() -> void:
 	_test_load_from_dict_ground_layer_row_count()
 	_test_load_from_dict_collision_layer_values()
 	_test_load_from_dict_triggers_layer_null_and_dict()
+	_test_get_blocked_tiles_empty_when_no_collision_layer()
+	_test_get_blocked_tiles_returns_blocked_positions()
+	_test_get_blocked_tiles_all_passable_returns_empty()
+	_test_get_blocked_tiles_multiple_rows()
 
 
 # ---------------------------------------------------------------------------
@@ -296,3 +300,80 @@ func _test_load_from_dict_triggers_layer_null_and_dict() -> void:
 		"trigger type is 'combat_start'")
 	_check(def.layers["triggers"][0][1]["encounter_id"] == "bandit_ambush",
 		"trigger encounter_id is 'bandit_ambush'")
+
+
+# ---------------------------------------------------------------------------
+# get_blocked_tiles — no collision layer → empty array
+# ---------------------------------------------------------------------------
+func _test_get_blocked_tiles_empty_when_no_collision_layer() -> void:
+	print("_test_get_blocked_tiles_empty_when_no_collision_layer")
+	var def := MapDefinitionClass.new()
+	def.tileset_ref = "ts"
+	def.map_width   = 2
+	def.map_height  = 2
+	# No collision layer in layers dict.
+	var tiles := def.get_blocked_tiles()
+	_check(tiles.size() == 0, "get_blocked_tiles returns empty array when no collision layer")
+
+
+# ---------------------------------------------------------------------------
+# get_blocked_tiles — blocked tiles returned as Vector2i positions
+# ---------------------------------------------------------------------------
+func _test_get_blocked_tiles_returns_blocked_positions() -> void:
+	print("_test_get_blocked_tiles_returns_blocked_positions")
+	var loader := MapLoaderClass.new()
+	var data := {
+		"tileset_ref": "ts",
+		"map_width": 2,
+		"map_height": 2,
+		"layers": {"collision": [[0, 1], [1, 0]]},
+	}
+	var def = loader.load_from_dict(data)
+	var tiles := def.get_blocked_tiles()
+	_check(tiles.size() == 2, "get_blocked_tiles returns 2 blocked tiles")
+	_check(tiles.has(Vector2i(1, 0)), "blocked tile (1, 0) is present")
+	_check(tiles.has(Vector2i(0, 1)), "blocked tile (0, 1) is present")
+
+
+# ---------------------------------------------------------------------------
+# get_blocked_tiles — all passable → empty array
+# ---------------------------------------------------------------------------
+func _test_get_blocked_tiles_all_passable_returns_empty() -> void:
+	print("_test_get_blocked_tiles_all_passable_returns_empty")
+	var loader := MapLoaderClass.new()
+	var data := {
+		"tileset_ref": "ts",
+		"map_width": 3,
+		"map_height": 2,
+		"layers": {"collision": [[0, 0, 0], [0, 0, 0]]},
+	}
+	var def = loader.load_from_dict(data)
+	var tiles := def.get_blocked_tiles()
+	_check(tiles.size() == 0, "get_blocked_tiles returns empty array when all tiles are passable")
+
+
+# ---------------------------------------------------------------------------
+# get_blocked_tiles — multiple rows all blocked
+# ---------------------------------------------------------------------------
+func _test_get_blocked_tiles_multiple_rows() -> void:
+	print("_test_get_blocked_tiles_multiple_rows")
+	var loader := MapLoaderClass.new()
+	var data := {
+		"tileset_ref": "ts",
+		"map_width": 3,
+		"map_height": 3,
+		"layers": {
+			"collision": [
+				[1, 0, 1],
+				[0, 1, 0],
+				[1, 0, 0],
+			]
+		},
+	}
+	var def = loader.load_from_dict(data)
+	var tiles := def.get_blocked_tiles()
+	_check(tiles.size() == 4, "get_blocked_tiles returns 4 blocked tiles")
+	_check(tiles.has(Vector2i(0, 0)), "blocked tile (0, 0) is present")
+	_check(tiles.has(Vector2i(2, 0)), "blocked tile (2, 0) is present")
+	_check(tiles.has(Vector2i(1, 1)), "blocked tile (1, 1) is present")
+	_check(tiles.has(Vector2i(0, 2)), "blocked tile (0, 2) is present")

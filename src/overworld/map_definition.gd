@@ -18,6 +18,10 @@ var collision_layer: int = 1
 ## Interaction/trigger layer bitmask for this map.
 var interaction_layer: int = 2
 
+## Tile positions the player cannot enter, in grid coordinates.
+## Each element is a Vector2i.
+var blocked_tiles: Array = []
+
 const MapDefinitionClass = preload("res://overworld/map_definition.gd")
 
 
@@ -27,6 +31,8 @@ const MapDefinitionClass = preload("res://overworld/map_definition.gd")
 ##   "spawn_point"       : Dictionary with "x" (int) and "y" (int)
 ##   "collision_layer"   : int  (default 1)
 ##   "interaction_layer" : int  (default 2)
+##   "blocked_tiles"     : Array of Dictionaries with "x" (int) and "y" (int)
+##                         (optional, defaults to empty)
 static func from_dict(data: Dictionary):
 	var def := MapDefinitionClass.new()
 	def.map_id = data.get("map_id", "")
@@ -34,6 +40,10 @@ static func from_dict(data: Dictionary):
 	def.spawn_point = Vector2i(int(sp.get("x", 0)), int(sp.get("y", 0)))
 	def.collision_layer = int(data.get("collision_layer", 1))
 	def.interaction_layer = int(data.get("interaction_layer", 2))
+	var raw_blocked: Array = data.get("blocked_tiles", [])
+	for entry in raw_blocked:
+		if entry is Dictionary:
+			def.blocked_tiles.append(Vector2i(int(entry.get("x", 0)), int(entry.get("y", 0))))
 	return def
 
 
