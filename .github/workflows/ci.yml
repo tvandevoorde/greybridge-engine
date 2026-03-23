@@ -156,3 +156,11 @@ jobs:
       - name: Unit tests — condition_display
         working-directory: src
         run: godot --headless --script ./tests/unit/ui/test_condition_display.gd
+
+      - name: Unit tests — combat_log_entry
+        working-directory: src
+        run: godot --headless --script ./tests/unit/rules_engine/test_combat_log_entry.gd
+
+      - name: Unit tests — combat_log
+        working-directory: src
+        run: godot --headless --script ./tests/unit/ui/test_combat_log.gd
