@@ -146,10 +146,10 @@ func _run_full_encounter(seed_value: int) -> Dictionary:
 	}
 	tlc.setup(state_manager, economies)
 
-	# Capture result from CombatResolver signal.
-	var combat_result: String = ""
+	# Capture result from CombatResolver signal using array mutation (closure-safe).
+	var combat_results: Array = []
 	combat_resolver.combat_ended.connect(func(outcome: Dictionary) -> void:
-		combat_result = outcome["result"]
+		combat_results.append(outcome["result"])
 	)
 
 	# --- Main combat loop ---
@@ -207,7 +207,7 @@ func _run_full_encounter(seed_value: int) -> Dictionary:
 	combat_resolver.free()
 
 	return {
-		"result": combat_result,
+		"result": combat_results[0] if combat_results.size() > 0 else "",
 		"rounds": rounds_played,
 		"final_hp": final_hp,
 	}
@@ -524,21 +524,21 @@ func _test_combat_ends_player_victory() -> void:
 		{"id": "bandit",  "side": "enemy",  "current_hp": 0,  "loot": ["gold_piece"]},
 	]
 
-	var received_outcome: Dictionary = {}
-	cr.combat_ended.connect(func(o: Dictionary) -> void: received_outcome = o)
+	var received_outcomes: Array = []
+	cr.combat_ended.connect(func(o: Dictionary) -> void: received_outcomes.append(o))
 	var loot_items: Array = []
 	cr.loot_ready.connect(func(r: Array) -> void: loot_items.append_array(r))
-	var overworld_emitted: bool = false
-	cr.return_to_overworld.connect(func() -> void: overworld_emitted = true)
+	var overworld_events: Array = []
+	cr.return_to_overworld.connect(func() -> void: overworld_events.append(true))
 
 	tlc.begin_turn()
 	cr.resolve(sm, participants)
 
-	_check(received_outcome.get("result", "") == "player_victory",
+	_check(received_outcomes.size() > 0 and received_outcomes[0].get("result", "") == "player_victory",
 		"combat_ended result is 'player_victory'")
 	_check(loot_items.has("gold_piece"),
 		"loot_ready emitted with the bandit's gold_piece")
-	_check(overworld_emitted == true,
+	_check(overworld_events.size() > 0,
 		"return_to_overworld emitted after player victory")
 	_check(sm.is_active() == false,
 		"CombatStateManager is cleared after combat ends")
@@ -567,17 +567,17 @@ func _test_combat_ends_player_defeat() -> void:
 		{"id": "bandit",  "side": "enemy",  "current_hp": 8,  "loot": []},
 	]
 
-	var received_outcome: Dictionary = {}
-	cr.combat_ended.connect(func(o: Dictionary) -> void: received_outcome = o)
-	var overworld_emitted: bool = false
-	cr.return_to_overworld.connect(func() -> void: overworld_emitted = true)
+	var received_outcomes: Array = []
+	cr.combat_ended.connect(func(o: Dictionary) -> void: received_outcomes.append(o))
+	var overworld_events: Array = []
+	cr.return_to_overworld.connect(func() -> void: overworld_events.append(true))
 
 	tlc.begin_turn()
 	cr.resolve(sm, participants)
 
-	_check(received_outcome.get("result", "") == "player_defeat",
+	_check(received_outcomes.size() > 0 and received_outcomes[0].get("result", "") == "player_defeat",
 		"combat_ended result is 'player_defeat'")
-	_check(overworld_emitted == true,
+	_check(overworld_events.size() > 0,
 		"return_to_overworld emitted after player defeat")
 	_check(sm.is_active() == false,
 		"CombatStateManager is cleared after player defeat")
