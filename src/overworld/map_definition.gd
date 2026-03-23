@@ -18,6 +18,10 @@ var collision_layer: int = 1
 ## Interaction/trigger layer bitmask for this map.
 var interaction_layer: int = 2
 
+## NPC spawn data as a list of raw Dictionaries parsed from JSON.
+## Each entry is passed to NpcController.load_npcs() at runtime.
+var npcs: Array = []
+
 const MapDefinitionClass = preload("res://overworld/map_definition.gd")
 
 
@@ -34,6 +38,7 @@ static func from_dict(data: Dictionary):
 	def.spawn_point = Vector2i(int(sp.get("x", 0)), int(sp.get("y", 0)))
 	def.collision_layer = int(data.get("collision_layer", 1))
 	def.interaction_layer = int(data.get("interaction_layer", 2))
+	def.npcs = data.get("npcs", []).duplicate()
 	return def
 
 
