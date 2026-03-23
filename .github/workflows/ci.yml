@@ -209,3 +209,11 @@ jobs:
       - name: Unit tests — enemy_turn_controller
         working-directory: src
         run: godot --headless --script ./tests/unit/combat_runtime/test_enemy_turn_controller.gd
+
+      - name: Unit tests — grid_movement_validator
+        working-directory: src
+        run: godot --headless --script ./tests/unit/rules_engine/test_grid_movement_validator.gd
+
+      - name: Unit tests — grid_movement_controller
+        working-directory: src
+        run: godot --headless --script ./tests/unit/overworld/test_grid_movement_controller.gd
