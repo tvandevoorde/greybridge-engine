@@ -176,3 +176,11 @@ jobs:
       - name: Unit tests — target_selector
         working-directory: src
         run: godot --headless --script ./tests/unit/ui/test_target_selector.gd
+
+      - name: Unit tests — enemy_ai
+        working-directory: src
+        run: godot --headless --script ./tests/unit/rules_engine/test_enemy_ai.gd
+
+      - name: Unit tests — enemy_turn_controller
+        working-directory: src
+        run: godot --headless --script ./tests/unit/combat_runtime/test_enemy_turn_controller.gd
