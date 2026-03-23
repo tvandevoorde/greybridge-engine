@@ -278,66 +278,66 @@ func _test_all_five_actions_selectable() -> void:
 # Input lock — select_action is blocked when a lock is active
 # ---------------------------------------------------------------------------
 func _test_select_action_blocked_when_input_locked() -> void:
-print("_test_select_action_blocked_when_input_locked")
-var menu := _make_menu()
-var economy := ActionEconomyClass.new(30)
-economy.start_turn()
-menu.refresh(economy)
-var lock := CombatInputLockClass.new()
-menu.set_input_lock(lock)
-lock.lock("dice_resolution")
-_check(menu.select_action("attack") == false, "select_action returns false when input locked")
-_check(_signal_count == 0, "no signal emitted when input locked")
-lock.free()
+	print("_test_select_action_blocked_when_input_locked")
+	var menu := _make_menu()
+	var economy := ActionEconomyClass.new(30)
+	economy.start_turn()
+	menu.refresh(economy)
+	var lock := CombatInputLockClass.new()
+	menu.set_input_lock(lock)
+	lock.lock("dice_resolution")
+	_check(menu.select_action("attack") == false, "select_action returns false when input locked")
+	_check(_signal_count == 0, "no signal emitted when input locked")
+	lock.free()
 
 
 # ---------------------------------------------------------------------------
 # Input lock — select_action succeeds once the lock is released
 # ---------------------------------------------------------------------------
 func _test_select_action_succeeds_after_unlock() -> void:
-print("_test_select_action_succeeds_after_unlock")
-var menu := _make_menu()
-var economy := ActionEconomyClass.new(30)
-economy.start_turn()
-menu.refresh(economy)
-var lock := CombatInputLockClass.new()
-menu.set_input_lock(lock)
-lock.lock("animation")
-_check(menu.select_action("attack") == false, "select_action blocked while locked")
-lock.unlock()
-_check(menu.select_action("attack") == true, "select_action succeeds after unlock")
-_check(_signal_count == 1, "signal emitted exactly once after unlock")
-lock.free()
+	print("_test_select_action_succeeds_after_unlock")
+	var menu := _make_menu()
+	var economy := ActionEconomyClass.new(30)
+	economy.start_turn()
+	menu.refresh(economy)
+	var lock := CombatInputLockClass.new()
+	menu.set_input_lock(lock)
+	lock.lock("animation")
+	_check(menu.select_action("attack") == false, "select_action blocked while locked")
+	lock.unlock()
+	_check(menu.select_action("attack") == true, "select_action succeeds after unlock")
+	_check(_signal_count == 1, "signal emitted exactly once after unlock")
+	lock.free()
 
 
 # ---------------------------------------------------------------------------
 # Input lock — no lock attached → normal behaviour
 # ---------------------------------------------------------------------------
 func _test_select_action_no_lock_attached_works_normally() -> void:
-print("_test_select_action_no_lock_attached_works_normally")
-var menu := _make_menu()
-var economy := ActionEconomyClass.new(30)
-economy.start_turn()
-menu.refresh(economy)
-# No set_input_lock() call — should behave as before
-_check(menu.select_action("dash") == true, "select_action works normally without a lock")
-_check(_signal_count == 1, "signal emitted when no lock is attached")
+	print("_test_select_action_no_lock_attached_works_normally")
+	var menu := _make_menu()
+	var economy := ActionEconomyClass.new(30)
+	economy.start_turn()
+	menu.refresh(economy)
+	# No set_input_lock() call — should behave as before
+	_check(menu.select_action("dash") == true, "select_action works normally without a lock")
+	_check(_signal_count == 1, "signal emitted when no lock is attached")
 
 
 # ---------------------------------------------------------------------------
 # Input lock — passing null to set_input_lock detaches any existing lock
 # ---------------------------------------------------------------------------
 func _test_set_input_lock_null_detaches_lock() -> void:
-print("_test_set_input_lock_null_detaches_lock")
-var menu := _make_menu()
-var economy := ActionEconomyClass.new(30)
-economy.start_turn()
-menu.refresh(economy)
-var lock := CombatInputLockClass.new()
-menu.set_input_lock(lock)
-lock.lock("dice_resolution")
-_check(menu.select_action("attack") == false, "blocked while lock attached")
-menu.set_input_lock(null)
-_check(menu.select_action("attack") == true, "select_action works after lock detached")
-_check(_signal_count == 1, "signal emitted after lock detached")
-lock.free()
+	print("_test_set_input_lock_null_detaches_lock")
+	var menu := _make_menu()
+	var economy := ActionEconomyClass.new(30)
+	economy.start_turn()
+	menu.refresh(economy)
+	var lock := CombatInputLockClass.new()
+	menu.set_input_lock(lock)
+	lock.lock("dice_resolution")
+	_check(menu.select_action("attack") == false, "blocked while lock attached")
+	menu.set_input_lock(null)
+	_check(menu.select_action("attack") == true, "select_action works after lock detached")
+	_check(_signal_count == 1, "signal emitted after lock detached")
+	lock.free()
