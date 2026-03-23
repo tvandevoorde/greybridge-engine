@@ -133,6 +133,10 @@ jobs:
         working-directory: src
         run: godot --headless --script ./tests/unit/combat_runtime/test_combat_initializer.gd
 
+      - name: Unit tests — combat_resolver
+        working-directory: src
+        run: godot --headless --script ./tests/unit/combat_runtime/test_combat_resolver.gd
+
       - name: Unit tests — overworld_controller
         working-directory: src
         run: godot --headless --script ./tests/unit/overworld/test_overworld_controller.gd
