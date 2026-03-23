@@ -37,6 +37,8 @@ func _run_all_tests() -> void:
 	_test_load_from_dict_defaults()
 	_test_load_from_dict_is_valid()
 	_test_load_from_dict_empty_is_invalid()
+	_test_load_from_dict_music_track()
+	_test_load_from_dict_music_track_default_empty()
 	_test_load_from_path_missing_file_returns_null()
 	_test_load_from_path_valid_json()
 
@@ -139,6 +141,31 @@ func _test_load_from_dict_empty_is_invalid() -> void:
 
 
 # ---------------------------------------------------------------------------
+# load_from_dict — music_track is parsed
+# ---------------------------------------------------------------------------
+func _test_load_from_dict_music_track() -> void:
+	print("_test_load_from_dict_music_track")
+	var data := {
+		"map_id": "test_map",
+		"spawn_point": {"x": 0, "y": 0},
+		"collision_layer": 1,
+		"interaction_layer": 2,
+		"music_track": "dungeon_theme",
+	}
+	var def := MapLoaderClass.load_from_dict(data)
+	_check(def.music_track == "dungeon_theme", "music_track parsed correctly")
+
+
+# ---------------------------------------------------------------------------
+# load_from_dict — missing music_track defaults to empty string
+# ---------------------------------------------------------------------------
+func _test_load_from_dict_music_track_default_empty() -> void:
+	print("_test_load_from_dict_music_track_default_empty")
+	var def := MapLoaderClass.load_from_dict({"map_id": "test_map"})
+	_check(def.music_track == "", "music_track defaults to empty string when absent")
+
+
+# ---------------------------------------------------------------------------
 # load_from_path — missing file returns null
 # ---------------------------------------------------------------------------
 func _test_load_from_path_missing_file_returns_null() -> void:
@@ -159,4 +186,5 @@ func _test_load_from_path_valid_json() -> void:
 		_check(def.spawn_point == Vector2i(2, 3), "loaded spawn_point matches JSON")
 		_check(def.collision_layer == 1, "loaded collision_layer matches JSON")
 		_check(def.interaction_layer == 2, "loaded interaction_layer matches JSON")
+		_check(def.music_track == "road_to_greybridge_theme", "loaded music_track matches JSON")
 		_check(def.is_valid() == true, "loaded map is valid")

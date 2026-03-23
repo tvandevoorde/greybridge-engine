@@ -50,6 +50,8 @@ func _run_all_tests() -> void:
 	_test_camera_follow_position_matches_spawn_point()
 	_test_bootstrap_no_combat_systems_active()
 	_test_bootstrap_overwrites_previous_state()
+	_test_bootstrap_emits_music_track_requested_when_track_set()
+	_test_bootstrap_does_not_emit_music_track_requested_when_no_track()
 
 
 # ---------------------------------------------------------------------------
@@ -211,4 +213,39 @@ func _test_bootstrap_overwrites_previous_state() -> void:
 	ob.bootstrap(def2)
 	_check(ob.current_map.map_id == "map_two", "current_map updated to second map")
 	_check(ob.is_bootstrapped == true, "is_bootstrapped remains true after second bootstrap")
+	ob.free()
+
+
+# ---------------------------------------------------------------------------
+# bootstrap() emits music_track_requested when map has a non-empty music_track
+# ---------------------------------------------------------------------------
+func _test_bootstrap_emits_music_track_requested_when_track_set() -> void:
+	print("_test_bootstrap_emits_music_track_requested_when_track_set")
+	var ob := OverworldBootstrapClass.new()
+	var received_tracks: Array = []
+	ob.music_track_requested.connect(func(track_id: String) -> void:
+		received_tracks.append(track_id)
+	)
+	var def := _make_map_def("test_map", 0, 0, 1, 2)
+	def.music_track = "forest_theme"
+	ob.bootstrap(def)
+	_check(received_tracks.size() == 1, "music_track_requested emitted once")
+	_check(received_tracks[0] == "forest_theme", "music_track_requested carries the correct track id")
+	ob.free()
+
+
+# ---------------------------------------------------------------------------
+# bootstrap() does NOT emit music_track_requested when map has no music_track
+# ---------------------------------------------------------------------------
+func _test_bootstrap_does_not_emit_music_track_requested_when_no_track() -> void:
+	print("_test_bootstrap_does_not_emit_music_track_requested_when_no_track")
+	var ob := OverworldBootstrapClass.new()
+	var received_tracks: Array = []
+	ob.music_track_requested.connect(func(track_id: String) -> void:
+		received_tracks.append(track_id)
+	)
+	var def := _make_map_def("test_map", 0, 0, 1, 2)
+	# def.music_track is "" by default
+	ob.bootstrap(def)
+	_check(received_tracks.size() == 0, "music_track_requested not emitted when track is empty")
 	ob.free()

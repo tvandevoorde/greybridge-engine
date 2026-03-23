@@ -34,6 +34,11 @@ signal stepped(from: Vector2i, to: Vector2i)
 ## reason    : String   — "blocked_by_collision" | "invalid_direction"
 signal move_blocked(position: Vector2i, direction: Vector2i, reason: String)
 
+## Emitted after the player successfully lands on a new tile.
+## Connect to trigger a footstep sound effect.
+## position : Vector2i — the tile the player has just stepped onto.
+signal footstep_requested(position: Vector2i)
+
 ## Current grid tile occupied by the player.
 var current_position: Vector2i = Vector2i(0, 0)
 
@@ -101,6 +106,7 @@ func request_step(direction: Vector2i) -> void:
 		var from: Vector2i = current_position
 		current_position = result["new_position"]
 		stepped.emit(from, current_position)
+		footstep_requested.emit(current_position)
 	else:
 		move_blocked.emit(current_position, direction, result["reason"])
 

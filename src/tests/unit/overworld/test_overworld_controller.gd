@@ -42,6 +42,12 @@ func _run_all_tests() -> void:
 	_test_return_from_combat_stores_rewards()
 	_test_return_from_combat_emits_combat_resolved()
 	_test_return_from_combat_empty_rewards()
+	_test_current_music_track_empty_by_default()
+	_test_set_current_music_track()
+	_test_start_combat_emits_combat_music_requested()
+	_test_return_from_combat_emits_overworld_music_resumed()
+	_test_return_from_combat_music_resumed_with_stored_track()
+	_test_return_from_combat_music_resumed_empty_when_no_track_set()
 
 
 # ---------------------------------------------------------------------------
@@ -230,4 +236,91 @@ func _test_return_from_combat_empty_rewards() -> void:
 	oc.return_from_combat([])
 	_check(signal_events.size() == 1, "combat_resolved emitted once with empty rewards")
 	_check(received_rewards.size() == 0, "combat_resolved payload is empty array")
+	oc.free()
+
+
+# ---------------------------------------------------------------------------
+# current_music_track is empty string by default
+# ---------------------------------------------------------------------------
+func _test_current_music_track_empty_by_default() -> void:
+	print("_test_current_music_track_empty_by_default")
+	var oc := OverworldControllerClass.new()
+	_check(oc.current_music_track == "", "current_music_track is empty string by default")
+	oc.free()
+
+
+# ---------------------------------------------------------------------------
+# set_current_music_track() stores the track id
+# ---------------------------------------------------------------------------
+func _test_set_current_music_track() -> void:
+	print("_test_set_current_music_track")
+	var oc := OverworldControllerClass.new()
+	oc.set_current_music_track("road_theme")
+	_check(oc.current_music_track == "road_theme", "current_music_track set by set_current_music_track()")
+	oc.free()
+
+
+# ---------------------------------------------------------------------------
+# start_combat() emits combat_music_requested
+# ---------------------------------------------------------------------------
+func _test_start_combat_emits_combat_music_requested() -> void:
+	print("_test_start_combat_emits_combat_music_requested")
+	var oc := OverworldControllerClass.new()
+	var events: Array = []
+	oc.combat_music_requested.connect(func() -> void:
+		events.append(true)
+	)
+	var roller := DiceRollerClass.new(0)
+	oc.start_combat([{"id": "hero", "dex_score": 10}], {}, roller)
+	_check(events.size() == 1, "combat_music_requested emitted once on start_combat()")
+	oc.free()
+
+
+# ---------------------------------------------------------------------------
+# return_from_combat() emits overworld_music_resumed
+# ---------------------------------------------------------------------------
+func _test_return_from_combat_emits_overworld_music_resumed() -> void:
+	print("_test_return_from_combat_emits_overworld_music_resumed")
+	var oc := OverworldControllerClass.new()
+	var events: Array = []
+	oc.overworld_music_resumed.connect(func(_track_id: String) -> void:
+		events.append(true)
+	)
+	oc.return_from_combat([])
+	_check(events.size() == 1, "overworld_music_resumed emitted once on return_from_combat()")
+	oc.free()
+
+
+# ---------------------------------------------------------------------------
+# return_from_combat() emits overworld_music_resumed with the stored track
+# ---------------------------------------------------------------------------
+func _test_return_from_combat_music_resumed_with_stored_track() -> void:
+	print("_test_return_from_combat_music_resumed_with_stored_track")
+	var oc := OverworldControllerClass.new()
+	oc.set_current_music_track("forest_theme")
+	var received_tracks: Array = []
+	oc.overworld_music_resumed.connect(func(track_id: String) -> void:
+		received_tracks.append(track_id)
+	)
+	oc.return_from_combat([])
+	_check(received_tracks.size() == 1, "overworld_music_resumed emitted once")
+	_check(received_tracks[0] == "forest_theme",
+		"overworld_music_resumed carries the stored music track id")
+	oc.free()
+
+
+# ---------------------------------------------------------------------------
+# return_from_combat() emits overworld_music_resumed with empty string when no track set
+# ---------------------------------------------------------------------------
+func _test_return_from_combat_music_resumed_empty_when_no_track_set() -> void:
+	print("_test_return_from_combat_music_resumed_empty_when_no_track_set")
+	var oc := OverworldControllerClass.new()
+	var received_tracks: Array = []
+	oc.overworld_music_resumed.connect(func(track_id: String) -> void:
+		received_tracks.append(track_id)
+	)
+	oc.return_from_combat([])
+	_check(received_tracks.size() == 1, "overworld_music_resumed emitted once")
+	_check(received_tracks[0] == "",
+		"overworld_music_resumed carries empty string when no track was set")
 	oc.free()

@@ -30,6 +30,11 @@ signal layers_initialized(collision_layer: int, interaction_layer: int)
 ## Emitted when the camera follow target is set, carrying the world position.
 signal camera_follow_initialized(position: Vector2)
 
+## Emitted when a map with a non-empty music_track is loaded.
+## The scene layer should use this to start background music.
+## Not emitted when the map has no associated music track.
+signal music_track_requested(track_id: String)
+
 ## True after bootstrap() completes successfully.
 var is_bootstrapped: bool = false
 
@@ -39,7 +44,7 @@ var current_map: MapDefinitionClass = null
 
 ## Runs the full overworld bootstrap sequence for [param map_def].
 ## Emits map_loaded, player_spawned, layers_initialized,
-## and camera_follow_initialized in order.
+## camera_follow_initialized, and music_track_requested (when track is set) in order.
 ## No combat systems are started.
 ##
 ## map_def : A valid MapDefinition (use MapLoader to construct one).
@@ -54,4 +59,6 @@ func bootstrap(map_def: MapDefinitionClass) -> void:
 		map_def.spawn_point.y * TILE_SIZE
 	)
 	camera_follow_initialized.emit(world_pos)
+	if map_def.music_track != "":
+		music_track_requested.emit(map_def.music_track)
 	is_bootstrapped = true
