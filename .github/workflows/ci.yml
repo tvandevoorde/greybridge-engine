@@ -168,3 +168,11 @@ jobs:
       - name: Unit tests — combat_log
         working-directory: src
         run: godot --headless --script ./tests/unit/ui/test_combat_log.gd
+
+      - name: Unit tests — target_resolver
+        working-directory: src
+        run: godot --headless --script ./tests/unit/rules_engine/test_target_resolver.gd
+
+      - name: Unit tests — target_selector
+        working-directory: src
+        run: godot --headless --script ./tests/unit/ui/test_target_selector.gd
