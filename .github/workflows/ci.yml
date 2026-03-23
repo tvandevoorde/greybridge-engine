@@ -176,3 +176,15 @@ jobs:
       - name: Unit tests — target_selector
         working-directory: src
         run: godot --headless --script ./tests/unit/ui/test_target_selector.gd
+
+      - name: Unit tests — reaction_trigger
+        working-directory: src
+        run: godot --headless --script ./tests/unit/rules_engine/test_reaction_trigger.gd
+
+      - name: Unit tests — reaction_window_handler
+        working-directory: src
+        run: godot --headless --script ./tests/unit/combat_runtime/test_reaction_window_handler.gd
+
+      - name: Unit tests — reaction_menu
+        working-directory: src
+        run: godot --headless --script ./tests/unit/ui/test_reaction_menu.gd
