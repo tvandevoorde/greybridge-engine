@@ -229,6 +229,14 @@ jobs:
       - name: Unit tests — grid_movement_controller
         working-directory: src
         run: godot --headless --script ./tests/unit/overworld/test_grid_movement_controller.gd
+
+      - name: Unit tests — inventory
+        working-directory: src
+        run: godot --headless --script ./tests/unit/rules_engine/test_inventory.gd
+
+      - name: Unit tests — chest_interactable
+        working-directory: src
+        run: godot --headless --script ./tests/unit/overworld/test_chest_interactable.gd
       - name: Unit tests — map_loader
         working-directory: src
         run: godot --headless --script ./tests/unit/rules_engine/test_map_loader.gd

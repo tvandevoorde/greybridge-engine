@@ -2,5 +2,15 @@
     "map_id": "road_to_greybridge",
     "spawn_point": { "x": 2, "y": 3 },
     "collision_layer": 1,
-    "interaction_layer": 2
+    "interaction_layer": 2,
+    "chests": [
+        {
+            "id": "chest_1",
+            "position": { "x": 4, "y": 2 },
+            "loot": [
+                { "id": "gold_coins", "name": "Gold Coins", "quantity": 10 },
+                { "id": "health_potion", "name": "Health Potion", "quantity": 1 }
+            ]
+        }
+    ]
 }
