@@ -18,6 +18,8 @@ var collision_layer: int = 1
 ## Interaction/trigger layer bitmask for this map.
 var interaction_layer: int = 2
 
+const MapDefinitionClass = preload("res://overworld/map_definition.gd")
+
 
 ## Constructs a MapDefinition from a Dictionary (e.g. parsed JSON).
 ## Expected keys:
@@ -25,8 +27,8 @@ var interaction_layer: int = 2
 ##   "spawn_point"       : Dictionary with "x" (int) and "y" (int)
 ##   "collision_layer"   : int  (default 1)
 ##   "interaction_layer" : int  (default 2)
-static func from_dict(data: Dictionary) -> MapDefinition:
-	var def := MapDefinition.new()
+static func from_dict(data: Dictionary):
+	var def := MapDefinitionClass.new()
 	def.map_id = data.get("map_id", "")
 	var sp: Dictionary = data.get("spawn_point", {})
 	def.spawn_point = Vector2i(int(sp.get("x", 0)), int(sp.get("y", 0)))

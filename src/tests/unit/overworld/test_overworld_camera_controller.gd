@@ -64,12 +64,12 @@ func _test_follow_target_updates_position() -> void:
 func _test_follow_target_emits_signal() -> void:
 	print("_test_follow_target_emits_signal")
 	var cc := OverworldCameraControllerClass.new()
-	var signal_count: int = 0
+	var signal_events: Array = []
 	cc.camera_follow_requested.connect(func(_pos: Vector2) -> void:
-		signal_count += 1
+		signal_events.append(true)
 	)
 	cc.follow_target(Vector2(32.0, 32.0))
-	_check(signal_count == 1, "camera_follow_requested emitted once")
+	_check(signal_events.size() == 1, "camera_follow_requested emitted once")
 	cc.free()
 
 
@@ -107,12 +107,12 @@ func _test_successive_follow_updates_position() -> void:
 func _test_successive_follow_emits_each_time() -> void:
 	print("_test_successive_follow_emits_each_time")
 	var cc := OverworldCameraControllerClass.new()
-	var signal_count: int = 0
+	var signal_events: Array = []
 	cc.camera_follow_requested.connect(func(_pos: Vector2) -> void:
-		signal_count += 1
+		signal_events.append(true)
 	)
 	cc.follow_target(Vector2(10.0, 10.0))
 	cc.follow_target(Vector2(20.0, 20.0))
 	cc.follow_target(Vector2(30.0, 30.0))
-	_check(signal_count == 3, "camera_follow_requested emitted 3 times for 3 calls")
+	_check(signal_events.size() == 3, "camera_follow_requested emitted 3 times for 3 calls")
 	cc.free()
