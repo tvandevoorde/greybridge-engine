@@ -6,6 +6,7 @@
 extends SceneTree
 
 const TargetSelectorClass = preload("res://ui/target_selector.gd")
+const CombatInputLockClass = preload("res://combat_runtime/combat_input_lock.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -74,6 +75,12 @@ func _run_all_tests() -> void:
 	_test_second_begin_replaces_previous_state()
 	_test_select_target_after_cancel_returns_false()
 	_test_confirmed_signal_fired_exactly_once()
+	_test_select_target_blocked_when_input_locked()
+	_test_select_target_succeeds_after_unlock()
+	_test_cancel_blocked_when_input_locked()
+	_test_cancel_succeeds_after_unlock()
+	_test_no_lock_attached_behaves_normally()
+	_test_set_input_lock_null_detaches_lock()
 
 
 # ---------------------------------------------------------------------------
@@ -83,6 +90,7 @@ func _test_initial_state_not_active() -> void:
 	print("_test_initial_state_not_active")
 	var selector := _make_selector()
 	_check(selector.is_active() == false, "selector is inactive before begin_selection")
+	selector.free()
 
 
 func _test_initial_get_valid_targets_empty() -> void:
@@ -90,6 +98,7 @@ func _test_initial_get_valid_targets_empty() -> void:
 	var selector := _make_selector()
 	_check(selector.get_valid_targets().size() == 0,
 		"get_valid_targets returns empty array before begin_selection")
+	selector.free()
 
 
 func _test_initial_is_valid_target_false() -> void:
@@ -97,6 +106,7 @@ func _test_initial_is_valid_target_false() -> void:
 	var selector := _make_selector()
 	_check(selector.is_valid_target(Vector2i(0, 0)) == false,
 		"is_valid_target returns false before begin_selection")
+	selector.free()
 
 
 func _test_initial_get_mode_empty() -> void:
@@ -104,6 +114,7 @@ func _test_initial_get_mode_empty() -> void:
 	var selector := _make_selector()
 	_check(selector.get_mode() == "",
 		"get_mode returns empty string before begin_selection")
+	selector.free()
 
 
 # ---------------------------------------------------------------------------
@@ -114,6 +125,7 @@ func _test_begin_selection_activates() -> void:
 	var selector := _make_selector()
 	selector.begin_selection([Vector2i(1, 0)], "single")
 	_check(selector.is_active() == true, "selector is active after begin_selection")
+	selector.free()
 
 
 func _test_begin_selection_stores_mode_single() -> void:
@@ -121,6 +133,7 @@ func _test_begin_selection_stores_mode_single() -> void:
 	var selector := _make_selector()
 	selector.begin_selection([], "single")
 	_check(selector.get_mode() == "single", "mode stored as 'single'")
+	selector.free()
 
 
 func _test_begin_selection_stores_mode_aoe() -> void:
@@ -128,6 +141,7 @@ func _test_begin_selection_stores_mode_aoe() -> void:
 	var selector := _make_selector()
 	selector.begin_selection([], "aoe")
 	_check(selector.get_mode() == "aoe", "mode stored as 'aoe'")
+	selector.free()
 
 
 func _test_begin_selection_stores_valid_targets() -> void:
@@ -139,6 +153,7 @@ func _test_begin_selection_stores_valid_targets() -> void:
 	_check(stored.size() == 2,                "two valid targets stored")
 	_check(stored.has(Vector2i(2, 3)),         "first target position stored")
 	_check(stored.has(Vector2i(5, 1)),         "second target position stored")
+	selector.free()
 
 
 # ---------------------------------------------------------------------------
@@ -154,6 +169,7 @@ func _test_get_valid_targets_returns_copy() -> void:
 	# Mutating the returned copy must not affect the selector's internal list
 	_check(selector.get_valid_targets().size() == 1,
 		"internal valid_targets unaffected by mutating the returned copy")
+	selector.free()
 
 
 # ---------------------------------------------------------------------------
@@ -165,6 +181,7 @@ func _test_is_valid_target_true_for_valid_position() -> void:
 	selector.begin_selection([Vector2i(4, 2)], "single")
 	_check(selector.is_valid_target(Vector2i(4, 2)) == true,
 		"is_valid_target returns true for a position in the valid set")
+	selector.free()
 
 
 func _test_is_valid_target_false_for_unknown_position() -> void:
@@ -173,6 +190,7 @@ func _test_is_valid_target_false_for_unknown_position() -> void:
 	selector.begin_selection([Vector2i(4, 2)], "single")
 	_check(selector.is_valid_target(Vector2i(9, 9)) == false,
 		"is_valid_target returns false for a position not in the valid set")
+	selector.free()
 
 
 # ---------------------------------------------------------------------------
@@ -183,6 +201,7 @@ func _test_select_target_when_inactive_returns_false() -> void:
 	var selector := _make_selector()
 	_check(selector.select_target(Vector2i(0, 0)) == false,
 		"select_target returns false when selector is inactive")
+	selector.free()
 
 
 func _test_select_target_invalid_position_returns_false() -> void:
@@ -191,6 +210,7 @@ func _test_select_target_invalid_position_returns_false() -> void:
 	selector.begin_selection([Vector2i(1, 0)], "single")
 	_check(selector.select_target(Vector2i(9, 9)) == false,
 		"select_target returns false for a position not in valid targets")
+	selector.free()
 
 
 func _test_select_target_invalid_emits_no_signal() -> void:
@@ -199,6 +219,7 @@ func _test_select_target_invalid_emits_no_signal() -> void:
 	selector.begin_selection([Vector2i(1, 0)], "single")
 	selector.select_target(Vector2i(9, 9))
 	_check(_confirmed_count == 0, "target_confirmed not emitted for invalid position")
+	selector.free()
 
 
 # ---------------------------------------------------------------------------
@@ -210,6 +231,7 @@ func _test_select_target_valid_returns_true() -> void:
 	selector.begin_selection([Vector2i(3, 0)], "single")
 	_check(selector.select_target(Vector2i(3, 0)) == true,
 		"select_target returns true for valid position")
+	selector.free()
 
 
 func _test_select_target_valid_emits_confirmed() -> void:
@@ -218,6 +240,7 @@ func _test_select_target_valid_emits_confirmed() -> void:
 	selector.begin_selection([Vector2i(3, 0)], "single")
 	selector.select_target(Vector2i(3, 0))
 	_check(_confirmed_count == 1, "target_confirmed signal emitted once")
+	selector.free()
 
 
 func _test_select_target_confirmed_position_correct() -> void:
@@ -227,6 +250,7 @@ func _test_select_target_confirmed_position_correct() -> void:
 	selector.select_target(Vector2i(3, 0))
 	_check(_confirmed_position == Vector2i(3, 0),
 		"target_confirmed carries the correct position")
+	selector.free()
 
 
 func _test_select_target_deactivates_selector() -> void:
@@ -235,6 +259,7 @@ func _test_select_target_deactivates_selector() -> void:
 	selector.begin_selection([Vector2i(3, 0)], "single")
 	selector.select_target(Vector2i(3, 0))
 	_check(selector.is_active() == false, "selector deactivates after successful selection")
+	selector.free()
 
 
 # ---------------------------------------------------------------------------
@@ -245,6 +270,7 @@ func _test_cancel_when_inactive_does_nothing() -> void:
 	var selector := _make_selector()
 	selector.cancel()
 	_check(_cancelled_count == 0, "cancel when inactive emits no signal")
+	selector.free()
 
 
 func _test_cancel_when_active_emits_cancelled() -> void:
@@ -253,6 +279,7 @@ func _test_cancel_when_active_emits_cancelled() -> void:
 	selector.begin_selection([Vector2i(1, 0)], "single")
 	selector.cancel()
 	_check(_cancelled_count == 1, "target_cancelled emitted on cancel")
+	selector.free()
 
 
 func _test_cancel_deactivates_selector() -> void:
@@ -261,6 +288,7 @@ func _test_cancel_deactivates_selector() -> void:
 	selector.begin_selection([Vector2i(1, 0)], "single")
 	selector.cancel()
 	_check(selector.is_active() == false, "selector deactivates after cancel")
+	selector.free()
 
 
 func _test_cancel_clears_valid_targets() -> void:
@@ -270,6 +298,7 @@ func _test_cancel_clears_valid_targets() -> void:
 	selector.cancel()
 	_check(selector.get_valid_targets().size() == 0,
 		"valid targets cleared after cancel")
+	selector.free()
 
 
 # ---------------------------------------------------------------------------
@@ -286,6 +315,7 @@ func _test_second_begin_replaces_previous_state() -> void:
 		"old target no longer valid after second begin_selection")
 	_check(selector.is_valid_target(Vector2i(5, 5)) == true,
 		"new target valid after second begin_selection")
+	selector.free()
 
 
 # ---------------------------------------------------------------------------
@@ -298,6 +328,7 @@ func _test_select_target_after_cancel_returns_false() -> void:
 	selector.cancel()
 	_check(selector.select_target(Vector2i(1, 0)) == false,
 		"select_target returns false after cancel deactivates selector")
+	selector.free()
 
 
 # ---------------------------------------------------------------------------
@@ -311,3 +342,118 @@ func _test_confirmed_signal_fired_exactly_once() -> void:
 	# Attempting a second selection after deactivation must not fire again
 	selector.select_target(Vector2i(2, 2))
 	_check(_confirmed_count == 1, "target_confirmed fired exactly once per selection")
+	selector.free()
+
+
+
+# ---------------------------------------------------------------------------
+# Input lock — select_target is blocked when a lock is active
+# ---------------------------------------------------------------------------
+func _test_select_target_blocked_when_input_locked() -> void:
+	print("_test_select_target_blocked_when_input_locked")
+	var selector := TargetSelectorClass.new()
+	selector.target_confirmed.connect(func(p: Vector2i) -> void: _confirmed_count += 1)
+	_confirmed_count = 0
+	var lock := CombatInputLockClass.new()
+	selector.set_input_lock(lock)
+	selector.begin_selection([Vector2i(1, 1)], "single")
+	lock.lock("dice_resolution")
+	_check(selector.select_target(Vector2i(1, 1)) == false, "select_target returns false when locked")
+	_check(_confirmed_count == 0, "target_confirmed not emitted when locked")
+	_check(selector.is_active() == true, "selector remains active when input locked")
+	lock.free()
+	selector.free()
+
+
+# ---------------------------------------------------------------------------
+# Input lock — select_target succeeds after unlock
+# ---------------------------------------------------------------------------
+func _test_select_target_succeeds_after_unlock() -> void:
+	print("_test_select_target_succeeds_after_unlock")
+	var selector := TargetSelectorClass.new()
+	selector.target_confirmed.connect(func(p: Vector2i) -> void: _confirmed_count += 1)
+	_confirmed_count = 0
+	var lock := CombatInputLockClass.new()
+	selector.set_input_lock(lock)
+	selector.begin_selection([Vector2i(1, 1)], "single")
+	lock.lock("animation")
+	selector.select_target(Vector2i(1, 1))
+	lock.unlock()
+	_check(selector.select_target(Vector2i(1, 1)) == true, "select_target succeeds after unlock")
+	_check(_confirmed_count == 1, "target_confirmed emitted once after unlock")
+	lock.free()
+	selector.free()
+
+
+# ---------------------------------------------------------------------------
+# Input lock — cancel is blocked when a lock is active
+# ---------------------------------------------------------------------------
+func _test_cancel_blocked_when_input_locked() -> void:
+	print("_test_cancel_blocked_when_input_locked")
+	var selector := TargetSelectorClass.new()
+	selector.target_cancelled.connect(func() -> void: _cancelled_count += 1)
+	_cancelled_count = 0
+	var lock := CombatInputLockClass.new()
+	selector.set_input_lock(lock)
+	selector.begin_selection([Vector2i(1, 1)], "single")
+	lock.lock("dice_resolution")
+	selector.cancel()
+	_check(_cancelled_count == 0, "target_cancelled not emitted when input locked")
+	_check(selector.is_active() == true, "selector remains active when cancel blocked")
+	lock.free()
+	selector.free()
+
+
+# ---------------------------------------------------------------------------
+# Input lock — cancel succeeds after unlock
+# ---------------------------------------------------------------------------
+func _test_cancel_succeeds_after_unlock() -> void:
+	print("_test_cancel_succeeds_after_unlock")
+	var selector := TargetSelectorClass.new()
+	selector.target_cancelled.connect(func() -> void: _cancelled_count += 1)
+	_cancelled_count = 0
+	var lock := CombatInputLockClass.new()
+	selector.set_input_lock(lock)
+	selector.begin_selection([Vector2i(1, 1)], "single")
+	lock.lock("animation")
+	selector.cancel()
+	_check(_cancelled_count == 0, "cancel blocked while locked")
+	lock.unlock()
+	selector.cancel()
+	_check(_cancelled_count == 1, "cancel succeeds after unlock")
+	lock.free()
+	selector.free()
+
+
+# ---------------------------------------------------------------------------
+# Input lock — no lock attached → normal behaviour
+# ---------------------------------------------------------------------------
+func _test_no_lock_attached_behaves_normally() -> void:
+	print("_test_no_lock_attached_behaves_normally")
+	var selector := TargetSelectorClass.new()
+	selector.target_confirmed.connect(func(p: Vector2i) -> void: _confirmed_count += 1)
+	_confirmed_count = 0
+	selector.begin_selection([Vector2i(2, 2)], "single")
+	_check(selector.select_target(Vector2i(2, 2)) == true, "select_target works without a lock")
+	_check(_confirmed_count == 1, "target_confirmed emitted without lock")
+	selector.free()
+
+
+# ---------------------------------------------------------------------------
+# Input lock — null detaches any existing lock
+# ---------------------------------------------------------------------------
+func _test_set_input_lock_null_detaches_lock() -> void:
+	print("_test_set_input_lock_null_detaches_lock")
+	var selector := TargetSelectorClass.new()
+	selector.target_confirmed.connect(func(p: Vector2i) -> void: _confirmed_count += 1)
+	_confirmed_count = 0
+	var lock := CombatInputLockClass.new()
+	selector.set_input_lock(lock)
+	lock.lock("dice_resolution")
+	selector.begin_selection([Vector2i(3, 3)], "single")
+	_check(selector.select_target(Vector2i(3, 3)) == false, "select_target blocked before detach")
+	selector.set_input_lock(null)
+	_check(selector.select_target(Vector2i(3, 3)) == true, "select_target works after lock detached")
+	_check(_confirmed_count == 1, "target_confirmed emitted after lock detached")
+	lock.free()
+	selector.free()

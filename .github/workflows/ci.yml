@@ -141,6 +141,16 @@ jobs:
         working-directory: src
         run: godot --headless --script ./tests/unit/combat_runtime/test_turn_lifecycle_controller.gd
 
+      - name: Unit tests — combat_state_snapshot
+        working-directory: src
+        run: godot --headless --script ./tests/unit/combat_runtime/test_combat_state_snapshot.gd
+      - name: Unit tests — combat_input_lock
+        working-directory: src
+        run: godot --headless --script ./tests/unit/combat_runtime/test_combat_input_lock.gd
+      - name: Unit tests — combat_animation_event_bus
+        working-directory: src
+        run: godot --headless --script ./tests/unit/combat_runtime/test_combat_animation_event_bus.gd
+
       - name: Unit tests — overworld_controller
         working-directory: src
         run: godot --headless --script ./tests/unit/overworld/test_overworld_controller.gd
@@ -152,6 +162,10 @@ jobs:
       - name: Integration test — combat harness
         working-directory: src
         run: godot --headless --script ./tests/integration/test_combat_harness.gd
+
+      - name: Integration test — combat flow
+        working-directory: src
+        run: godot --headless --script ./tests/integration/test_combat_flow.gd
 
       - name: Unit tests — combat_action_menu
         working-directory: src
@@ -188,3 +202,10 @@ jobs:
       - name: Unit tests — reaction_menu
         working-directory: src
         run: godot --headless --script ./tests/unit/ui/test_reaction_menu.gd
+      - name: Unit tests — enemy_ai
+        working-directory: src
+        run: godot --headless --script ./tests/unit/rules_engine/test_enemy_ai.gd
+
+      - name: Unit tests — enemy_turn_controller
+        working-directory: src
+        run: godot --headless --script ./tests/unit/combat_runtime/test_enemy_turn_controller.gd

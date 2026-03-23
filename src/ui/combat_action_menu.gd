@@ -20,6 +20,7 @@ class_name CombatActionMenu
 extends Node
 
 const CombatActionClass = preload("res://rules_engine/core/combat_action.gd")
+const CombatInputLockClass = preload("res://combat_runtime/combat_input_lock.gd")
 
 ## Emitted when the player selects a valid, available action.
 ## The combat runtime receives this signal and calls the rules engine to
@@ -27,12 +28,19 @@ const CombatActionClass = preload("res://rules_engine/core/combat_action.gd")
 signal action_selected(action_id: String)
 
 var _economy = null
+var _input_lock: CombatInputLockClass = null
 
 
 ## Binds a new ActionEconomy snapshot to the menu.
 ## Call at the start of each actor turn so availability reflects current state.
 func refresh(economy) -> void:
 	_economy = economy
+
+
+## Attaches a CombatInputLock so the menu can gate selections during
+## resolution or animation phases.  Pass null to detach any existing lock.
+func set_input_lock(lock: CombatInputLockClass) -> void:
+	_input_lock = lock
 
 
 ## Returns the IDs of every action that can be rendered as a button.
@@ -60,6 +68,7 @@ func is_action_enabled(action_id: String) -> bool:
 ##   1. An economy snapshot has been provided via refresh().
 ##   2. The action_id is a recognised V1 action.
 ##   3. The Action slot has not yet been spent this turn.
+##   4. Input is not currently locked (dice resolution / animation).
 ## On success emits action_selected and returns true.
 ## On failure returns false without emitting anything.
 func select_action(action_id: String) -> bool:
@@ -68,6 +77,8 @@ func select_action(action_id: String) -> bool:
 	if not CombatActionClass.is_valid_action(action_id):
 		return false
 	if not _economy.is_action_available():
+		return false
+	if _input_lock != null and _input_lock.is_locked():
 		return false
 	action_selected.emit(action_id)
 	return true
