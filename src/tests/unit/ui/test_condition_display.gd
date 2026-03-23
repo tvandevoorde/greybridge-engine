@@ -261,12 +261,12 @@ func _test_duration_update_reflected() -> void:
 func _test_conditions_updated_signal_emitted() -> void:
 	print("_test_conditions_updated_signal_emitted")
 	var d := _make_display()
-	var signal_count: int = 0
-	d.conditions_updated.connect(func(_id: String) -> void: signal_count += 1)
+	var received_ids: Array = []
+	d.conditions_updated.connect(func(id: String) -> void: received_ids.append(id))
 	d.refresh("hero", [])
-	_check(signal_count == 1, "conditions_updated emitted once on refresh")
+	_check(received_ids.size() == 1, "conditions_updated emitted once on refresh")
 	d.refresh("hero", [{"id": "prone", "name": "Prone", "duration": -1}])
-	_check(signal_count == 2, "conditions_updated emitted on second refresh")
+	_check(received_ids.size() == 2, "conditions_updated emitted on second refresh")
 	d.free()
 
 
@@ -276,10 +276,11 @@ func _test_conditions_updated_signal_emitted() -> void:
 func _test_conditions_updated_signal_carries_actor_id() -> void:
 	print("_test_conditions_updated_signal_carries_actor_id")
 	var d := _make_display()
-	var received_id: String = ""
-	d.conditions_updated.connect(func(id: String) -> void: received_id = id)
+	var received_ids: Array = []
+	d.conditions_updated.connect(func(id: String) -> void: received_ids.append(id))
 	d.refresh("bandit_1", [])
-	_check(received_id == "bandit_1", "conditions_updated carries actor_id 'bandit_1'")
+	_check(received_ids.size() == 1, "conditions_updated emitted once for actor_id check")
+	_check(received_ids[0] == "bandit_1", "conditions_updated carries actor_id 'bandit_1'")
 	d.free()
 
 
