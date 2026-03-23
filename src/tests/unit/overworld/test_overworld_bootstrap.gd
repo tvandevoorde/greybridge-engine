@@ -37,7 +37,6 @@ func _make_map_def(map_id: String, x: int, y: int, col: int, inter: int) -> MapD
 	def.interaction_layer = inter
 	return def
 
-
 func _run_all_tests() -> void:
 	_test_not_bootstrapped_by_default()
 	_test_current_map_null_by_default()
@@ -46,6 +45,8 @@ func _run_all_tests() -> void:
 	_test_bootstrap_emits_map_loaded()
 	_test_bootstrap_emits_player_spawned()
 	_test_bootstrap_emits_layers_initialized()
+	_test_bootstrap_emits_collision_tiles_ready()
+	_test_bootstrap_collision_tiles_match_map_def()
 	_test_bootstrap_emits_camera_follow_initialized()
 	_test_camera_follow_position_matches_spawn_point()
 	_test_bootstrap_no_combat_systems_active()
@@ -148,6 +149,41 @@ func _test_bootstrap_emits_layers_initialized() -> void:
 	_check(col_received.size() == 1, "layers_initialized emitted once")
 	_check(col_received[0] == 3, "collision_layer in signal matches map def")
 	_check(inter_received[0] == 5, "interaction_layer in signal matches map def")
+	ob.free()
+
+
+# ---------------------------------------------------------------------------
+# bootstrap() emits collision_tiles_ready
+# ---------------------------------------------------------------------------
+func _test_bootstrap_emits_collision_tiles_ready() -> void:
+	print("_test_bootstrap_emits_collision_tiles_ready")
+	var ob := OverworldBootstrapClass.new()
+	var received: Array = []
+	ob.collision_tiles_ready.connect(func(tiles: Array) -> void:
+		received.append(tiles)
+	)
+	var def := _make_map_def("test_map", 0, 0, 1, 2)
+	ob.bootstrap(def)
+	_check(received.size() == 1, "collision_tiles_ready emitted once")
+	ob.free()
+
+
+# ---------------------------------------------------------------------------
+# bootstrap() collision_tiles_ready carries blocked tiles from the map def
+# ---------------------------------------------------------------------------
+func _test_bootstrap_collision_tiles_match_map_def() -> void:
+	print("_test_bootstrap_collision_tiles_match_map_def")
+	var ob := OverworldBootstrapClass.new()
+	var received_tiles: Array = []
+	ob.collision_tiles_ready.connect(func(tiles: Array) -> void:
+		received_tiles.append_array(tiles)
+	)
+	var def := _make_map_def("test_map", 0, 0, 1, 2)
+	def.blocked_tiles = [Vector2i(1, 2), Vector2i(3, 4)]
+	ob.bootstrap(def)
+	_check(received_tiles.size() == 2, "collision_tiles_ready carries 2 blocked tiles")
+	_check(received_tiles.has(Vector2i(1, 2)), "tile (1,2) present in signal payload")
+	_check(received_tiles.has(Vector2i(3, 4)), "tile (3,4) present in signal payload")
 	ob.free()
 
 
