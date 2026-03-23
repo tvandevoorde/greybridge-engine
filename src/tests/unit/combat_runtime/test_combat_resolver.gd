@@ -285,9 +285,11 @@ func _test_resolve_emits_combat_ended_on_victory() -> void:
 		{"id": "player", "side": "player", "current_hp": 5},
 		{"id": "goblin", "side": "enemy", "current_hp": 0},
 	]
-	var received_outcome: Dictionary = {}
-	cr.combat_ended.connect(func(o: Dictionary) -> void: received_outcome = o)
+	var received_outcomes: Array = []
+	cr.combat_ended.connect(func(o: Dictionary) -> void: received_outcomes.append(o))
 	cr.resolve(sm, participants)
+	_check(received_outcomes.size() == 1, "combat_ended emitted once on player_victory")
+	var received_outcome: Dictionary = received_outcomes[0]
 	_check(received_outcome.get("result", "") == "player_victory", "combat_ended result is player_victory")
 	cr.free()
 
@@ -301,9 +303,11 @@ func _test_resolve_emits_combat_ended_on_defeat() -> void:
 		{"id": "player", "side": "player", "current_hp": 0},
 		{"id": "goblin", "side": "enemy", "current_hp": 7},
 	]
-	var received_outcome: Dictionary = {}
-	cr.combat_ended.connect(func(o: Dictionary) -> void: received_outcome = o)
+	var received_outcomes: Array = []
+	cr.combat_ended.connect(func(o: Dictionary) -> void: received_outcomes.append(o))
 	cr.resolve(sm, participants)
+	_check(received_outcomes.size() == 1, "combat_ended emitted once on player_defeat")
+	var received_outcome: Dictionary = received_outcomes[0]
 	_check(received_outcome.get("result", "") == "player_defeat", "combat_ended result is player_defeat")
 	cr.free()
 
@@ -356,10 +360,10 @@ func _test_resolve_emits_return_to_overworld_on_victory() -> void:
 		{"id": "player", "side": "player", "current_hp": 5},
 		{"id": "goblin", "side": "enemy", "current_hp": 0},
 	]
-	var overworld_return_emitted: bool = false
-	cr.return_to_overworld.connect(func() -> void: overworld_return_emitted = true)
+	var overworld_return_events: Array = []
+	cr.return_to_overworld.connect(func() -> void: overworld_return_events.append(true))
 	cr.resolve(sm, participants)
-	_check(overworld_return_emitted == true, "return_to_overworld emitted on player victory")
+	_check(overworld_return_events.size() == 1, "return_to_overworld emitted on player victory")
 	cr.free()
 
 
@@ -372,10 +376,10 @@ func _test_resolve_emits_return_to_overworld_on_defeat() -> void:
 		{"id": "player", "side": "player", "current_hp": 0},
 		{"id": "goblin", "side": "enemy", "current_hp": 7},
 	]
-	var overworld_return_emitted: bool = false
-	cr.return_to_overworld.connect(func() -> void: overworld_return_emitted = true)
+	var overworld_return_events: Array = []
+	cr.return_to_overworld.connect(func() -> void: overworld_return_events.append(true))
 	cr.resolve(sm, participants)
-	_check(overworld_return_emitted == true, "return_to_overworld emitted on player defeat")
+	_check(overworld_return_events.size() == 1, "return_to_overworld emitted on player defeat")
 	cr.free()
 
 
@@ -391,9 +395,11 @@ func _test_resolve_outcome_contains_rewards_on_victory() -> void:
 		{"id": "player", "side": "player", "current_hp": 5},
 		{"id": "goblin", "side": "enemy", "current_hp": 0, "loot": ["dagger"]},
 	]
-	var received_outcome: Dictionary = {}
-	cr.combat_ended.connect(func(o: Dictionary) -> void: received_outcome = o)
+	var received_outcomes: Array = []
+	cr.combat_ended.connect(func(o: Dictionary) -> void: received_outcomes.append(o))
 	cr.resolve(sm, participants)
+	_check(received_outcomes.size() == 1, "combat_ended emitted once for rewards outcome")
+	var received_outcome: Dictionary = received_outcomes[0]
 	var rewards: Array = received_outcome.get("rewards", [])
 	_check(rewards.size() == 1, "outcome rewards has one item")
 	_check(rewards.has("dagger"), "dagger present in outcome rewards")
