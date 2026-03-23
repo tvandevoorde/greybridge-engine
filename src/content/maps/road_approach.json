@@ -1,0 +1,51 @@
+{
+  "tileset_ref": "res://content/tilesets/road.tres",
+  "map_width": 10,
+  "map_height": 8,
+  "layers": {
+    "ground": [
+      [1, 1, 1, 2, 2, 2, 1, 1, 1, 1],
+      [1, 1, 1, 2, 2, 2, 1, 1, 1, 1],
+      [1, 1, 1, 2, 2, 2, 1, 1, 1, 1],
+      [1, 1, 1, 2, 2, 2, 1, 1, 1, 1],
+      [1, 1, 1, 2, 2, 2, 1, 1, 1, 1],
+      [1, 1, 1, 2, 2, 2, 1, 1, 1, 1],
+      [1, 1, 1, 2, 2, 2, 1, 1, 1, 1],
+      [1, 1, 1, 2, 2, 2, 1, 1, 1, 1]
+    ],
+    "props": [
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [3, 0, 0, 0, 0, 0, 0, 0, 3, 0],
+      [3, 0, 0, 0, 0, 0, 0, 0, 3, 0],
+      [0, 0, 4, 0, 0, 0, 4, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [3, 0, 0, 0, 0, 0, 0, 0, 3, 0],
+      [3, 0, 0, 0, 0, 0, 0, 0, 3, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    ],
+    "collision": [
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [1, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+      [1, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+      [0, 0, 1, 0, 0, 0, 1, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [1, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+      [1, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    ],
+    "triggers": [
+      [null, null, null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null, null, null],
+      [null, null, null,
+        {"type": "combat_start", "encounter_id": "bandit_ambush"},
+        {"type": "combat_start", "encounter_id": "bandit_ambush"},
+        {"type": "combat_start", "encounter_id": "bandit_ambush"},
+        null, null, null, null],
+      [null, null, null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null, null, null]
+    ]
+  }
+}
