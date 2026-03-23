@@ -324,19 +324,19 @@ func _test_confirmed_signal_fired_exactly_once() -> void:
 # Input lock — select_target is blocked when a lock is active
 # ---------------------------------------------------------------------------
 func _test_select_target_blocked_when_input_locked() -> void:
-print("_test_select_target_blocked_when_input_locked")
-var selector := TargetSelectorClass.new()
-selector.target_confirmed.connect(func(p: Vector2i) -> void: _confirmed_count += 1)
-_confirmed_count = 0
-var lock := CombatInputLockClass.new()
-selector.set_input_lock(lock)
-selector.begin_selection([Vector2i(1, 1)], "single")
-lock.lock("dice_resolution")
-_check(selector.select_target(Vector2i(1, 1)) == false, "select_target returns false when locked")
-_check(_confirmed_count == 0, "target_confirmed not emitted when locked")
-_check(selector.is_active() == true, "selector remains active when input locked")
-lock.free()
-selector.free()
+	print("_test_select_target_blocked_when_input_locked")
+	var selector := TargetSelectorClass.new()
+	selector.target_confirmed.connect(func(p: Vector2i) -> void: _confirmed_count += 1)
+	_confirmed_count = 0
+	var lock := CombatInputLockClass.new()
+	selector.set_input_lock(lock)
+	selector.begin_selection([Vector2i(1, 1)], "single")
+	lock.lock("dice_resolution")
+	_check(selector.select_target(Vector2i(1, 1)) == false, "select_target returns false when locked")
+	_check(_confirmed_count == 0, "target_confirmed not emitted when locked")
+	_check(selector.is_active() == true, "selector remains active when input locked")
+	lock.free()
+	selector.free()
 
 
 # ---------------------------------------------------------------------------
