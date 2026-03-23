@@ -32,7 +32,9 @@ var _fail_count: int = 0
 ## Fixed seed for all deterministic assertions.
 const COMBAT_SEED: int = 7
 
-## Hard cap on turns to prevent infinite loops (2 actors × 100 rounds).
+## Hard cap on turns to prevent infinite loops.
+## Set to 200 to accommodate up to 100 rounds for 2 actors; the encounter
+## assertion checks outcome["rounds"] < 100 for a more meaningful bound.
 const MAX_TURNS: int = 200
 
 
@@ -132,7 +134,7 @@ func _run_full_encounter(seed_value: int) -> Dictionary:
 	var turn_order_ids: Array = (
 		["fighter", "bandit"] if fighter_init >= bandit_init else ["bandit", "fighter"]
 	)
-	print("[Initiative] fighter=%d bandit=%d  order: %s" % [
+	print("[Initiative] fighter=%d bandit=%d  order: %s (ties favour fighter)" % [
 		fighter_init, bandit_init, str(turn_order_ids)
 	])
 
@@ -487,7 +489,9 @@ func _test_oa_blocked_when_reaction_spent() -> void:
 func _test_oa_blocked_when_target_disengaging() -> void:
 	print("\n=== _test_oa_blocked_when_target_disengaging ===")
 	var oa := OpportunityAttackClass.new()
-	# Attacker has a fresh reaction.
+	# Direct start_turn() call is intentional here: this test is purely validating
+	# the OpportunityAttack rule against a Disengage flag and does not require the
+	# full TurnLifecycleController setup.
 	var economy := ActionEconomyClass.new(30)
 	economy.start_turn()
 	_check(economy.is_reaction_available() == true, "reaction available for this check")
