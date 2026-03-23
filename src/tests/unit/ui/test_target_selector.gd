@@ -6,6 +6,7 @@
 extends SceneTree
 
 const TargetSelectorClass = preload("res://ui/target_selector.gd")
+const CombatInputLockClass = preload("res://combat_runtime/combat_input_lock.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -74,6 +75,12 @@ func _run_all_tests() -> void:
 	_test_second_begin_replaces_previous_state()
 	_test_select_target_after_cancel_returns_false()
 	_test_confirmed_signal_fired_exactly_once()
+	_test_select_target_blocked_when_input_locked()
+	_test_select_target_succeeds_after_unlock()
+	_test_cancel_blocked_when_input_locked()
+	_test_cancel_succeeds_after_unlock()
+	_test_no_lock_attached_behaves_normally()
+	_test_set_input_lock_null_detaches_lock()
 
 
 # ---------------------------------------------------------------------------
@@ -311,3 +318,116 @@ func _test_confirmed_signal_fired_exactly_once() -> void:
 	# Attempting a second selection after deactivation must not fire again
 	selector.select_target(Vector2i(2, 2))
 	_check(_confirmed_count == 1, "target_confirmed fired exactly once per selection")
+
+
+# ---------------------------------------------------------------------------
+# Input lock — select_target is blocked when a lock is active
+# ---------------------------------------------------------------------------
+func _test_select_target_blocked_when_input_locked() -> void:
+print("_test_select_target_blocked_when_input_locked")
+var selector := TargetSelectorClass.new()
+selector.target_confirmed.connect(func(p: Vector2i) -> void: _confirmed_count += 1)
+_confirmed_count = 0
+var lock := CombatInputLockClass.new()
+selector.set_input_lock(lock)
+selector.begin_selection([Vector2i(1, 1)], "single")
+lock.lock("dice_resolution")
+_check(selector.select_target(Vector2i(1, 1)) == false, "select_target returns false when locked")
+_check(_confirmed_count == 0, "target_confirmed not emitted when locked")
+_check(selector.is_active() == true, "selector remains active when input locked")
+lock.free()
+selector.free()
+
+
+# ---------------------------------------------------------------------------
+# Input lock — select_target succeeds after unlock
+# ---------------------------------------------------------------------------
+func _test_select_target_succeeds_after_unlock() -> void:
+print("_test_select_target_succeeds_after_unlock")
+var selector := TargetSelectorClass.new()
+selector.target_confirmed.connect(func(p: Vector2i) -> void: _confirmed_count += 1)
+_confirmed_count = 0
+var lock := CombatInputLockClass.new()
+selector.set_input_lock(lock)
+selector.begin_selection([Vector2i(1, 1)], "single")
+lock.lock("animation")
+selector.select_target(Vector2i(1, 1))
+lock.unlock()
+_check(selector.select_target(Vector2i(1, 1)) == true, "select_target succeeds after unlock")
+_check(_confirmed_count == 1, "target_confirmed emitted once after unlock")
+lock.free()
+selector.free()
+
+
+# ---------------------------------------------------------------------------
+# Input lock — cancel is blocked when a lock is active
+# ---------------------------------------------------------------------------
+func _test_cancel_blocked_when_input_locked() -> void:
+print("_test_cancel_blocked_when_input_locked")
+var selector := TargetSelectorClass.new()
+selector.target_cancelled.connect(func() -> void: _cancelled_count += 1)
+_cancelled_count = 0
+var lock := CombatInputLockClass.new()
+selector.set_input_lock(lock)
+selector.begin_selection([Vector2i(1, 1)], "single")
+lock.lock("dice_resolution")
+selector.cancel()
+_check(_cancelled_count == 0, "target_cancelled not emitted when input locked")
+_check(selector.is_active() == true, "selector remains active when cancel blocked")
+lock.free()
+selector.free()
+
+
+# ---------------------------------------------------------------------------
+# Input lock — cancel succeeds after unlock
+# ---------------------------------------------------------------------------
+func _test_cancel_succeeds_after_unlock() -> void:
+print("_test_cancel_succeeds_after_unlock")
+var selector := TargetSelectorClass.new()
+selector.target_cancelled.connect(func() -> void: _cancelled_count += 1)
+_cancelled_count = 0
+var lock := CombatInputLockClass.new()
+selector.set_input_lock(lock)
+selector.begin_selection([Vector2i(1, 1)], "single")
+lock.lock("animation")
+selector.cancel()
+_check(_cancelled_count == 0, "cancel blocked while locked")
+lock.unlock()
+selector.cancel()
+_check(_cancelled_count == 1, "cancel succeeds after unlock")
+lock.free()
+selector.free()
+
+
+# ---------------------------------------------------------------------------
+# Input lock — no lock attached → normal behaviour
+# ---------------------------------------------------------------------------
+func _test_no_lock_attached_behaves_normally() -> void:
+print("_test_no_lock_attached_behaves_normally")
+var selector := TargetSelectorClass.new()
+selector.target_confirmed.connect(func(p: Vector2i) -> void: _confirmed_count += 1)
+_confirmed_count = 0
+selector.begin_selection([Vector2i(2, 2)], "single")
+_check(selector.select_target(Vector2i(2, 2)) == true, "select_target works without a lock")
+_check(_confirmed_count == 1, "target_confirmed emitted without lock")
+selector.free()
+
+
+# ---------------------------------------------------------------------------
+# Input lock — null detaches any existing lock
+# ---------------------------------------------------------------------------
+func _test_set_input_lock_null_detaches_lock() -> void:
+print("_test_set_input_lock_null_detaches_lock")
+var selector := TargetSelectorClass.new()
+selector.target_confirmed.connect(func(p: Vector2i) -> void: _confirmed_count += 1)
+_confirmed_count = 0
+var lock := CombatInputLockClass.new()
+selector.set_input_lock(lock)
+lock.lock("dice_resolution")
+selector.begin_selection([Vector2i(3, 3)], "single")
+_check(selector.select_target(Vector2i(3, 3)) == false, "select_target blocked before detach")
+selector.set_input_lock(null)
+_check(selector.select_target(Vector2i(3, 3)) == true, "select_target works after lock detached")
+_check(_confirmed_count == 1, "target_confirmed emitted after lock detached")
+lock.free()
+selector.free()

@@ -8,6 +8,8 @@
 ##   - Emit target_confirmed when a valid target is chosen.
 ##   - Emit target_cancelled when the player cancels; the combat runtime must
 ##     return focus to the action menu on receiving this signal.
+##   - Respect a CombatInputLock so selection is suppressed during resolution
+##     or animation phases.
 ##
 ## Usage:
 ##   selector.begin_selection(valid_targets, "single")
@@ -15,6 +17,8 @@
 ##   selector.cancel()                         # → emits target_cancelled
 class_name TargetSelector
 extends Node
+
+const CombatInputLockClass = preload("res://combat_runtime/combat_input_lock.gd")
 
 ## Emitted when the player confirms a valid target position.
 ## The combat runtime receives this and advances to resolution.
@@ -27,6 +31,13 @@ signal target_cancelled()
 var _valid_targets: Array[Vector2i] = []
 var _mode: String = "single"
 var _active: bool = false
+var _input_lock: CombatInputLockClass = null
+
+
+## Attaches a CombatInputLock so the selector can suppress input during
+## resolution or animation phases.  Pass null to detach any existing lock.
+func set_input_lock(lock: CombatInputLockClass) -> void:
+	_input_lock = lock
 
 
 ## Activates target selection with the provided set of valid positions.
@@ -40,10 +51,13 @@ func begin_selection(valid_targets: Array[Vector2i], mode: String) -> void:
 
 ## Attempts to confirm the given position as the chosen target.
 ## Returns true and emits target_confirmed if the position is valid and selection is active.
-## Returns false without emitting anything if the position is invalid or selection is inactive.
+## Returns false without emitting anything if the position is invalid, selection is inactive,
+## or input is currently locked.
 ## _active is set to false before emitting to prevent re-entrant selection from a handler.
 func select_target(position: Vector2i) -> bool:
 	if not _active:
+		return false
+	if _input_lock != null and _input_lock.is_locked():
 		return false
 	if not is_valid_target(position):
 		return false
@@ -53,12 +67,15 @@ func select_target(position: Vector2i) -> bool:
 
 
 ## Cancels the current target selection.
-## Emits target_cancelled if selection is active; otherwise does nothing.
+## Emits target_cancelled if selection is active and input is not locked.
+## Has no effect if selection is inactive or input is locked.
 ## _active is cleared before emitting to prevent re-entrant cancel.
 ## _valid_targets is cleared after emitting so signal handlers can inspect
 ## the positions that were in play at the time of cancellation.
 func cancel() -> void:
 	if not _active:
+		return
+	if _input_lock != null and _input_lock.is_locked():
 		return
 	_active = false
 	target_cancelled.emit()
