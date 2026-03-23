@@ -130,10 +130,14 @@ func _test_combat_ready_signal_emitted() -> void:
 	var signal_turn_order: Array = []
 	var signal_positions: Dictionary = {}
 	ci.combat_ready.connect(func(to: Array, pos: Dictionary) -> void:
-		signal_turn_order = to
-		signal_positions = pos
+		signal_turn_order.append_array(to)
+		signal_positions.merge(pos)
 	)
 	ci.initialize(actors, positions, roller)
+
+	print("Received combat_ready signal with turn_order: %s" % str(signal_turn_order))
+	print("Received combat_ready signal with positions: %s" % str(signal_positions))
+
 	_check(signal_turn_order.size() == 2, "signal received turn_order with 2 entries")
 	_check(signal_positions.has("hero"), "signal received positions with hero key")
 	_check(signal_positions.has("goblin"), "signal received positions with goblin key")
