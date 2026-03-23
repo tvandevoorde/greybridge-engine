@@ -100,8 +100,8 @@ func advance_turn() -> void:
 ##
 ## Returns a CombatSnapshot whose to_dict() method yields a fully serializable
 ## (JSON-compatible) representation of the snapshot.
-func take_snapshot(positions: Dictionary) -> CombatSnapshot:
-	var snap: CombatSnapshot = CombatSnapshotClass.new()
+func take_snapshot(positions: Dictionary) -> CombatSnapshotClass:
+	var snap: CombatSnapshotClass = CombatSnapshotClass.new()
 	snap.round = _round
 	snap.turn_index = _current_turn_index
 	snap.current_combatant_id = get_current_combatant_id()

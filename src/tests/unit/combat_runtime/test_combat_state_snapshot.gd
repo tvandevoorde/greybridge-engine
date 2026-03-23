@@ -8,6 +8,7 @@
 extends SceneTree
 
 const CombatStateManager = preload("res://combat_runtime/combat_state_manager.gd")
+const CombatSnapshot = preload("res://rules_engine/core/combat_snapshot.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
