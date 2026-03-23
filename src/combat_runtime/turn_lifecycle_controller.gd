@@ -166,13 +166,18 @@ func get_current_phase() -> TurnPhase:
 	return _current_phase
 
 
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_PREDELETE and is_instance_valid(_input_lock):
+		_input_lock.free()
+		_input_lock = null
+
+
 # ---------------------------------------------------------------------------
 # Internal helpers
 # ---------------------------------------------------------------------------
 
 func _set_phase(phase: TurnPhase, combatant_id: String) -> void:
 	_current_phase = phase
-	phase_changed.emit(phase, combatant_id)
 	# Manage input lock: unlock during player-interactive phases; lock otherwise.
 	match phase:
 		TurnPhase.MOVEMENT, TurnPhase.ACTION, TurnPhase.BONUS_ACTION:
@@ -181,3 +186,4 @@ func _set_phase(phase: TurnPhase, combatant_id: String) -> void:
 			_input_lock.lock("start_of_turn")
 		TurnPhase.END:
 			_input_lock.lock("end_of_turn")
+	phase_changed.emit(phase, combatant_id)

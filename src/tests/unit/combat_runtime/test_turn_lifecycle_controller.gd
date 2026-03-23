@@ -434,13 +434,14 @@ func _test_input_lock_locked_during_start_phase() -> void:
 	var sm := CombatStateManagerClass.new()
 	sm.start_combat([{"id": "player"}], ["player"])
 	tlc.setup(sm, {})
-	var lock_state_at_start: bool = false
+	var lock_states_at_start: Array = []
 	tlc.phase_changed.connect(func(p: TurnLifecycleControllerClass.TurnPhase, _id: String) -> void:
 		if p == TurnLifecycleControllerClass.TurnPhase.START:
-			lock_state_at_start = tlc.get_input_lock().is_locked()
+			lock_states_at_start.append(tlc.get_input_lock().is_locked())
 	)
 	tlc.begin_turn()
-	_check(lock_state_at_start == true, "input lock is locked when START phase is entered")
+	_check(lock_states_at_start.size() == 1, "START phase observed once for lock check")
+	_check(lock_states_at_start[0] == true, "input lock is locked when START phase is entered")
 	tlc.free()
 
 
@@ -469,13 +470,14 @@ func _test_input_lock_locked_during_end_phase() -> void:
 	sm.start_combat([{"id": "player"}, {"id": "orc"}], ["player", "orc"])
 	tlc.setup(sm, {})
 	tlc.begin_turn()
-	var lock_state_at_end: bool = false
+	var lock_states_at_end: Array = []
 	tlc.phase_changed.connect(func(p: TurnLifecycleControllerClass.TurnPhase, _id: String) -> void:
 		if p == TurnLifecycleControllerClass.TurnPhase.END:
-			lock_state_at_end = tlc.get_input_lock().is_locked()
+			lock_states_at_end.append(tlc.get_input_lock().is_locked())
 	)
 	tlc.end_turn()
-	_check(lock_state_at_end == true, "input lock is locked when END phase is entered")
+	_check(lock_states_at_end.size() == 1, "END phase observed once for lock check")
+	_check(lock_states_at_end[0] == true, "input lock is locked when END phase is entered")
 	tlc.free()
 
 
