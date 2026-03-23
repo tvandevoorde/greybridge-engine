@@ -345,6 +345,7 @@ func _test_confirmed_signal_fired_exactly_once() -> void:
 	selector.free()
 
 
+
 # ---------------------------------------------------------------------------
 # Input lock — select_target is blocked when a lock is active
 # ---------------------------------------------------------------------------

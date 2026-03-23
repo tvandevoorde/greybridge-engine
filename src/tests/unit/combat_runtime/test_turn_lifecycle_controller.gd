@@ -50,6 +50,13 @@ func _run_all_tests() -> void:
 	_test_end_turn_no_round_started_within_same_round()
 	_test_full_cycle_two_actors()
 	_test_turn_started_carries_correct_round()
+	_test_get_input_lock_returns_non_null()
+	_test_input_lock_locked_during_start_phase()
+	_test_input_lock_unlocked_during_movement_phase()
+	_test_input_lock_locked_during_end_phase()
+	_test_input_lock_locked_after_end_turn()
+	_test_input_lock_unlocked_for_second_turn()
+	_test_input_lock_external_dice_resolution()
 
 
 # ---------------------------------------------------------------------------
@@ -404,4 +411,121 @@ func _test_turn_started_carries_correct_round() -> void:
 	_check(turn_start_rounds[0] == 1, "first turn_started is in round 1")
 	_check(turn_start_rounds[1] == 1, "second turn_started is in round 1")
 	_check(turn_start_rounds[2] == 2, "third turn_started is in round 2")
+	tlc.free()
+
+
+
+# ---------------------------------------------------------------------------
+# Input lock — get_input_lock
+# ---------------------------------------------------------------------------
+func _test_get_input_lock_returns_non_null() -> void:
+	print("_test_get_input_lock_returns_non_null")
+	var tlc := TurnLifecycleControllerClass.new()
+	_check(tlc.get_input_lock() != null, "get_input_lock() returns a non-null lock")
+	tlc.free()
+
+
+# ---------------------------------------------------------------------------
+# Input lock — locked during START phase
+# ---------------------------------------------------------------------------
+func _test_input_lock_locked_during_start_phase() -> void:
+	print("_test_input_lock_locked_during_start_phase")
+	var tlc := TurnLifecycleControllerClass.new()
+	var sm := CombatStateManagerClass.new()
+	sm.start_combat([{"id": "player"}], ["player"])
+	tlc.setup(sm, {})
+	var lock_state_at_start: bool = false
+	tlc.phase_changed.connect(func(p: TurnLifecycleControllerClass.TurnPhase, _id: String) -> void:
+		if p == TurnLifecycleControllerClass.TurnPhase.START:
+			lock_state_at_start = tlc.get_input_lock().is_locked()
+	)
+	tlc.begin_turn()
+	_check(lock_state_at_start == true, "input lock is locked when START phase is entered")
+	tlc.free()
+
+
+# ---------------------------------------------------------------------------
+# Input lock — unlocked when MOVEMENT phase begins
+# ---------------------------------------------------------------------------
+func _test_input_lock_unlocked_during_movement_phase() -> void:
+	print("_test_input_lock_unlocked_during_movement_phase")
+	var tlc := TurnLifecycleControllerClass.new()
+	var sm := CombatStateManagerClass.new()
+	sm.start_combat([{"id": "player"}], ["player"])
+	tlc.setup(sm, {})
+	tlc.begin_turn()
+	_check(tlc.get_input_lock().is_locked() == false,
+		"input lock is unlocked after begin_turn() enters MOVEMENT phase")
+	tlc.free()
+
+
+# ---------------------------------------------------------------------------
+# Input lock — locked during END phase
+# ---------------------------------------------------------------------------
+func _test_input_lock_locked_during_end_phase() -> void:
+	print("_test_input_lock_locked_during_end_phase")
+	var tlc := TurnLifecycleControllerClass.new()
+	var sm := CombatStateManagerClass.new()
+	sm.start_combat([{"id": "player"}, {"id": "orc"}], ["player", "orc"])
+	tlc.setup(sm, {})
+	tlc.begin_turn()
+	var lock_state_at_end: bool = false
+	tlc.phase_changed.connect(func(p: TurnLifecycleControllerClass.TurnPhase, _id: String) -> void:
+		if p == TurnLifecycleControllerClass.TurnPhase.END:
+			lock_state_at_end = tlc.get_input_lock().is_locked()
+	)
+	tlc.end_turn()
+	_check(lock_state_at_end == true, "input lock is locked when END phase is entered")
+	tlc.free()
+
+
+# ---------------------------------------------------------------------------
+# Input lock — remains locked after end_turn (IDLE, between turns)
+# ---------------------------------------------------------------------------
+func _test_input_lock_locked_after_end_turn() -> void:
+	print("_test_input_lock_locked_after_end_turn")
+	var tlc := TurnLifecycleControllerClass.new()
+	var sm := CombatStateManagerClass.new()
+	sm.start_combat([{"id": "player"}, {"id": "orc"}], ["player", "orc"])
+	tlc.setup(sm, {})
+	tlc.begin_turn()
+	tlc.end_turn()
+	_check(tlc.get_input_lock().is_locked() == true,
+		"input lock remains locked in IDLE state between turns")
+	tlc.free()
+
+
+# ---------------------------------------------------------------------------
+# Input lock — unlocked again when the second actor's turn begins
+# ---------------------------------------------------------------------------
+func _test_input_lock_unlocked_for_second_turn() -> void:
+	print("_test_input_lock_unlocked_for_second_turn")
+	var tlc := TurnLifecycleControllerClass.new()
+	var sm := CombatStateManagerClass.new()
+	sm.start_combat([{"id": "player"}, {"id": "orc"}], ["player", "orc"])
+	tlc.setup(sm, {})
+	tlc.begin_turn()
+	tlc.end_turn()
+	tlc.begin_turn()  # orc's turn
+	_check(tlc.get_input_lock().is_locked() == false,
+		"input lock is unlocked when second actor's MOVEMENT phase begins")
+	tlc.free()
+
+
+# ---------------------------------------------------------------------------
+# Input lock — external dice resolution locking via get_input_lock()
+# ---------------------------------------------------------------------------
+func _test_input_lock_external_dice_resolution() -> void:
+	print("_test_input_lock_external_dice_resolution")
+	var tlc := TurnLifecycleControllerClass.new()
+	var sm := CombatStateManagerClass.new()
+	sm.start_combat([{"id": "player"}, {"id": "orc"}], ["player", "orc"])
+	tlc.setup(sm, {})
+	tlc.begin_turn()  # input unlocked (MOVEMENT phase)
+	_check(tlc.get_input_lock().is_locked() == false, "input unlocked before dice resolution")
+	# Simulate dice resolution lock/unlock from the combat runtime.
+	tlc.get_input_lock().lock("dice_resolution")
+	_check(tlc.get_input_lock().is_locked() == true, "input locked during dice resolution")
+	tlc.get_input_lock().unlock()
+	_check(tlc.get_input_lock().is_locked() == false, "input unlocked after dice resolution")
 	tlc.free()
