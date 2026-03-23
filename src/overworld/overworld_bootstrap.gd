@@ -30,6 +30,10 @@ signal layers_initialized(collision_layer: int, interaction_layer: int)
 ## Emitted when the camera follow target is set, carrying the world position.
 signal camera_follow_initialized(position: Vector2)
 
+## Emitted with the pixel-space bounding rect of the map (origin at (0, 0)).
+## Consumers should pass this to OverworldCameraController.set_map_bounds().
+signal camera_bounds_initialized(bounds: Rect2)
+
 ## True after bootstrap() completes successfully.
 var is_bootstrapped: bool = false
 
@@ -54,4 +58,7 @@ func bootstrap(map_def: MapDefinitionClass) -> void:
 		map_def.spawn_point.y * TILE_SIZE
 	)
 	camera_follow_initialized.emit(world_pos)
+	var map_width_px := float(map_def.map_width * TILE_SIZE)
+	var map_height_px := float(map_def.map_height * TILE_SIZE)
+	camera_bounds_initialized.emit(Rect2(0.0, 0.0, map_width_px, map_height_px))
 	is_bootstrapped = true

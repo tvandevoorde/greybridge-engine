@@ -34,6 +34,8 @@ func _run_all_tests() -> void:
 	_test_load_from_dict_spawn_point()
 	_test_load_from_dict_collision_layer()
 	_test_load_from_dict_interaction_layer()
+	_test_load_from_dict_map_width()
+	_test_load_from_dict_map_height()
 	_test_load_from_dict_defaults()
 	_test_load_from_dict_is_valid()
 	_test_load_from_dict_empty_is_invalid()
@@ -103,6 +105,40 @@ func _test_load_from_dict_interaction_layer() -> void:
 
 
 # ---------------------------------------------------------------------------
+# load_from_dict — map_width is parsed
+# ---------------------------------------------------------------------------
+func _test_load_from_dict_map_width() -> void:
+	print("_test_load_from_dict_map_width")
+	var data := {
+		"map_id": "test_map",
+		"spawn_point": {"x": 0, "y": 0},
+		"collision_layer": 1,
+		"interaction_layer": 2,
+		"map_width": 20,
+		"map_height": 15,
+	}
+	var def := MapLoaderClass.load_from_dict(data)
+	_check(def.map_width == 20, "map_width parsed correctly")
+
+
+# ---------------------------------------------------------------------------
+# load_from_dict — map_height is parsed
+# ---------------------------------------------------------------------------
+func _test_load_from_dict_map_height() -> void:
+	print("_test_load_from_dict_map_height")
+	var data := {
+		"map_id": "test_map",
+		"spawn_point": {"x": 0, "y": 0},
+		"collision_layer": 1,
+		"interaction_layer": 2,
+		"map_width": 20,
+		"map_height": 15,
+	}
+	var def := MapLoaderClass.load_from_dict(data)
+	_check(def.map_height == 15, "map_height parsed correctly")
+
+
+# ---------------------------------------------------------------------------
 # load_from_dict — missing keys use defaults
 # ---------------------------------------------------------------------------
 func _test_load_from_dict_defaults() -> void:
@@ -112,6 +148,8 @@ func _test_load_from_dict_defaults() -> void:
 	_check(def.spawn_point == Vector2i(0, 0), "default spawn_point is Vector2i(0,0)")
 	_check(def.collision_layer == 1, "default collision_layer is 1")
 	_check(def.interaction_layer == 2, "default interaction_layer is 2")
+	_check(def.map_width == 0, "default map_width is 0")
+	_check(def.map_height == 0, "default map_height is 0")
 
 
 # ---------------------------------------------------------------------------
@@ -159,4 +197,6 @@ func _test_load_from_path_valid_json() -> void:
 		_check(def.spawn_point == Vector2i(2, 3), "loaded spawn_point matches JSON")
 		_check(def.collision_layer == 1, "loaded collision_layer matches JSON")
 		_check(def.interaction_layer == 2, "loaded interaction_layer matches JSON")
+		_check(def.map_width == 20, "loaded map_width matches JSON")
+		_check(def.map_height == 15, "loaded map_height matches JSON")
 		_check(def.is_valid() == true, "loaded map is valid")

@@ -12,6 +12,12 @@ var map_id: String = ""
 ## Player spawn position in grid coordinates (tile units).
 var spawn_point: Vector2i = Vector2i.ZERO
 
+## Map width in tiles.
+var map_width: int = 0
+
+## Map height in tiles.
+var map_height: int = 0
+
 ## Physics collision layer bitmask for this map.
 var collision_layer: int = 1
 
@@ -32,6 +38,8 @@ static func from_dict(data: Dictionary):
 	def.map_id = data.get("map_id", "")
 	var sp: Dictionary = data.get("spawn_point", {})
 	def.spawn_point = Vector2i(int(sp.get("x", 0)), int(sp.get("y", 0)))
+	def.map_width = int(data.get("map_width", 0))
+	def.map_height = int(data.get("map_height", 0))
 	def.collision_layer = int(data.get("collision_layer", 1))
 	def.interaction_layer = int(data.get("interaction_layer", 2))
 	return def
