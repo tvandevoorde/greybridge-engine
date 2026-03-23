@@ -220,13 +220,14 @@ func _test_return_from_combat_emits_combat_resolved() -> void:
 func _test_return_from_combat_empty_rewards() -> void:
 	print("_test_return_from_combat_empty_rewards")
 	var oc := OverworldControllerClass.new()
-	var signal_count: int = 0
+	var signal_events: Array = []
 	var received_rewards: Array = ["sentinel"]
 	oc.combat_resolved.connect(func(r: Array) -> void:
-		signal_count += 1
-		received_rewards = r
+		signal_events.append(true)
+		received_rewards.clear()
+		received_rewards.append_array(r)
 	)
 	oc.return_from_combat([])
-	_check(signal_count == 1, "combat_resolved emitted once with empty rewards")
+	_check(signal_events.size() == 1, "combat_resolved emitted once with empty rewards")
 	_check(received_rewards.size() == 0, "combat_resolved payload is empty array")
 	oc.free()
