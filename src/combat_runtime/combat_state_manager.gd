@@ -12,6 +12,8 @@
 ##   - Tracks combat active / inactive state
 class_name CombatStateManager
 
+const CombatSnapshotClass = preload("res://rules_engine/core/combat_snapshot.gd")
+
 var _active: bool = false
 var _participants: Array = []
 var _initiative_order: Array = []
@@ -89,3 +91,30 @@ func advance_turn() -> void:
 	if _current_turn_index >= _initiative_order.size():
 		_current_turn_index = 0
 		_round += 1
+
+
+## Take a point-in-time snapshot of the current combat state.
+##
+## positions : Dictionary mapping actor id (String) → Vector2i grid position.
+##             Pass an empty Dictionary when positions are not tracked.
+##
+## Returns a CombatSnapshot whose to_dict() method yields a fully serializable
+## (JSON-compatible) representation of the snapshot.
+func take_snapshot(positions: Dictionary) -> CombatSnapshot:
+	var snap: CombatSnapshot = CombatSnapshotClass.new()
+	snap.round = _round
+	snap.turn_index = _current_turn_index
+	snap.current_combatant_id = get_current_combatant_id()
+	snap.initiative_order = _initiative_order.duplicate()
+	for p: Dictionary in _participants:
+		var actor_id: String = p.get("id", "")
+		var entry: Dictionary = {
+			"id": actor_id,
+			"current_hp": p.get("current_hp", 0),
+		}
+		if positions.has(actor_id):
+			var pos: Vector2i = positions[actor_id]
+			entry["position_x"] = pos.x
+			entry["position_y"] = pos.y
+		snap.actors.append(entry)
+	return snap

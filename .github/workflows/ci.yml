@@ -141,6 +141,10 @@ jobs:
         working-directory: src
         run: godot --headless --script ./tests/unit/combat_runtime/test_turn_lifecycle_controller.gd
 
+      - name: Unit tests — combat_state_snapshot
+        working-directory: src
+        run: godot --headless --script ./tests/unit/combat_runtime/test_combat_state_snapshot.gd
+
       - name: Unit tests — overworld_controller
         working-directory: src
         run: godot --headless --script ./tests/unit/overworld/test_overworld_controller.gd
