@@ -18,6 +18,12 @@ var collision_layer: int = 1
 ## Interaction/trigger layer bitmask for this map.
 var interaction_layer: int = 2
 
+## When true the map uses limited visibility (fog of war).
+var fog_of_war_enabled: bool = false
+
+## Visibility radius in tile units used when fog_of_war_enabled is true.
+var visibility_radius: int = 5
+
 const MapDefinitionClass = preload("res://overworld/map_definition.gd")
 
 
@@ -34,6 +40,8 @@ static func from_dict(data: Dictionary):
 	def.spawn_point = Vector2i(int(sp.get("x", 0)), int(sp.get("y", 0)))
 	def.collision_layer = int(data.get("collision_layer", 1))
 	def.interaction_layer = int(data.get("interaction_layer", 2))
+	def.fog_of_war_enabled = bool(data.get("fog_of_war_enabled", false))
+	def.visibility_radius = int(data.get("visibility_radius", 5))
 	return def
 
 

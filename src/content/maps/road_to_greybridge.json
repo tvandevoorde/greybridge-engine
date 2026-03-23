@@ -2,5 +2,7 @@
     "map_id": "road_to_greybridge",
     "spawn_point": { "x": 2, "y": 3 },
     "collision_layer": 1,
-    "interaction_layer": 2
+    "interaction_layer": 2,
+    "fog_of_war_enabled": true,
+    "visibility_radius": 5
 }
