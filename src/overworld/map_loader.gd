@@ -2,7 +2,6 @@
 ## Pure utility class for loading MapDefinition from Dictionary or JSON file.
 ##
 ## Architecture: pure GDScript class — NOT a Node. No scene access.
-class_name MapLoader
 extends RefCounted
 
 const MapDefinitionClass = preload("res://overworld/map_definition.gd")

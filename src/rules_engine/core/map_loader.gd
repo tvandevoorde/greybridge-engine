@@ -3,8 +3,6 @@
 ##
 ## Architecture: NOT a Node. Pure logic — no UI, no scene references.
 ## Accepts raw JSON text or a pre-parsed Dictionary.
-class_name MapLoader
-
 const MapDefinitionClass = preload("res://rules_engine/core/map_definition.gd")
 
 ## Parse a map definition from a pre-parsed Dictionary.
