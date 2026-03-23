@@ -83,20 +83,21 @@ func _test_interact_opens_closed_door() -> void:
 func _test_interact_emits_door_state_changed() -> void:
 	print("_test_interact_emits_door_state_changed")
 	var door := DoorInteractableClass.new()
-	var signal_fired := false
-	door.door_state_changed.connect(func(_pos, _open): signal_fired = true)
+	var signal_events: Array = []
+	door.door_state_changed.connect(func(_pos, _open): signal_events.append(true))
 	door.interact()
-	_check(signal_fired == true, "interact() emits door_state_changed")
+	_check(signal_events.size() == 1, "interact() emits door_state_changed")
 	door.free()
 
 
 func _test_interact_signal_carries_is_open_true() -> void:
 	print("_test_interact_signal_carries_is_open_true")
 	var door := DoorInteractableClass.new()
-	var received_is_open: bool = false
-	door.door_state_changed.connect(func(_pos, open): received_is_open = open)
+	var received_open_values: Array = []
+	door.door_state_changed.connect(func(_pos, open): received_open_values.append(open))
 	door.interact()
-	_check(received_is_open == true, "signal carries is_open = true after opening")
+	_check(received_open_values.size() == 1 and received_open_values[0] == true,
+		"signal carries is_open = true after opening")
 	door.free()
 
 
@@ -104,10 +105,11 @@ func _test_interact_signal_carries_position() -> void:
 	print("_test_interact_signal_carries_position")
 	var door := DoorInteractableClass.new()
 	door.set_tile_position(Vector2i(4, 2))
-	var received_position: Vector2i = Vector2i(-1, -1)
-	door.door_state_changed.connect(func(pos, _open): received_position = pos)
+	var received_positions: Array = []
+	door.door_state_changed.connect(func(pos, _open): received_positions.append(pos))
 	door.interact()
-	_check(received_position == Vector2i(4, 2), "signal carries correct tile position")
+	_check(received_positions.size() == 1 and received_positions[0] == Vector2i(4, 2),
+		"signal carries correct tile position")
 	door.free()
 
 

@@ -3,7 +3,6 @@
 ## Holds the map's configuration including spawn point and layer assignments.
 ##
 ## Architecture: pure GDScript class — NOT a Node. No scene/resource access.
-class_name MapDefinition
 extends RefCounted
 
 ## Unique identifier for this map.
