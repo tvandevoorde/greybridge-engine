@@ -153,6 +153,10 @@ jobs:
         working-directory: src
         run: godot --headless --script ./tests/integration/test_combat_harness.gd
 
+      - name: Integration test — combat flow
+        working-directory: src
+        run: godot --headless --script ./tests/integration/test_combat_flow.gd
+
       - name: Unit tests — combat_action_menu
         working-directory: src
         run: godot --headless --script ./tests/unit/ui/test_combat_action_menu.gd
