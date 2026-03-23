@@ -119,8 +119,8 @@ func _test_start_combat_emits_combat_ready() -> void:
 	var received_order: Array = []
 	var received_positions: Dictionary = {}
 	oc.combat_ready.connect(func(to: Array, pos: Dictionary) -> void:
-		received_order = to
-		received_positions = pos
+		received_order.append_array(to)
+		received_positions.merge(pos)
 	)
 	oc.start_combat(actors, positions, roller)
 	_check(received_order.size() == 2, "combat_ready received turn_order with 2 entries")
@@ -143,7 +143,7 @@ func _test_start_combat_turn_order_sorted() -> void:
 	]
 	var received_order: Array = []
 	oc.combat_ready.connect(func(to: Array, _pos: Dictionary) -> void:
-		received_order = to
+		received_order.append_array(to)
 	)
 	oc.start_combat(actors, {}, roller)
 	_check(received_order.size() == 3, "turn order has 3 entries")
