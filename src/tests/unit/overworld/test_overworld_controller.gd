@@ -37,6 +37,11 @@ func _run_all_tests() -> void:
 	_test_start_combat_locks_controls()
 	_test_start_combat_emits_combat_ready()
 	_test_start_combat_turn_order_sorted()
+	_test_start_combat_clears_pending_rewards()
+	_test_return_from_combat_unlocks_controls()
+	_test_return_from_combat_stores_rewards()
+	_test_return_from_combat_emits_combat_resolved()
+	_test_return_from_combat_empty_rewards()
 
 
 # ---------------------------------------------------------------------------
@@ -152,4 +157,77 @@ func _test_start_combat_turn_order_sorted() -> void:
 			received_order[i]["total"] >= received_order[i + 1]["total"],
 			"entry %d total >= entry %d total" % [i, i + 1]
 		)
+	oc.free()
+
+
+# ---------------------------------------------------------------------------
+# start_combat() clears pending_rewards from a previous encounter
+# ---------------------------------------------------------------------------
+func _test_start_combat_clears_pending_rewards() -> void:
+	print("_test_start_combat_clears_pending_rewards")
+	var oc := OverworldControllerClass.new()
+	oc.pending_rewards = ["gold_piece"]
+	var roller := DiceRollerClass.new(0)
+	oc.start_combat([{"id": "hero", "dex_score": 10}], {}, roller)
+	_check(oc.pending_rewards.size() == 0, "pending_rewards cleared on start_combat()")
+	oc.free()
+
+
+# ---------------------------------------------------------------------------
+# return_from_combat() unlocks controls
+# ---------------------------------------------------------------------------
+func _test_return_from_combat_unlocks_controls() -> void:
+	print("_test_return_from_combat_unlocks_controls")
+	var oc := OverworldControllerClass.new()
+	oc.lock_controls()
+	oc.return_from_combat([])
+	_check(oc.controls_locked == false, "controls_locked is false after return_from_combat()")
+	oc.free()
+
+
+# ---------------------------------------------------------------------------
+# return_from_combat() stores rewards in pending_rewards
+# ---------------------------------------------------------------------------
+func _test_return_from_combat_stores_rewards() -> void:
+	print("_test_return_from_combat_stores_rewards")
+	var oc := OverworldControllerClass.new()
+	oc.return_from_combat(["gold_piece", "dagger"])
+	_check(oc.pending_rewards.size() == 2, "pending_rewards contains 2 items")
+	_check(oc.pending_rewards.has("gold_piece"), "gold_piece in pending_rewards")
+	_check(oc.pending_rewards.has("dagger"), "dagger in pending_rewards")
+	oc.free()
+
+
+# ---------------------------------------------------------------------------
+# return_from_combat() emits combat_resolved with the reward list
+# ---------------------------------------------------------------------------
+func _test_return_from_combat_emits_combat_resolved() -> void:
+	print("_test_return_from_combat_emits_combat_resolved")
+	var oc := OverworldControllerClass.new()
+	var received_rewards: Array = []
+	oc.combat_resolved.connect(func(r: Array) -> void:
+		received_rewards.append_array(r)
+	)
+	oc.return_from_combat(["sword"])
+	_check(received_rewards.size() == 1, "combat_resolved emitted with one reward")
+	_check(received_rewards.has("sword"), "sword present in combat_resolved payload")
+	oc.free()
+
+
+# ---------------------------------------------------------------------------
+# return_from_combat() with empty rewards list
+# ---------------------------------------------------------------------------
+func _test_return_from_combat_empty_rewards() -> void:
+	print("_test_return_from_combat_empty_rewards")
+	var oc := OverworldControllerClass.new()
+	var signal_events: Array = []
+	var received_rewards: Array = ["sentinel"]
+	oc.combat_resolved.connect(func(r: Array) -> void:
+		signal_events.append(true)
+		received_rewards.clear()
+		received_rewards.append_array(r)
+	)
+	oc.return_from_combat([])
+	_check(signal_events.size() == 1, "combat_resolved emitted once with empty rewards")
+	_check(received_rewards.size() == 0, "combat_resolved payload is empty array")
 	oc.free()

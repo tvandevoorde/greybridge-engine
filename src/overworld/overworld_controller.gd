@@ -19,8 +19,16 @@ signal controls_locked_changed(locked: bool)
 ## positions  : Dictionary mapping actor id (String) → Vector2i starting grid position.
 signal combat_ready(turn_order: Array, positions: Dictionary)
 
+## Emitted when combat resolves and the overworld resumes.
+## rewards : Array of reward items collected during the combat encounter.
+signal combat_resolved(rewards: Array)
+
 ## True when the player cannot move or interact in the overworld.
 var controls_locked: bool = false
+
+## Reward items collected from the most recent combat encounter.
+## Populated by return_from_combat() and cleared on the next start_combat().
+var pending_rewards: Array = []
 
 
 ## Lock overworld controls, preventing player input.
@@ -42,8 +50,20 @@ func unlock_controls() -> void:
 ## positions : Dictionary mapping actor id (String) → Vector2i starting grid position.
 ## roller    : DiceRoller instance (inject a seeded roller for deterministic tests).
 func start_combat(actors: Array, positions: Dictionary, roller: DiceRollerClass) -> void:
+	pending_rewards = []
 	lock_controls()
 	var initializer := CombatInitializerClass.new()
 	var result: Dictionary = initializer.initialize(actors, positions, roller)
 	initializer.free()
 	combat_ready.emit(result["turn_order"], result["positions"])
+
+
+## Called when combat ends and the scene returns to the overworld.
+## Stores the rewards collected during combat, unlocks player controls,
+## and emits combat_resolved so the scene can distribute rewards.
+##
+## rewards : Array of reward items collected during the combat encounter.
+func return_from_combat(rewards: Array) -> void:
+	pending_rewards = rewards.duplicate()
+	unlock_controls()
+	combat_resolved.emit(pending_rewards)
