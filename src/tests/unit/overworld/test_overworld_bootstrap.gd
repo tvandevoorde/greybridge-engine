@@ -176,7 +176,7 @@ func _test_bootstrap_collision_tiles_match_map_def() -> void:
 	var ob := OverworldBootstrapClass.new()
 	var received_tiles: Array = []
 	ob.collision_tiles_ready.connect(func(tiles: Array) -> void:
-		received_tiles = tiles
+		received_tiles.append_array(tiles)
 	)
 	var def := _make_map_def("test_map", 0, 0, 1, 2)
 	def.blocked_tiles = [Vector2i(1, 2), Vector2i(3, 4)]
