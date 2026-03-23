@@ -112,31 +112,32 @@ func _test_unlock_clears_reason() -> void:
 func _test_lock_emits_signal() -> void:
 	print("_test_lock_emits_signal")
 	var lock := CombatInputLockClass.new()
-	var emitted: bool = false
-	lock.input_locked.connect(func(_r: String) -> void: emitted = true)
+	var events: Array = []
+	lock.input_locked.connect(func(_r: String) -> void: events.append(true))
 	lock.lock("dice_resolution")
-	_check(emitted == true, "input_locked signal emitted on lock()")
+	_check(events.size() == 1, "input_locked signal emitted on lock()")
 	lock.free()
 
 
 func _test_lock_signal_carries_reason() -> void:
 	print("_test_lock_signal_carries_reason")
 	var lock := CombatInputLockClass.new()
-	var received_reason: String = ""
-	lock.input_locked.connect(func(r: String) -> void: received_reason = r)
+	var received_reasons: Array = []
+	lock.input_locked.connect(func(r: String) -> void: received_reasons.append(r))
 	lock.lock("animation")
-	_check(received_reason == "animation", "input_locked signal carries reason")
+	_check(received_reasons.size() == 1, "input_locked signal emitted once for reason check")
+	_check(received_reasons[0] == "animation", "input_locked signal carries reason")
 	lock.free()
 
 
 func _test_unlock_emits_signal() -> void:
 	print("_test_unlock_emits_signal")
 	var lock := CombatInputLockClass.new()
-	var emitted: bool = false
-	lock.input_unlocked.connect(func() -> void: emitted = true)
+	var events: Array = []
+	lock.input_unlocked.connect(func() -> void: events.append(true))
 	lock.lock("dice_resolution")
 	lock.unlock()
-	_check(emitted == true, "input_unlocked signal emitted on unlock()")
+	_check(events.size() == 1, "input_unlocked signal emitted on unlock()")
 	lock.free()
 
 
@@ -164,23 +165,23 @@ func _test_unlock_idempotent() -> void:
 func _test_lock_idempotent_no_duplicate_signal() -> void:
 	print("_test_lock_idempotent_no_duplicate_signal")
 	var lock := CombatInputLockClass.new()
-	var count: int = 0
-	lock.input_locked.connect(func(_r: String) -> void: count += 1)
+	var events: Array = []
+	lock.input_locked.connect(func(_r: String) -> void: events.append(true))
 	lock.lock("first")
 	lock.lock("second")
-	_check(count == 1, "input_locked emitted only once for duplicate lock() calls")
+	_check(events.size() == 1, "input_locked emitted only once for duplicate lock() calls")
 	lock.free()
 
 
 func _test_unlock_idempotent_no_duplicate_signal() -> void:
 	print("_test_unlock_idempotent_no_duplicate_signal")
 	var lock := CombatInputLockClass.new()
-	var count: int = 0
-	lock.input_unlocked.connect(func() -> void: count += 1)
+	var events: Array = []
+	lock.input_unlocked.connect(func() -> void: events.append(true))
 	lock.lock("first")
 	lock.unlock()
 	lock.unlock()
-	_check(count == 1, "input_unlocked emitted only once for duplicate unlock() calls")
+	_check(events.size() == 1, "input_unlocked emitted only once for duplicate unlock() calls")
 	lock.free()
 
 
@@ -190,18 +191,18 @@ func _test_unlock_idempotent_no_duplicate_signal() -> void:
 func _test_lock_then_unlock_then_lock_again() -> void:
 	print("_test_lock_then_unlock_then_lock_again")
 	var lock := CombatInputLockClass.new()
-	var locked_count: int = 0
-	var unlocked_count: int = 0
-	lock.input_locked.connect(func(_r: String) -> void: locked_count += 1)
-	lock.input_unlocked.connect(func() -> void: unlocked_count += 1)
+	var locked_events: Array = []
+	var unlocked_events: Array = []
+	lock.input_locked.connect(func(_r: String) -> void: locked_events.append(true))
+	lock.input_unlocked.connect(func() -> void: unlocked_events.append(true))
 
 	lock.lock("dice_resolution")
 	lock.unlock()
 	lock.lock("animation")
 	lock.unlock()
 
-	_check(locked_count == 2,   "input_locked emitted twice for two lock cycles")
-	_check(unlocked_count == 2, "input_unlocked emitted twice for two lock cycles")
+	_check(locked_events.size() == 2,   "input_locked emitted twice for two lock cycles")
+	_check(unlocked_events.size() == 2, "input_unlocked emitted twice for two lock cycles")
 	_check(lock.is_locked() == false, "ends unlocked after two full cycles")
 	lock.free()
 
