@@ -33,7 +33,7 @@ var quest_flags: Dictionary = {}
 ##   "dialogue_id"  : String
 ##   "pass_through" : bool       (default false)
 ##   "quest_flags"  : Dictionary (default {})
-static func from_dict(data: Dictionary):
+static func from_dict(data: Dictionary) -> NpcDefinition:
 	var def := NpcDefinitionClass.new()
 	def.npc_id = data.get("npc_id", "")
 	var pos: Dictionary = data.get("position", {})

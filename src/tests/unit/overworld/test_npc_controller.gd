@@ -63,15 +63,16 @@ func _test_load_npcs_emits_npc_blocked_tiles_changed() -> void:
 func _test_load_npcs_blocked_tiles_excludes_pass_through() -> void:
 	print("_test_load_npcs_blocked_tiles_excludes_pass_through")
 	var ctrl := NpcControllerClass.new()
-	var received_tiles: Array = []
+	var events: Array = []
 	ctrl.npc_blocked_tiles_changed.connect(func(tiles: Array) -> void:
-		received_tiles = tiles.duplicate()
+		events.append(tiles.duplicate())
 	)
 	ctrl.load_npcs([
 		{"npc_id": "spirit", "position": {"x": 5, "y": 5},
 			"dialogue_id": "spirit_talk", "pass_through": true, "quest_flags": {}}
 	])
-	_check(received_tiles.size() == 0,
+	_check(events.size() == 1, "npc_blocked_tiles_changed emitted once for pass-through NPC")
+	_check(events[0].size() == 0,
 		"pass-through NPC not included in blocked tiles signal")
 	ctrl.free()
 
@@ -79,16 +80,17 @@ func _test_load_npcs_blocked_tiles_excludes_pass_through() -> void:
 func _test_load_npcs_blocked_tiles_includes_solid() -> void:
 	print("_test_load_npcs_blocked_tiles_includes_solid")
 	var ctrl := NpcControllerClass.new()
-	var received_tiles: Array = []
+	var events: Array = []
 	ctrl.npc_blocked_tiles_changed.connect(func(tiles: Array) -> void:
-		received_tiles = tiles.duplicate()
+		events.append(tiles.duplicate())
 	)
 	ctrl.load_npcs([
 		{"npc_id": "merchant", "position": {"x": 4, "y": 3},
 			"dialogue_id": "merchant_greeting", "pass_through": false, "quest_flags": {}}
 	])
-	_check(received_tiles.size() == 1, "solid NPC position included in blocked tiles")
-	_check(received_tiles[0] == Vector2i(4, 3), "blocked tile matches NPC position")
+	_check(events.size() == 1, "npc_blocked_tiles_changed emitted once for solid NPC")
+	_check(events[0].size() == 1, "solid NPC position included in blocked tiles")
+	_check(events[0][0] == Vector2i(4, 3), "blocked tile matches NPC position")
 	ctrl.free()
 
 
