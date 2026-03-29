@@ -1,5 +1,5 @@
 ## InteractionValidator
-## Pure logic class — no Node, no UI, no scene references.
+## Pure logic class for validating overworld interaction adjacency.
 ## Determines whether a player position is adjacent (4-directional) to an
 ## interactable position on the overworld grid.
 ##
@@ -7,11 +7,9 @@
 ## east, or west of the player (distance of exactly 1 in one cardinal axis,
 ## 0 in the other).  Diagonal tiles are not considered adjacent.
 ##
-## Usage:
-##   var validator := InteractionValidator.new()
-##   validator.is_adjacent(Vector2i(3, 4), Vector2i(3, 3))  # → true (north)
-##   validator.is_adjacent(Vector2i(3, 4), Vector2i(4, 3))  # → false (diagonal)
+## Architecture: pure GDScript class — NOT a Node. No scene/resource access.
 class_name InteractionValidator
+extends RefCounted
 
 
 ## Returns true if player_pos is exactly one cardinal step from interactable_pos.

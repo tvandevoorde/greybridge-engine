@@ -3,6 +3,15 @@
     "spawn_point": { "x": 4, "y": 3 },
     "collision_layer": 1,
     "interaction_layer": 2,
+    "npcs": [
+        {
+            "npc_id": "travelling_merchant",
+            "position": { "x": 4, "y": 3 },
+            "dialogue_id": "merchant_greeting",
+            "pass_through": false,
+            "quest_flags": { "met_merchant": true }
+        }
+    ],
     "chests": [
         {
             "id": "chest_1",

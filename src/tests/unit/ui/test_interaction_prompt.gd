@@ -35,6 +35,7 @@ func _run_all_tests() -> void:
 	_test_show_prompt_stores_handler_id()
 	_test_hide_prompt_clears_is_visible()
 	_test_hide_prompt_clears_handler_id()
+	_test_show_then_hide_full_cycle()
 	_test_show_prompt_replaces_previous_handler_id()
 	_test_hide_after_never_shown_stays_hidden()
 
@@ -95,6 +96,21 @@ func _test_hide_prompt_clears_handler_id() -> void:
 	prompt.hide_prompt()
 	_check(prompt.current_handler_id == "",
 		"current_handler_id is empty after hide_prompt()")
+	prompt.free()
+
+
+# ---------------------------------------------------------------------------
+# show → hide full cycle
+# ---------------------------------------------------------------------------
+func _test_show_then_hide_full_cycle() -> void:
+	print("_test_show_then_hide_full_cycle")
+	var prompt := InteractionPromptClass.new()
+	prompt.show_prompt("elder")
+	_check(prompt.is_visible == true and prompt.current_handler_id == "elder",
+		"prompt visible with correct handler after show_prompt")
+	prompt.hide_prompt()
+	_check(prompt.is_visible == false and prompt.current_handler_id == "",
+		"prompt hidden and handler cleared after hide_prompt")
 	prompt.free()
 
 

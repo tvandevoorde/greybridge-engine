@@ -17,6 +17,9 @@ var collision_layer: int = 1
 ## Interaction/trigger layer bitmask for this map.
 var interaction_layer: int = 2
 
+## NPC spawn data as a list of raw Dictionaries parsed from JSON.
+## Each entry is passed to NpcController.load_npcs() at runtime.
+var npcs: Array = []
 ## Tile positions the player cannot enter, in grid coordinates.
 ## Each element is a Vector2i.
 var blocked_tiles: Array = []
@@ -39,6 +42,7 @@ static func from_dict(data: Dictionary):
 	def.spawn_point = Vector2i(int(sp.get("x", 0)), int(sp.get("y", 0)))
 	def.collision_layer = int(data.get("collision_layer", 1))
 	def.interaction_layer = int(data.get("interaction_layer", 2))
+	def.npcs = data.get("npcs", []).duplicate()
 	var raw_blocked: Array = data.get("blocked_tiles", [])
 	for entry in raw_blocked:
 		if entry is Dictionary:

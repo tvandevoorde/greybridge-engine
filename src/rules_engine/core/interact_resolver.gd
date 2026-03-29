@@ -1,5 +1,5 @@
 ## InteractResolver
-## Pure logic class — no Node, no UI, no scene references.
+## Pure logic class for resolving overworld interaction targets.
 ## Computes the interaction target tile given a player position and facing direction,
 ## and resolves which interactable (if any) occupies that tile.
 ##
@@ -7,13 +7,9 @@
 ##   "id"       : String   — unique identifier for the interactable (NPC id, door id, etc.).
 ##   "position" : Vector2i — tile position of the interactable.
 ##
-## Usage:
-##   var resolver := InteractResolver.new()
-##   var target := resolver.get_interact_target(Vector2i(3, 4), Vector2i(0, -1))
-##   var found := resolver.resolve(target, candidates)
-##   if not found.is_empty():
-##       # interact with found["id"]
+## Architecture: pure GDScript class — NOT a Node. No scene/resource access.
 class_name InteractResolver
+extends RefCounted
 
 
 ## Returns the tile immediately in front of the player.

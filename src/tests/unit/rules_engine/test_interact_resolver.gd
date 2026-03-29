@@ -1,6 +1,5 @@
 ## test_interact_resolver.gd
-## Unit tests for InteractResolver
-## (src/rules_engine/core/interact_resolver.gd).
+## Unit tests for InteractResolver (src/rules_engine/core/interact_resolver.gd).
 ##
 ## Run headlessly from the Godot project root (src/) with:
 ##   godot --headless --script ./tests/unit/rules_engine/test_interact_resolver.gd
@@ -45,7 +44,7 @@ func _run_all_tests() -> void:
 
 
 # ---------------------------------------------------------------------------
-# get_interact_target — facing-direction target tile
+# get_interact_target -- facing-direction target tile
 # ---------------------------------------------------------------------------
 func _test_get_interact_target_north() -> void:
 	print("_test_get_interact_target_north")
@@ -83,7 +82,7 @@ func _test_get_interact_target_arbitrary_position() -> void:
 
 
 # ---------------------------------------------------------------------------
-# resolve — interactable candidate lookup
+# resolve -- interactable candidate lookup
 # ---------------------------------------------------------------------------
 func _test_resolve_finds_npc() -> void:
 	print("_test_resolve_finds_npc")
