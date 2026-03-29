@@ -27,6 +27,10 @@ signal player_spawned(position: Vector2i)
 ## Emitted when the collision and interaction layers are initialized.
 signal layers_initialized(collision_layer: int, interaction_layer: int)
 
+## Emitted with the blocked tile positions derived from the map definition.
+## blocked_tiles : Array of Vector2i — tiles the player cannot enter.
+signal collision_tiles_ready(blocked_tiles: Array)
+
 ## Emitted when the camera follow target is set, carrying the world position.
 signal camera_follow_initialized(position: Vector2)
 
@@ -49,6 +53,7 @@ func bootstrap(map_def: MapDefinitionClass) -> void:
 	map_loaded.emit(map_def)
 	player_spawned.emit(map_def.spawn_point)
 	layers_initialized.emit(map_def.collision_layer, map_def.interaction_layer)
+	collision_tiles_ready.emit(map_def.blocked_tiles)
 	var world_pos := Vector2(
 		map_def.spawn_point.x * TILE_SIZE,
 		map_def.spawn_point.y * TILE_SIZE
