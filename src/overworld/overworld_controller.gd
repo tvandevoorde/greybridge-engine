@@ -30,6 +30,10 @@ var controls_locked: bool = false
 ## Populated by return_from_combat() and cleared on the next start_combat().
 var pending_rewards: Array = []
 
+## The player's grid tile position at the moment combat was initiated.
+## Preserved so the scene can restore the player after returning from combat.
+var saved_player_tile: Vector2i = Vector2i(0, 0)
+
 
 ## Lock overworld controls, preventing player input.
 func lock_controls() -> void:
@@ -45,12 +49,15 @@ func unlock_controls() -> void:
 
 ## Transition from overworld to combat.
 ## Locks controls, rolls initiative for all actors, and emits combat_ready.
+## Preserves the player's current tile position for restoration after combat.
 ##
-## actors    : Array of actor Dictionaries, each with "id" and "dex_score".
-## positions : Dictionary mapping actor id (String) → Vector2i starting grid position.
-## roller    : DiceRoller instance (inject a seeded roller for deterministic tests).
-func start_combat(actors: Array, positions: Dictionary, roller: DiceRollerClass) -> void:
+## actors      : Array of actor Dictionaries, each with "id" and "dex_score".
+## positions   : Dictionary mapping actor id (String) → Vector2i starting grid position.
+## roller      : DiceRoller instance (inject a seeded roller for deterministic tests).
+## player_tile : Vector2i — the player's current overworld tile (saved for return).
+func start_combat(actors: Array, positions: Dictionary, roller: DiceRollerClass, player_tile: Vector2i = Vector2i(0, 0)) -> void:
 	pending_rewards = []
+	saved_player_tile = player_tile
 	lock_controls()
 	var initializer := CombatInitializerClass.new()
 	var result: Dictionary = initializer.initialize(actors, positions, roller)

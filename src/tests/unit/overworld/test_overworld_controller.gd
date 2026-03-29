@@ -38,6 +38,8 @@ func _run_all_tests() -> void:
 	_test_start_combat_emits_combat_ready()
 	_test_start_combat_turn_order_sorted()
 	_test_start_combat_clears_pending_rewards()
+	_test_start_combat_saves_player_tile()
+	_test_start_combat_default_player_tile_is_origin()
 	_test_return_from_combat_unlocks_controls()
 	_test_return_from_combat_stores_rewards()
 	_test_return_from_combat_emits_combat_resolved()
@@ -230,4 +232,31 @@ func _test_return_from_combat_empty_rewards() -> void:
 	oc.return_from_combat([])
 	_check(signal_events.size() == 1, "combat_resolved emitted once with empty rewards")
 	_check(received_rewards.size() == 0, "combat_resolved payload is empty array")
+	oc.free()
+
+
+# ---------------------------------------------------------------------------
+# start_combat() saves player tile for return
+# ---------------------------------------------------------------------------
+func _test_start_combat_saves_player_tile() -> void:
+	print("_test_start_combat_saves_player_tile")
+	var oc := OverworldControllerClass.new()
+	var roller := DiceRollerClass.new(1)
+	var actors: Array = [{"id": "hero", "dex_score": 14}]
+	oc.start_combat(actors, {}, roller, Vector2i(3, 7))
+	_check(oc.saved_player_tile == Vector2i(3, 7),
+		"saved_player_tile stores the tile passed to start_combat()")
+	oc.free()
+
+
+# ---------------------------------------------------------------------------
+# start_combat() default player_tile is origin when not provided
+# ---------------------------------------------------------------------------
+func _test_start_combat_default_player_tile_is_origin() -> void:
+	print("_test_start_combat_default_player_tile_is_origin")
+	var oc := OverworldControllerClass.new()
+	var roller := DiceRollerClass.new(1)
+	oc.start_combat([{"id": "hero", "dex_score": 10}], {}, roller)
+	_check(oc.saved_player_tile == Vector2i(0, 0),
+		"saved_player_tile defaults to (0,0) when not provided")
 	oc.free()
