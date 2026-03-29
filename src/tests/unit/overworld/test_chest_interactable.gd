@@ -14,6 +14,17 @@ var _pass_count: int = 0
 var _fail_count: int = 0
 
 
+class SignalCapture:
+	var count: int = 0
+	var emitted: bool = false
+	var items: Array = []
+
+	func on_chest_opened(opened_items: Array) -> void:
+		count += 1
+		emitted = true
+		items = opened_items.duplicate(true)
+
+
 func _initialize() -> void:
 	_run_all_tests()
 	print("\nResults: %d passed, %d failed" % [_pass_count, _fail_count])
@@ -121,11 +132,11 @@ func _test_open_second_time_does_not_emit_signal() -> void:
 	var chest := ChestInteractableClass.new()
 	var inv := InventoryClass.new()
 	chest.set_loot([{"id": "torch", "name": "Torch", "quantity": 1}])
-	var signal_count: int = 0
-	chest.chest_opened.connect(func(_items: Array) -> void: signal_count += 1)
+	var capture := SignalCapture.new()
+	chest.chest_opened.connect(capture.on_chest_opened)
 	chest.open(inv)
 	chest.open(inv)
-	_check(signal_count == 1, "chest_opened emitted exactly once across two open() calls")
+	_check(capture.count == 1, "chest_opened emitted exactly once across two open() calls")
 	chest.free()
 
 
@@ -137,10 +148,10 @@ func _test_open_emits_chest_opened_signal() -> void:
 	var chest := ChestInteractableClass.new()
 	var inv := InventoryClass.new()
 	chest.set_loot([{"id": "sword", "name": "Sword", "quantity": 1}])
-	var emitted: bool = false
-	chest.chest_opened.connect(func(_items: Array) -> void: emitted = true)
+	var capture := SignalCapture.new()
+	chest.chest_opened.connect(capture.on_chest_opened)
 	chest.open(inv)
-	_check(emitted, "chest_opened signal emitted on first open()")
+	_check(capture.emitted, "chest_opened signal emitted on first open()")
 	chest.free()
 
 
@@ -149,12 +160,16 @@ func _test_open_signal_carries_correct_items() -> void:
 	var chest := ChestInteractableClass.new()
 	var inv := InventoryClass.new()
 	chest.set_loot([{"id": "ruby", "name": "Ruby", "quantity": 2}])
-	var received_items: Array = []
-	chest.chest_opened.connect(func(items: Array) -> void: received_items = items)
+	var capture := SignalCapture.new()
+	chest.chest_opened.connect(capture.on_chest_opened)
 	chest.open(inv)
-	_check(received_items.size() == 1, "signal carries one item")
-	_check(received_items[0].get("id") == "ruby", "signal item has correct id")
-	_check(received_items[0].get("quantity") == 2, "signal item has correct quantity")
+	_check(capture.items.size() == 1, "signal carries one item")
+	if capture.items.size() > 0:
+		_check(capture.items[0].get("id") == "ruby", "signal item has correct id")
+		_check(capture.items[0].get("quantity") == 2, "signal item has correct quantity")
+	else:
+		_check(false, "signal item has correct id")
+		_check(false, "signal item has correct quantity")
 	chest.free()
 
 
