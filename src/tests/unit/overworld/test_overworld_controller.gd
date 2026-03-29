@@ -44,6 +44,10 @@ func _run_all_tests() -> void:
 	_test_return_from_combat_stores_rewards()
 	_test_return_from_combat_emits_combat_resolved()
 	_test_return_from_combat_empty_rewards()
+	_test_start_map_transition_locks_controls()
+	_test_start_map_transition_emits_signal()
+	_test_start_map_transition_signal_carries_target_map()
+	_test_start_map_transition_signal_carries_target_spawn()
 
 
 # ---------------------------------------------------------------------------
@@ -260,3 +264,63 @@ func _test_start_combat_default_player_tile_is_origin() -> void:
 	_check(oc.saved_player_tile == Vector2i(0, 0),
 		"saved_player_tile defaults to (0,0) when not provided")
 	oc.free()
+
+
+# ---------------------------------------------------------------------------
+# start_map_transition() locks overworld controls
+# ---------------------------------------------------------------------------
+func _test_start_map_transition_locks_controls() -> void:
+	print("_test_start_map_transition_locks_controls")
+	var oc := OverworldControllerClass.new()
+	oc.start_map_transition("greybridge_town", Vector2i(1, 8))
+	_check(oc.controls_locked == true,
+		"controls_locked is true after start_map_transition()")
+	oc.free()
+
+
+# ---------------------------------------------------------------------------
+# start_map_transition() emits map_transition_started
+# ---------------------------------------------------------------------------
+func _test_start_map_transition_emits_signal() -> void:
+	print("_test_start_map_transition_emits_signal")
+	var oc := OverworldControllerClass.new()
+	var fired: Array = []
+	oc.map_transition_started.connect(func(_m: String, _s: Vector2i) -> void:
+		fired.append(true)
+	)
+	oc.start_map_transition("greybridge_town", Vector2i(1, 8))
+	_check(fired.size() == 1, "map_transition_started emitted once")
+	oc.free()
+
+
+# ---------------------------------------------------------------------------
+# map_transition_started carries the target_map
+# ---------------------------------------------------------------------------
+func _test_start_map_transition_signal_carries_target_map() -> void:
+	print("_test_start_map_transition_signal_carries_target_map")
+	var oc := OverworldControllerClass.new()
+	var maps: Array[String] = []
+	oc.map_transition_started.connect(func(m: String, _s: Vector2i) -> void:
+		maps.append(m)
+	)
+	oc.start_map_transition("greybridge_town", Vector2i(1, 8))
+	_check(maps.size() == 1 and maps[0] == "greybridge_town",
+		"map_transition_started carries correct target_map")
+	oc.free()
+
+
+# ---------------------------------------------------------------------------
+# map_transition_started carries the target_spawn
+# ---------------------------------------------------------------------------
+func _test_start_map_transition_signal_carries_target_spawn() -> void:
+	print("_test_start_map_transition_signal_carries_target_spawn")
+	var oc := OverworldControllerClass.new()
+	var spawns: Array[Vector2i] = []
+	oc.map_transition_started.connect(func(_m: String, s: Vector2i) -> void:
+		spawns.append(s)
+	)
+	oc.start_map_transition("greybridge_town", Vector2i(3, 9))
+	_check(spawns.size() == 1 and spawns[0] == Vector2i(3, 9),
+		"map_transition_started carries correct target_spawn")
+	oc.free()
+

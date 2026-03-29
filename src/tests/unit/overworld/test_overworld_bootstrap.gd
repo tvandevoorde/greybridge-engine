@@ -51,7 +51,12 @@ func _run_all_tests() -> void:
 	_test_camera_follow_position_matches_spawn_point()
 	_test_bootstrap_no_combat_systems_active()
 	_test_bootstrap_overwrites_previous_state()
-
+	_test_bootstrap_emits_transitions_ready()
+	_test_bootstrap_at_uses_override_spawn_for_player_spawned()
+	_test_bootstrap_at_uses_override_spawn_for_camera()
+	_test_bootstrap_at_sets_is_bootstrapped()
+	_test_bootstrap_at_emits_transitions_ready()
+	_test_transitions_ready_carries_map_transitions()
 
 # ---------------------------------------------------------------------------
 # is_bootstrapped is false by default
@@ -248,3 +253,105 @@ func _test_bootstrap_overwrites_previous_state() -> void:
 	_check(ob.current_map.map_id == "map_two", "current_map updated to second map")
 	_check(ob.is_bootstrapped == true, "is_bootstrapped remains true after second bootstrap")
 	ob.free()
+
+
+# ---------------------------------------------------------------------------
+# bootstrap() emits transitions_ready
+# ---------------------------------------------------------------------------
+func _test_bootstrap_emits_transitions_ready() -> void:
+	print("_test_bootstrap_emits_transitions_ready")
+	var ob := OverworldBootstrapClass.new()
+	var received: Array = []
+	ob.transitions_ready.connect(func(_t: Array) -> void:
+		received.append(true)
+	)
+	var def := _make_map_def("test_map", 0, 0, 1, 2)
+	ob.bootstrap(def)
+	_check(received.size() == 1, "transitions_ready emitted once during bootstrap()")
+	ob.free()
+
+
+# ---------------------------------------------------------------------------
+# transitions_ready carries the map's transition list
+# ---------------------------------------------------------------------------
+func _test_transitions_ready_carries_map_transitions() -> void:
+	print("_test_transitions_ready_carries_map_transitions")
+	var ob := OverworldBootstrapClass.new()
+	var received_lists: Array = []
+	ob.transitions_ready.connect(func(t: Array) -> void:
+		received_lists.append(t)
+	)
+	var def := _make_map_def("test_map", 0, 0, 1, 2)
+	def.transitions = [{"tile": {"x": 5, "y": 0}, "target_map": "greybridge_town",
+		"target_spawn": {"x": 1, "y": 8}, "required_flags": {}}]
+	ob.bootstrap(def)
+	_check(received_lists.size() == 1, "transitions_ready emitted once")
+	_check(received_lists[0].size() == 1, "transitions_ready payload has 1 transition")
+	ob.free()
+
+
+# ---------------------------------------------------------------------------
+# bootstrap_at() uses the supplied spawn point for player_spawned
+# ---------------------------------------------------------------------------
+func _test_bootstrap_at_uses_override_spawn_for_player_spawned() -> void:
+	print("_test_bootstrap_at_uses_override_spawn_for_player_spawned")
+	var ob := OverworldBootstrapClass.new()
+	var received_positions: Array = []
+	ob.player_spawned.connect(func(pos: Vector2i) -> void:
+		received_positions.append(pos)
+	)
+	var def := _make_map_def("test_map", 1, 1, 1, 2)
+	ob.bootstrap_at(def, Vector2i(7, 3))
+	_check(received_positions.size() == 1, "player_spawned emitted once from bootstrap_at()")
+	_check(received_positions[0] == Vector2i(7, 3),
+		"player_spawned uses the override spawn, not map default")
+	ob.free()
+
+
+# ---------------------------------------------------------------------------
+# bootstrap_at() uses the override spawn for camera_follow_initialized
+# ---------------------------------------------------------------------------
+func _test_bootstrap_at_uses_override_spawn_for_camera() -> void:
+	print("_test_bootstrap_at_uses_override_spawn_for_camera")
+	var ob := OverworldBootstrapClass.new()
+	var received_positions: Array = []
+	ob.camera_follow_initialized.connect(func(pos: Vector2) -> void:
+		received_positions.append(pos)
+	)
+	var def := _make_map_def("test_map", 1, 1, 1, 2)
+	ob.bootstrap_at(def, Vector2i(7, 3))
+	var tile_size: int = OverworldBootstrapClass.TILE_SIZE
+	var expected := Vector2(7 * tile_size, 3 * tile_size)
+	_check(received_positions.size() == 1, "camera_follow_initialized emitted once from bootstrap_at()")
+	_check(received_positions[0] == expected,
+		"camera follow uses override spawn * TILE_SIZE")
+	ob.free()
+
+
+# ---------------------------------------------------------------------------
+# bootstrap_at() sets is_bootstrapped
+# ---------------------------------------------------------------------------
+func _test_bootstrap_at_sets_is_bootstrapped() -> void:
+	print("_test_bootstrap_at_sets_is_bootstrapped")
+	var ob := OverworldBootstrapClass.new()
+	var def := _make_map_def("test_map", 0, 0, 1, 2)
+	ob.bootstrap_at(def, Vector2i(2, 5))
+	_check(ob.is_bootstrapped == true, "is_bootstrapped is true after bootstrap_at()")
+	ob.free()
+
+
+# ---------------------------------------------------------------------------
+# bootstrap_at() emits transitions_ready
+# ---------------------------------------------------------------------------
+func _test_bootstrap_at_emits_transitions_ready() -> void:
+	print("_test_bootstrap_at_emits_transitions_ready")
+	var ob := OverworldBootstrapClass.new()
+	var received: Array = []
+	ob.transitions_ready.connect(func(_t: Array) -> void:
+		received.append(true)
+	)
+	var def := _make_map_def("test_map", 0, 0, 1, 2)
+	ob.bootstrap_at(def, Vector2i(0, 0))
+	_check(received.size() == 1, "transitions_ready emitted once during bootstrap_at()")
+	ob.free()
+

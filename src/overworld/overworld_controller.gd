@@ -23,6 +23,13 @@ signal combat_ready(turn_order: Array, positions: Dictionary)
 ## rewards : Array of reward items collected during the combat encounter.
 signal combat_resolved(rewards: Array)
 
+## Emitted when a map transition is initiated by the player stepping on a
+## transition tile.  The scene layer should respond by loading the target map
+## and calling OverworldBootstrap.bootstrap_at() with the supplied spawn.
+## target_map   : String    — map_id of the destination map to load.
+## target_spawn : Vector2i  — grid tile to place the player on arrival.
+signal map_transition_started(target_map: String, target_spawn: Vector2i)
+
 ## True when the player cannot move or interact in the overworld.
 var controls_locked: bool = false
 
@@ -74,3 +81,15 @@ func return_from_combat(rewards: Array) -> void:
 	pending_rewards = rewards.duplicate()
 	unlock_controls()
 	combat_resolved.emit(pending_rewards)
+
+
+## Initiate a map transition triggered by the player stepping on a
+## transition tile.  Locks overworld controls and emits
+## map_transition_started so the scene layer can load the new map and
+## call OverworldBootstrap.bootstrap_at() with the supplied spawn.
+##
+## target_map   : String    — map_id of the destination map.
+## target_spawn : Vector2i  — grid tile the player should arrive on.
+func start_map_transition(target_map: String, target_spawn: Vector2i) -> void:
+	lock_controls()
+	map_transition_started.emit(target_map, target_spawn)
