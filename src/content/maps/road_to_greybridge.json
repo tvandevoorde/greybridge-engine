@@ -3,6 +3,14 @@
     "spawn_point": { "x": 4, "y": 3 },
     "collision_layer": 1,
     "interaction_layer": 2,
+    "transitions": [
+        {
+            "tile": { "x": 9, "y": 3 },
+            "target_map": "greybridge_town",
+            "target_spawn": { "x": 1, "y": 8 },
+            "required_flags": {}
+        }
+    ],
     "npcs": [
         {
             "npc_id": "travelling_merchant",

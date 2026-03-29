@@ -1,0 +1,14 @@
+{
+    "map_id": "greybridge_town",
+    "spawn_point": { "x": 1, "y": 8 },
+    "collision_layer": 1,
+    "interaction_layer": 2,
+    "transitions": [
+        {
+            "tile": { "x": 1, "y": 9 },
+            "target_map": "road_to_greybridge",
+            "target_spawn": { "x": 9, "y": 2 },
+            "required_flags": {}
+        }
+    ]
+}
