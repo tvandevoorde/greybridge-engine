@@ -8,8 +8,6 @@
 ## Exit code 0 = all assertions passed; 1 = one or more assertions failed.
 extends SceneTree
 
-const InteractionValidatorClass = preload(
-	"res://rules_engine/core/interaction_validator.gd")
 const InteractionValidatorClass = preload("res://rules_engine/core/interaction_validator.gd")
 
 var _pass_count: int = 0
@@ -32,81 +30,6 @@ func _check(condition: bool, description: String) -> void:
 
 
 func _run_all_tests() -> void:
-	_test_adjacent_south()
-	_test_adjacent_north()
-	_test_adjacent_east()
-	_test_adjacent_west()
-	_test_same_tile_not_adjacent()
-	_test_diagonal_not_adjacent()
-	_test_distance_two_not_adjacent()
-	_test_symmetry()
-
-
-# ---------------------------------------------------------------------------
-# is_adjacent — one step in each cardinal direction is adjacent
-# ---------------------------------------------------------------------------
-func _test_adjacent_south() -> void:
-	print("_test_adjacent_south")
-	var validator := InteractionValidatorClass.new()
-	_check(validator.is_adjacent(Vector2i(3, 3), Vector2i(3, 4)),
-		"one step south is adjacent")
-
-
-func _test_adjacent_north() -> void:
-	print("_test_adjacent_north")
-	var validator := InteractionValidatorClass.new()
-	_check(validator.is_adjacent(Vector2i(3, 3), Vector2i(3, 2)),
-		"one step north is adjacent")
-
-
-func _test_adjacent_east() -> void:
-	print("_test_adjacent_east")
-	var validator := InteractionValidatorClass.new()
-	_check(validator.is_adjacent(Vector2i(3, 3), Vector2i(4, 3)),
-		"one step east is adjacent")
-
-
-func _test_adjacent_west() -> void:
-	print("_test_adjacent_west")
-	var validator := InteractionValidatorClass.new()
-	_check(validator.is_adjacent(Vector2i(3, 3), Vector2i(2, 3)),
-		"one step west is adjacent")
-
-
-# ---------------------------------------------------------------------------
-# is_adjacent — non-adjacent cases
-# ---------------------------------------------------------------------------
-func _test_same_tile_not_adjacent() -> void:
-	print("_test_same_tile_not_adjacent")
-	var validator := InteractionValidatorClass.new()
-	_check(validator.is_adjacent(Vector2i(3, 3), Vector2i(3, 3)) == false,
-		"same tile is not adjacent")
-
-
-func _test_diagonal_not_adjacent() -> void:
-	print("_test_diagonal_not_adjacent")
-	var validator := InteractionValidatorClass.new()
-	_check(validator.is_adjacent(Vector2i(3, 3), Vector2i(4, 4)) == false,
-		"diagonal tile is not adjacent")
-
-
-func _test_distance_two_not_adjacent() -> void:
-	print("_test_distance_two_not_adjacent")
-	var validator := InteractionValidatorClass.new()
-	_check(validator.is_adjacent(Vector2i(3, 3), Vector2i(5, 3)) == false,
-		"two steps away is not adjacent")
-
-
-# ---------------------------------------------------------------------------
-# is_adjacent — symmetry
-# ---------------------------------------------------------------------------
-func _test_symmetry() -> void:
-	print("_test_symmetry")
-	var validator := InteractionValidatorClass.new()
-	var a := Vector2i(1, 2)
-	var b := Vector2i(1, 3)
-	_check(validator.is_adjacent(a, b) == validator.is_adjacent(b, a),
-		"is_adjacent is symmetric")
 	_test_same_position_is_not_adjacent()
 	_test_north_is_adjacent()
 	_test_south_is_adjacent()
