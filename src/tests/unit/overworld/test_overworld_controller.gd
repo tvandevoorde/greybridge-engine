@@ -38,6 +38,8 @@ func _run_all_tests() -> void:
 	_test_start_combat_emits_combat_ready()
 	_test_start_combat_turn_order_sorted()
 	_test_start_combat_clears_pending_rewards()
+	_test_start_combat_saves_player_tile()
+	_test_start_combat_default_player_tile_is_origin()
 	_test_return_from_combat_unlocks_controls()
 	_test_return_from_combat_stores_rewards()
 	_test_return_from_combat_emits_combat_resolved()
@@ -48,6 +50,10 @@ func _run_all_tests() -> void:
 	_test_return_from_combat_emits_overworld_music_resumed()
 	_test_return_from_combat_music_resumed_with_stored_track()
 	_test_return_from_combat_music_resumed_empty_when_no_track_set()
+	_test_start_map_transition_locks_controls()
+	_test_start_map_transition_emits_signal()
+	_test_start_map_transition_signal_carries_target_map()
+	_test_start_map_transition_signal_carries_target_spawn()
 
 
 # ---------------------------------------------------------------------------
@@ -246,6 +252,16 @@ func _test_current_music_track_empty_by_default() -> void:
 	print("_test_current_music_track_empty_by_default")
 	var oc := OverworldControllerClass.new()
 	_check(oc.current_music_track == "", "current_music_track is empty string by default")
+# start_combat() saves player tile for return
+# ---------------------------------------------------------------------------
+func _test_start_combat_saves_player_tile() -> void:
+	print("_test_start_combat_saves_player_tile")
+	var oc := OverworldControllerClass.new()
+	var roller := DiceRollerClass.new(1)
+	var actors: Array = [{"id": "hero", "dex_score": 14}]
+	oc.start_combat(actors, {}, roller, Vector2i(3, 7))
+	_check(oc.saved_player_tile == Vector2i(3, 7),
+		"saved_player_tile stores the tile passed to start_combat()")
 	oc.free()
 
 
@@ -257,6 +273,15 @@ func _test_set_current_music_track() -> void:
 	var oc := OverworldControllerClass.new()
 	oc.set_current_music_track("road_theme")
 	_check(oc.current_music_track == "road_theme", "current_music_track set by set_current_music_track()")
+# start_combat() default player_tile is origin when not provided
+# ---------------------------------------------------------------------------
+func _test_start_combat_default_player_tile_is_origin() -> void:
+	print("_test_start_combat_default_player_tile_is_origin")
+	var oc := OverworldControllerClass.new()
+	var roller := DiceRollerClass.new(1)
+	oc.start_combat([{"id": "hero", "dex_score": 10}], {}, roller)
+	_check(oc.saved_player_tile == Vector2i(0, 0),
+		"saved_player_tile defaults to (0,0) when not provided")
 	oc.free()
 
 
@@ -273,6 +298,14 @@ func _test_start_combat_emits_combat_music_requested() -> void:
 	var roller := DiceRollerClass.new(0)
 	oc.start_combat([{"id": "hero", "dex_score": 10}], {}, roller)
 	_check(events.size() == 1, "combat_music_requested emitted once on start_combat()")
+# start_map_transition() locks overworld controls
+# ---------------------------------------------------------------------------
+func _test_start_map_transition_locks_controls() -> void:
+	print("_test_start_map_transition_locks_controls")
+	var oc := OverworldControllerClass.new()
+	oc.start_map_transition("greybridge_town", Vector2i(1, 8))
+	_check(oc.controls_locked == true,
+		"controls_locked is true after start_map_transition()")
 	oc.free()
 
 
@@ -288,6 +321,17 @@ func _test_return_from_combat_emits_overworld_music_resumed() -> void:
 	)
 	oc.return_from_combat([])
 	_check(events.size() == 1, "overworld_music_resumed emitted once on return_from_combat()")
+# start_map_transition() emits map_transition_started
+# ---------------------------------------------------------------------------
+func _test_start_map_transition_emits_signal() -> void:
+	print("_test_start_map_transition_emits_signal")
+	var oc := OverworldControllerClass.new()
+	var fired: Array = []
+	oc.map_transition_started.connect(func(_m: String, _s: Vector2i) -> void:
+		fired.append(true)
+	)
+	oc.start_map_transition("greybridge_town", Vector2i(1, 8))
+	_check(fired.size() == 1, "map_transition_started emitted once")
 	oc.free()
 
 
@@ -306,6 +350,18 @@ func _test_return_from_combat_music_resumed_with_stored_track() -> void:
 	_check(received_tracks.size() == 1, "overworld_music_resumed emitted once")
 	_check(received_tracks[0] == "forest_theme",
 		"overworld_music_resumed carries the stored music track id")
+# map_transition_started carries the target_map
+# ---------------------------------------------------------------------------
+func _test_start_map_transition_signal_carries_target_map() -> void:
+	print("_test_start_map_transition_signal_carries_target_map")
+	var oc := OverworldControllerClass.new()
+	var maps: Array[String] = []
+	oc.map_transition_started.connect(func(m: String, _s: Vector2i) -> void:
+		maps.append(m)
+	)
+	oc.start_map_transition("greybridge_town", Vector2i(1, 8))
+	_check(maps.size() == 1 and maps[0] == "greybridge_town",
+		"map_transition_started carries correct target_map")
 	oc.free()
 
 
@@ -324,3 +380,17 @@ func _test_return_from_combat_music_resumed_empty_when_no_track_set() -> void:
 	_check(received_tracks[0] == "",
 		"overworld_music_resumed carries empty string when no track was set")
 	oc.free()
+# map_transition_started carries the target_spawn
+# ---------------------------------------------------------------------------
+func _test_start_map_transition_signal_carries_target_spawn() -> void:
+	print("_test_start_map_transition_signal_carries_target_spawn")
+	var oc := OverworldControllerClass.new()
+	var spawns: Array[Vector2i] = []
+	oc.map_transition_started.connect(func(_m: String, s: Vector2i) -> void:
+		spawns.append(s)
+	)
+	oc.start_map_transition("greybridge_town", Vector2i(3, 9))
+	_check(spawns.size() == 1 and spawns[0] == Vector2i(3, 9),
+		"map_transition_started carries correct target_spawn")
+	oc.free()
+

@@ -31,6 +31,12 @@ signal combat_music_requested()
 ## track_id : String — the music track associated with the current map.
 ##            Empty string when no track was set for this map.
 signal overworld_music_resumed(track_id: String)
+## Emitted when a map transition is initiated by the player stepping on a
+## transition tile.  The scene layer should respond by loading the target map
+## and calling OverworldBootstrap.bootstrap_at() with the supplied spawn.
+## target_map   : String    — map_id of the destination map to load.
+## target_spawn : Vector2i  — grid tile to place the player on arrival.
+signal map_transition_started(target_map: String, target_spawn: Vector2i)
 
 ## True when the player cannot move or interact in the overworld.
 var controls_locked: bool = false
@@ -42,6 +48,9 @@ var pending_rewards: Array = []
 ## The music track identifier for the currently loaded map.
 ## Set via set_current_music_track() after bootstrap.
 var current_music_track: String = ""
+## The player's grid tile position at the moment combat was initiated.
+## Preserved so the scene can restore the player after returning from combat.
+var saved_player_tile: Vector2i = Vector2i(0, 0)
 
 
 ## Lock overworld controls, preventing player input.
@@ -68,12 +77,16 @@ func set_current_music_track(track_id: String) -> void:
 ## Transition from overworld to combat.
 ## Locks controls, rolls initiative for all actors, emits combat_music_requested,
 ## and emits combat_ready.
+## Locks controls, rolls initiative for all actors, and emits combat_ready.
+## Preserves the player's current tile position for restoration after combat.
 ##
-## actors    : Array of actor Dictionaries, each with "id" and "dex_score".
-## positions : Dictionary mapping actor id (String) → Vector2i starting grid position.
-## roller    : DiceRoller instance (inject a seeded roller for deterministic tests).
-func start_combat(actors: Array, positions: Dictionary, roller: DiceRollerClass) -> void:
+## actors      : Array of actor Dictionaries, each with "id" and "dex_score".
+## positions   : Dictionary mapping actor id (String) → Vector2i starting grid position.
+## roller      : DiceRoller instance (inject a seeded roller for deterministic tests).
+## player_tile : Vector2i — the player's current overworld tile (saved for return).
+func start_combat(actors: Array, positions: Dictionary, roller: DiceRollerClass, player_tile: Vector2i = Vector2i(0, 0)) -> void:
 	pending_rewards = []
+	saved_player_tile = player_tile
 	lock_controls()
 	combat_music_requested.emit()
 	var initializer := CombatInitializerClass.new()
@@ -93,3 +106,15 @@ func return_from_combat(rewards: Array) -> void:
 	unlock_controls()
 	combat_resolved.emit(pending_rewards)
 	overworld_music_resumed.emit(current_music_track)
+
+
+## Initiate a map transition triggered by the player stepping on a
+## transition tile.  Locks overworld controls and emits
+## map_transition_started so the scene layer can load the new map and
+## call OverworldBootstrap.bootstrap_at() with the supplied spawn.
+##
+## target_map   : String    — map_id of the destination map.
+## target_spawn : Vector2i  — grid tile the player should arrive on.
+func start_map_transition(target_map: String, target_spawn: Vector2i) -> void:
+	lock_controls()
+	map_transition_started.emit(target_map, target_spawn)
