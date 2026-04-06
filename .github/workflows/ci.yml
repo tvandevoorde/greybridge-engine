@@ -171,6 +171,14 @@ jobs:
         working-directory: src
         run: godot --headless --script ./tests/unit/overworld/test_collision_debug_overlay.gd
 
+      - name: Unit tests — trigger_debug_overlay
+        working-directory: src
+        run: godot --headless --script ./tests/unit/overworld/test_trigger_debug_overlay.gd
+
+      - name: Unit tests — overworld_debug_overlay
+        working-directory: src
+        run: godot --headless --script ./tests/unit/overworld/test_overworld_debug_overlay.gd
+
       - name: Unit tests — movement_system
         working-directory: src
         run: godot --headless --script ./tests/unit/rules_engine/test_movement_system.gd
