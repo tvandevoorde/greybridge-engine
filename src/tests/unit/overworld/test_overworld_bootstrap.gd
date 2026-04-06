@@ -29,12 +29,14 @@ func _check(condition: bool, description: String) -> void:
 		_fail_count += 1
 
 
-func _make_map_def(map_id: String, x: int, y: int, col: int, inter: int) -> MapDefinitionClass:
+func _make_map_def(map_id: String, x: int, y: int, col: int, inter: int, w: int = 0, h: int = 0) -> MapDefinitionClass:
 	var def := MapDefinitionClass.new()
 	def.map_id = map_id
 	def.spawn_point = Vector2i(x, y)
 	def.collision_layer = col
 	def.interaction_layer = inter
+	def.map_width = w
+	def.map_height = h
 	return def
 
 func _run_all_tests() -> void:
@@ -49,6 +51,8 @@ func _run_all_tests() -> void:
 	_test_bootstrap_collision_tiles_match_map_def()
 	_test_bootstrap_emits_camera_follow_initialized()
 	_test_camera_follow_position_matches_spawn_point()
+	_test_bootstrap_emits_camera_bounds_initialized()
+	_test_camera_bounds_match_map_dimensions()
 	_test_bootstrap_no_combat_systems_active()
 	_test_bootstrap_overwrites_previous_state()
 	_test_bootstrap_emits_music_track_requested_when_track_set()
@@ -226,6 +230,40 @@ func _test_camera_follow_position_matches_spawn_point() -> void:
 	var tile_size: int = OverworldBootstrapClass.TILE_SIZE
 	var expected := Vector2(3 * tile_size, 5 * tile_size)
 	_check(received_positions[0] == expected, "camera position is spawn_point * TILE_SIZE")
+	ob.free()
+
+
+# ---------------------------------------------------------------------------
+# bootstrap() emits camera_bounds_initialized
+# ---------------------------------------------------------------------------
+func _test_bootstrap_emits_camera_bounds_initialized() -> void:
+	print("_test_bootstrap_emits_camera_bounds_initialized")
+	var ob := OverworldBootstrapClass.new()
+	var received: Array = []
+	ob.camera_bounds_initialized.connect(func(bounds: Rect2) -> void:
+		received.append(bounds)
+	)
+	var def := _make_map_def("test_map", 0, 0, 1, 2, 20, 15)
+	ob.bootstrap(def)
+	_check(received.size() == 1, "camera_bounds_initialized emitted once")
+	ob.free()
+
+
+# ---------------------------------------------------------------------------
+# camera_bounds_initialized rect dimensions match map_width/height * TILE_SIZE
+# ---------------------------------------------------------------------------
+func _test_camera_bounds_match_map_dimensions() -> void:
+	print("_test_camera_bounds_match_map_dimensions")
+	var ob := OverworldBootstrapClass.new()
+	var received: Array = []
+	ob.camera_bounds_initialized.connect(func(bounds: Rect2) -> void:
+		received.append(bounds)
+	)
+	var def := _make_map_def("test_map", 0, 0, 1, 2, 20, 15)
+	ob.bootstrap(def)
+	var tile_size: int = OverworldBootstrapClass.TILE_SIZE
+	var expected := Rect2(0.0, 0.0, float(20 * tile_size), float(15 * tile_size))
+	_check(received[0] == expected, "camera_bounds rect matches map_width/height * TILE_SIZE")
 	ob.free()
 
 

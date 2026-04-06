@@ -34,6 +34,9 @@ signal collision_tiles_ready(blocked_tiles: Array)
 ## Emitted when the camera follow target is set, carrying the world position.
 signal camera_follow_initialized(position: Vector2)
 
+## Emitted with the pixel-space bounding rect of the map (origin at (0, 0)).
+## Consumers should pass this to OverworldCameraController.set_map_bounds().
+signal camera_bounds_initialized(bounds: Rect2)
 ## Emitted when a map with a non-empty music_track is loaded.
 ## The scene layer should use this to start background music.
 ## Not emitted when the map has no associated music track.
@@ -85,6 +88,9 @@ func bootstrap_at(map_def: MapDefinitionClass, spawn: Vector2i) -> void:
 		spawn.y * TILE_SIZE
 	)
 	camera_follow_initialized.emit(world_pos)
+	var map_width_px := float(map_def.map_width * TILE_SIZE)
+	var map_height_px := float(map_def.map_height * TILE_SIZE)
+	camera_bounds_initialized.emit(Rect2(0.0, 0.0, map_width_px, map_height_px))
 	if map_def.music_track != "":
 		music_track_requested.emit(map_def.music_track)
 	is_bootstrapped = true
