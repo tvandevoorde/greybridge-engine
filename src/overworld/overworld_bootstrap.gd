@@ -42,6 +42,18 @@ signal music_track_requested(track_id: String)
 ## Connect to MapTransitionController.load_transitions() in the scene layer.
 signal transitions_ready(transitions: Array)
 
+## Emitted after all other bootstrap signals with the fog-of-war settings for
+## the loaded map.  The scene layer should:
+##   - Call FogOfWarController.enable(visibility_radius) when fog_enabled is true,
+##     followed by FogOfWarController.update_position(spawn) for initial visibility.
+##   - Call FogOfWarController.disable() when fog_enabled is false.
+##   - Connect GridMovementController.stepped to
+##     func(_from, to): fog_of_war_controller.update_position(to)
+##     so fog updates every time the player moves.
+## fog_enabled       : bool — whether this map uses limited visibility.
+## visibility_radius : int  — Chebyshev tile radius when fog is enabled.
+signal fog_of_war_ready(fog_enabled: bool, visibility_radius: int)
+
 ## True after bootstrap() completes successfully.
 var is_bootstrapped: bool = false
 
@@ -87,4 +99,5 @@ func bootstrap_at(map_def: MapDefinitionClass, spawn: Vector2i) -> void:
 	camera_follow_initialized.emit(world_pos)
 	if map_def.music_track != "":
 		music_track_requested.emit(map_def.music_track)
+	fog_of_war_ready.emit(map_def.fog_of_war_enabled, map_def.visibility_radius)
 	is_bootstrapped = true

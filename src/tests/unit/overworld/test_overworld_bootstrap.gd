@@ -60,6 +60,11 @@ func _run_all_tests() -> void:
 	_test_bootstrap_at_sets_is_bootstrapped()
 	_test_bootstrap_at_emits_transitions_ready()
 	_test_transitions_ready_carries_map_transitions()
+	_test_bootstrap_emits_fog_of_war_ready()
+	_test_bootstrap_fog_of_war_ready_carries_enabled_flag()
+	_test_bootstrap_fog_of_war_ready_carries_visibility_radius()
+	_test_bootstrap_fog_of_war_ready_when_fog_disabled()
+	_test_bootstrap_at_emits_fog_of_war_ready()
 
 # ---------------------------------------------------------------------------
 # is_bootstrapped is false by default
@@ -386,3 +391,90 @@ func _test_bootstrap_at_emits_transitions_ready() -> void:
 	_check(received.size() == 1, "transitions_ready emitted once during bootstrap_at()")
 	ob.free()
 
+
+
+# ---------------------------------------------------------------------------
+# bootstrap() emits fog_of_war_ready
+# ---------------------------------------------------------------------------
+func _test_bootstrap_emits_fog_of_war_ready() -> void:
+	print("_test_bootstrap_emits_fog_of_war_ready")
+	var ob := OverworldBootstrapClass.new()
+	var received: Array = []
+	ob.fog_of_war_ready.connect(func(_e: bool, _r: int) -> void:
+		received.append(true)
+	)
+	var def := _make_map_def("test_map", 0, 0, 1, 2)
+	ob.bootstrap(def)
+	_check(received.size() == 1, "fog_of_war_ready emitted once during bootstrap()")
+	ob.free()
+
+
+# ---------------------------------------------------------------------------
+# fog_of_war_ready carries fog_enabled flag from the map definition
+# ---------------------------------------------------------------------------
+func _test_bootstrap_fog_of_war_ready_carries_enabled_flag() -> void:
+	print("_test_bootstrap_fog_of_war_ready_carries_enabled_flag")
+	var ob := OverworldBootstrapClass.new()
+	var enabled_values: Array = []
+	ob.fog_of_war_ready.connect(func(e: bool, _r: int) -> void:
+		enabled_values.append(e)
+	)
+	var def := _make_map_def("test_map", 0, 0, 1, 2)
+	def.fog_of_war_enabled = true
+	ob.bootstrap(def)
+	_check(enabled_values.size() == 1, "fog_of_war_ready emitted once")
+	_check(enabled_values[0] == true, "fog_of_war_ready carries fog_enabled = true")
+	ob.free()
+
+
+# ---------------------------------------------------------------------------
+# fog_of_war_ready carries visibility_radius from the map definition
+# ---------------------------------------------------------------------------
+func _test_bootstrap_fog_of_war_ready_carries_visibility_radius() -> void:
+	print("_test_bootstrap_fog_of_war_ready_carries_visibility_radius")
+	var ob := OverworldBootstrapClass.new()
+	var radius_values: Array = []
+	ob.fog_of_war_ready.connect(func(_e: bool, r: int) -> void:
+		radius_values.append(r)
+	)
+	var def := _make_map_def("test_map", 0, 0, 1, 2)
+	def.fog_of_war_enabled = true
+	def.visibility_radius = 7
+	ob.bootstrap(def)
+	_check(radius_values.size() == 1, "fog_of_war_ready emitted once")
+	_check(radius_values[0] == 7, "fog_of_war_ready carries the correct visibility_radius")
+	ob.free()
+
+
+# ---------------------------------------------------------------------------
+# fog_of_war_ready emitted with fog_enabled = false when map has no fog
+# ---------------------------------------------------------------------------
+func _test_bootstrap_fog_of_war_ready_when_fog_disabled() -> void:
+	print("_test_bootstrap_fog_of_war_ready_when_fog_disabled")
+	var ob := OverworldBootstrapClass.new()
+	var enabled_values: Array = []
+	ob.fog_of_war_ready.connect(func(e: bool, _r: int) -> void:
+		enabled_values.append(e)
+	)
+	var def := _make_map_def("test_map", 0, 0, 1, 2)
+	# def.fog_of_war_enabled is false by default
+	ob.bootstrap(def)
+	_check(enabled_values.size() == 1, "fog_of_war_ready emitted even when fog is disabled")
+	_check(enabled_values[0] == false, "fog_of_war_ready carries fog_enabled = false")
+	ob.free()
+
+
+# ---------------------------------------------------------------------------
+# bootstrap_at() emits fog_of_war_ready
+# ---------------------------------------------------------------------------
+func _test_bootstrap_at_emits_fog_of_war_ready() -> void:
+	print("_test_bootstrap_at_emits_fog_of_war_ready")
+	var ob := OverworldBootstrapClass.new()
+	var received: Array = []
+	ob.fog_of_war_ready.connect(func(_e: bool, _r: int) -> void:
+		received.append(true)
+	)
+	var def := _make_map_def("test_map", 0, 0, 1, 2)
+	ob.bootstrap_at(def, Vector2i(3, 1))
+	_check(received.size() == 1, "fog_of_war_ready emitted once during bootstrap_at()")
+	ob.free()
