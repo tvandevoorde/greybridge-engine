@@ -4,7 +4,7 @@
     "collision_layer": 1,
     "interaction_layer": 2,
     "fog_of_war_enabled": true,
-    "visibility_radius": 5
+    "visibility_radius": 5,
     "music_track": "road_to_greybridge_theme",
     "transitions": [
         {
