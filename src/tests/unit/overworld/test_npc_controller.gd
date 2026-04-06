@@ -40,6 +40,10 @@ func _run_all_tests() -> void:
 	_test_apply_dialogue_outcome_emits_quest_flag_set()
 	_test_apply_dialogue_outcome_emits_once_per_flag()
 	_test_apply_dialogue_outcome_empty_flags_emits_nothing()
+	_test_try_interact_blocked_when_required_flags_not_met()
+	_test_try_interact_allowed_when_required_flags_met()
+	_test_set_quest_flags_updates_immediately()
+	_test_try_interact_no_required_flags_always_allowed()
 
 
 # ---------------------------------------------------------------------------
@@ -243,3 +247,87 @@ func _test_apply_dialogue_outcome_empty_flags_emits_nothing() -> void:
 	ctrl.apply_dialogue_outcome("silent_npc", {})
 	_check(events.size() == 0, "no quest_flag_set emitted for empty flags dictionary")
 	ctrl.free()
+
+
+# ---------------------------------------------------------------------------
+# try_interact — required_flags gating
+# ---------------------------------------------------------------------------
+func _test_try_interact_blocked_when_required_flags_not_met() -> void:
+	print("_test_try_interact_blocked_when_required_flags_not_met")
+	var ctrl := NpcControllerClass.new()
+	ctrl.load_npcs([
+		{"npc_id": "gatekeeper", "position": {"x": 3, "y": 4},
+			"dialogue_id": "gate_talk", "pass_through": false,
+			"quest_flags": {}, "required_flags": {"gate_key_found": true}}
+	])
+	ctrl.update_player_state(Vector2i(3, 3), Vector2i(0, 1))
+	var events: Array = []
+	ctrl.dialogue_started.connect(func(_n: String, _d: String) -> void:
+		events.append(true)
+	)
+	# Quest flags do not satisfy requirement yet.
+	ctrl.try_interact()
+	_check(events.size() == 0,
+		"dialogue_started not emitted when NPC required_flags not met")
+	ctrl.free()
+
+
+func _test_try_interact_allowed_when_required_flags_met() -> void:
+	print("_test_try_interact_allowed_when_required_flags_met")
+	var ctrl := NpcControllerClass.new()
+	ctrl.load_npcs([
+		{"npc_id": "gatekeeper", "position": {"x": 3, "y": 4},
+			"dialogue_id": "gate_talk", "pass_through": false,
+			"quest_flags": {}, "required_flags": {"gate_key_found": true}}
+	])
+	ctrl.update_player_state(Vector2i(3, 3), Vector2i(0, 1))
+	ctrl.set_quest_flags({"gate_key_found": true})
+	var npc_ids: Array[String] = []
+	ctrl.dialogue_started.connect(func(npc_id: String, _d: String) -> void:
+		npc_ids.append(npc_id)
+	)
+	ctrl.try_interact()
+	_check(npc_ids.size() == 1, "dialogue_started emitted when required_flags are met")
+	_check(npc_ids[0] == "gatekeeper", "correct npc_id emitted")
+	ctrl.free()
+
+
+func _test_set_quest_flags_updates_immediately() -> void:
+	print("_test_set_quest_flags_updates_immediately")
+	var ctrl := NpcControllerClass.new()
+	ctrl.load_npcs([
+		{"npc_id": "guard", "position": {"x": 2, "y": 3},
+			"dialogue_id": "guard_talk", "pass_through": false,
+			"quest_flags": {}, "required_flags": {"pass_granted": true}}
+	])
+	ctrl.update_player_state(Vector2i(2, 2), Vector2i(0, 1))
+	var events: Array = []
+	ctrl.dialogue_started.connect(func(_n: String, _d: String) -> void:
+		events.append(true)
+	)
+	# First attempt — flag not set.
+	ctrl.try_interact()
+	_check(events.size() == 0, "no dialogue before set_quest_flags")
+	# Set the flag — immediately enables interaction.
+	ctrl.set_quest_flags({"pass_granted": true})
+	ctrl.try_interact()
+	_check(events.size() == 1, "dialogue starts after set_quest_flags sets required flag")
+	ctrl.free()
+
+
+func _test_try_interact_no_required_flags_always_allowed() -> void:
+	print("_test_try_interact_no_required_flags_always_allowed")
+	var ctrl := NpcControllerClass.new()
+	ctrl.load_npcs([
+		{"npc_id": "merchant", "position": {"x": 4, "y": 3},
+			"dialogue_id": "merchant_hello", "pass_through": false,
+			"quest_flags": {}}
+	])
+	ctrl.update_player_state(Vector2i(4, 2), Vector2i(0, 1))
+	var events: Array = []
+	ctrl.dialogue_started.connect(func(_n: String, _d: String) -> void:
+		events.append(true)
+	)
+	ctrl.try_interact()
+	_check(events.size() == 1,
+		"NPC with no required_flags is always accessible")

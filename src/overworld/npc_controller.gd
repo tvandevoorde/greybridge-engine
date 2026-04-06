@@ -18,7 +18,8 @@ const InteractResolverClass = preload("res://rules_engine/core/interact_resolver
 ##         must be forwarded to GridMovementController.set_blocked_tiles().
 signal npc_blocked_tiles_changed(tiles: Array)
 
-## Emitted when the player interacts with an NPC that has a dialogue_id.
+## Emitted when the player interacts with an NPC that has a dialogue_id
+## and all required_flags are satisfied.
 ## npc_id      : String — the NPC's unique identifier.
 ## dialogue_id : String — the dialogue tree to start.
 signal dialogue_started(npc_id: String, dialogue_id: String)
@@ -38,6 +39,10 @@ var _player_position: Vector2i = Vector2i.ZERO
 ## Defaults to south (0, 1).
 var _player_facing: Vector2i = Vector2i(0, 1)
 
+## Current quest flag state used to validate NPC required_flags.
+## Updated by set_quest_flags() whenever the world state changes.
+var _quest_flags: Dictionary = {}
+
 
 ## Loads NPC definitions from an Array of raw Dictionaries and emits
 ## npc_blocked_tiles_changed so consumers can update collision data.
@@ -55,14 +60,26 @@ func update_player_state(position: Vector2i, facing: Vector2i) -> void:
 	_player_facing = facing
 
 
+## Replaces the current quest flag state used to validate NPC required_flags.
+## Call this whenever a quest flag changes so the controller immediately
+## reflects the new world state.
+func set_quest_flags(flags: Dictionary) -> void:
+	_quest_flags = flags.duplicate()
+
+
 ## Attempts an interaction in the player's facing direction.
-## If an NPC occupies the target tile and has a dialogue_id, emits
-## dialogue_started. Has no effect when no NPC is found.
+## If an NPC occupies the target tile, has a dialogue_id, and all its
+## required_flags are satisfied, emits dialogue_started.
+## Has no effect when no NPC is found or flag requirements are not met.
 func try_interact() -> void:
 	var target_tile := _resolver.get_interact_target(_player_position, _player_facing)
 	var npc = _registry.get_npc_at(target_tile)
-	if npc != null and npc.dialogue_id != "":
-		dialogue_started.emit(npc.npc_id, npc.dialogue_id)
+	if npc == null or npc.dialogue_id == "":
+		return
+	for flag_name in npc.required_flags:
+		if _quest_flags.get(flag_name, null) != npc.required_flags[flag_name]:
+			return
+	dialogue_started.emit(npc.npc_id, npc.dialogue_id)
 
 
 ## Applies the quest flags produced by a completed dialogue outcome.
