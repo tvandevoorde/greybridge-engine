@@ -269,11 +269,11 @@ func _test_set_required_flags_stores_copy() -> void:
 	door.set_required_flags(original_req)
 	original_req.clear()
 	# The stored copy should still block (key_held not in quest flags).
-	var blocked_count: int = 0
+	var blocked_events: Array = []
 	door.interaction_blocked.connect(func(_r: String) -> void:
-		blocked_count += 1
+		blocked_events.append(true)
 	)
 	door.interact()
-	_check(blocked_count == 1,
+	_check(blocked_events.size() == 1,
 		"set_required_flags stores a copy; clearing original does not clear door flags")
 	door.free()

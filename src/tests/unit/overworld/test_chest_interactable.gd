@@ -339,10 +339,11 @@ func _test_set_required_flags_stores_copy() -> void:
 	# Mutate the original — should not affect the chest's stored copy.
 	original_req.clear()
 	# Now the stored required_flags should still block (vault_open not in quest flags).
-	var blocked_count: int = 0
+	var blocked_events: Array = []
 	chest.interaction_blocked.connect(func(_r: String) -> void:
-		blocked_count += 1
+		blocked_events.append(true)
 	)
 	chest.open(inv)
-	_check(blocked_count == 1,
+	_check(blocked_events.size() == 1,
 		"set_required_flags stores a copy; clearing original does not clear chest flags")
+	chest.free()
