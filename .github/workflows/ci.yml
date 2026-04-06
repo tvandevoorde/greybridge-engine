@@ -263,6 +263,13 @@ jobs:
         working-directory: src
         run: godot --headless --script ./tests/unit/rules_engine/test_map_loader.gd
 
+      - name: Unit tests — visibility_calculator
+        working-directory: src
+        run: godot --headless --script ./tests/unit/rules_engine/test_visibility_calculator.gd
+
+      - name: Unit tests — fog_of_war_controller
+        working-directory: src
+        run: godot --headless --script ./tests/unit/overworld/test_fog_of_war_controller.gd
       - name: Unit tests — door_state
         working-directory: src
         run: godot --headless --script ./tests/unit/rules_engine/test_door_state.gd
