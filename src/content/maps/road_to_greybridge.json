@@ -23,7 +23,16 @@
             "position": { "x": 4, "y": 3 },
             "dialogue_id": "merchant_greeting",
             "pass_through": false,
-            "quest_flags": { "met_merchant": true }
+            "quest_flags": { "met_merchant": true },
+            "required_flags": {}
+        },
+        {
+            "npc_id": "wounded_scout",
+            "position": { "x": 7, "y": 4 },
+            "dialogue_id": "scout_quest_update",
+            "pass_through": true,
+            "quest_flags": { "scout_rescued": true },
+            "required_flags": { "bandit_ambush_cleared": true }
         }
     ],
     "chests": [
@@ -33,7 +42,17 @@
             "loot": [
                 { "id": "gold_coins", "name": "Gold Coins", "quantity": 10 },
                 { "id": "health_potion", "name": "Health Potion", "quantity": 1 }
-            ]
+            ],
+            "required_flags": {}
+        },
+        {
+            "id": "chest_bandit_stash",
+            "position": { "x": 6, "y": 5 },
+            "loot": [
+                { "id": "stolen_goods", "name": "Stolen Goods", "quantity": 1 },
+                { "id": "gold_coins", "name": "Gold Coins", "quantity": 25 }
+            ],
+            "required_flags": { "bandit_ambush_cleared": true }
         }
     ],
     "blocked_tiles": [

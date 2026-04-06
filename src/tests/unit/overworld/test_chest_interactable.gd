@@ -55,6 +55,12 @@ func _run_all_tests() -> void:
 	_test_empty_chest_yields_no_items()
 	_test_multiple_loot_items_all_added()
 	_test_open_does_not_modify_original_loot_array()
+	_test_open_blocked_when_required_flags_not_met()
+	_test_open_allowed_when_required_flags_met()
+	_test_interaction_blocked_signal_emitted_when_flags_not_met()
+	_test_set_quest_flags_updates_immediately()
+	_test_open_no_required_flags_always_allowed()
+	_test_set_required_flags_stores_copy()
 
 
 # ---------------------------------------------------------------------------
@@ -246,3 +252,97 @@ func _test_open_does_not_modify_original_loot_array() -> void:
 	_check(chest.loot.size() == 1,
 		"internal loot array is unchanged after open()")
 	chest.free()
+
+
+# ---------------------------------------------------------------------------
+# required_flags gating
+# ---------------------------------------------------------------------------
+func _test_open_blocked_when_required_flags_not_met() -> void:
+	print("_test_open_blocked_when_required_flags_not_met")
+	var chest := ChestInteractableClass.new()
+	var inv := InventoryClass.new()
+	chest.set_loot([{"id": "gem", "name": "Gem", "quantity": 1}])
+	chest.set_required_flags({"chest_key_found": true})
+	var result: Array = chest.open(inv)
+	_check(result.size() == 0, "open() returns empty when required_flags not met")
+	_check(chest.is_opened == false, "chest remains closed when required_flags not met")
+	_check(inv.has_item("gem") == false, "gem not added to inventory when blocked")
+	chest.free()
+
+
+func _test_open_allowed_when_required_flags_met() -> void:
+	print("_test_open_allowed_when_required_flags_met")
+	var chest := ChestInteractableClass.new()
+	var inv := InventoryClass.new()
+	chest.set_loot([{"id": "gem", "name": "Gem", "quantity": 1}])
+	chest.set_required_flags({"chest_key_found": true})
+	chest.set_quest_flags({"chest_key_found": true})
+	var result: Array = chest.open(inv)
+	_check(result.size() == 1, "open() returns items when required_flags are met")
+	_check(chest.is_opened == true, "chest is opened when required_flags are satisfied")
+	_check(inv.has_item("gem"), "gem added to inventory when flags satisfied")
+	chest.free()
+
+
+func _test_interaction_blocked_signal_emitted_when_flags_not_met() -> void:
+	print("_test_interaction_blocked_signal_emitted_when_flags_not_met")
+	var chest := ChestInteractableClass.new()
+	var inv := InventoryClass.new()
+	chest.set_loot([{"id": "coin", "name": "Coin", "quantity": 1}])
+	chest.set_required_flags({"dungeon_cleared": true})
+	var blocked_reasons: Array[String] = []
+	chest.interaction_blocked.connect(func(reason: String) -> void:
+		blocked_reasons.append(reason)
+	)
+	chest.open(inv)
+	_check(blocked_reasons.size() == 1,
+		"interaction_blocked emitted when required_flags not met")
+	_check(blocked_reasons[0] == "missing_flag",
+		"reason is missing_flag")
+	chest.free()
+
+
+func _test_set_quest_flags_updates_immediately() -> void:
+	print("_test_set_quest_flags_updates_immediately")
+	var chest := ChestInteractableClass.new()
+	var inv := InventoryClass.new()
+	chest.set_loot([{"id": "scroll", "name": "Scroll", "quantity": 1}])
+	chest.set_required_flags({"library_unlocked": true})
+	# First attempt blocked.
+	var result_1: Array = chest.open(inv)
+	_check(result_1.size() == 0, "chest blocked before set_quest_flags")
+	# Set the flag — should immediately enable opening.
+	chest.set_quest_flags({"library_unlocked": true})
+	var result_2: Array = chest.open(inv)
+	_check(result_2.size() == 1, "chest opens after set_quest_flags sets required flag")
+	chest.free()
+
+
+func _test_open_no_required_flags_always_allowed() -> void:
+	print("_test_open_no_required_flags_always_allowed")
+	var chest := ChestInteractableClass.new()
+	var inv := InventoryClass.new()
+	chest.set_loot([{"id": "potion", "name": "Potion", "quantity": 1}])
+	var result: Array = chest.open(inv)
+	_check(result.size() == 1,
+		"chest with no required_flags is always openable")
+	chest.free()
+
+
+func _test_set_required_flags_stores_copy() -> void:
+	print("_test_set_required_flags_stores_copy")
+	var chest := ChestInteractableClass.new()
+	var inv := InventoryClass.new()
+	chest.set_loot([{"id": "diamond", "name": "Diamond", "quantity": 1}])
+	var original_req := {"vault_open": true}
+	chest.set_required_flags(original_req)
+	# Mutate the original — should not affect the chest's stored copy.
+	original_req.clear()
+	# Now the stored required_flags should still block (vault_open not in quest flags).
+	var blocked_count: int = 0
+	chest.interaction_blocked.connect(func(_r: String) -> void:
+		blocked_count += 1
+	)
+	chest.open(inv)
+	_check(blocked_count == 1,
+		"set_required_flags stores a copy; clearing original does not clear chest flags")

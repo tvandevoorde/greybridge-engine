@@ -39,6 +39,9 @@ func _run_all_tests() -> void:
 	_test_is_valid_with_id()
 	_test_is_valid_empty_id()
 	_test_from_dict_quest_flags_duplicated()
+	_test_from_dict_required_flags()
+	_test_from_dict_required_flags_defaults_empty()
+	_test_from_dict_required_flags_duplicated()
 
 
 # ---------------------------------------------------------------------------
@@ -187,3 +190,56 @@ func _test_from_dict_quest_flags_duplicated() -> void:
 	original_flags["new_key"] = "injected"
 	_check(not def.quest_flags.has("new_key"),
 		"quest_flags is a duplicate; modifying original does not affect definition")
+
+
+# ---------------------------------------------------------------------------
+# from_dict — required_flags dictionary is parsed
+# ---------------------------------------------------------------------------
+func _test_from_dict_required_flags() -> void:
+	print("_test_from_dict_required_flags")
+	var data := {
+		"npc_id": "gatekeeper",
+		"position": {"x": 3, "y": 3},
+		"dialogue_id": "gate_dialogue",
+		"pass_through": false,
+		"quest_flags": {},
+		"required_flags": {"quest_started": true}
+	}
+	var def := NpcDefinitionClass.from_dict(data)
+	_check(def.required_flags.has("quest_started"),
+		"required_flags contains quest_started key")
+	_check(def.required_flags["quest_started"] == true,
+		"required_flags quest_started value is true")
+
+
+# ---------------------------------------------------------------------------
+# from_dict — required_flags defaults to empty when omitted
+# ---------------------------------------------------------------------------
+func _test_from_dict_required_flags_defaults_empty() -> void:
+	print("_test_from_dict_required_flags_defaults_empty")
+	var data := {
+		"npc_id": "free_npc",
+		"position": {"x": 1, "y": 1},
+		"dialogue_id": "free_talk",
+	}
+	var def := NpcDefinitionClass.from_dict(data)
+	_check(def.required_flags.is_empty(),
+		"required_flags defaults to empty dict when omitted")
+
+
+# ---------------------------------------------------------------------------
+# from_dict — required_flags is a copy
+# ---------------------------------------------------------------------------
+func _test_from_dict_required_flags_duplicated() -> void:
+	print("_test_from_dict_required_flags_duplicated")
+	var original_req := {"gate_open": true}
+	var data := {
+		"npc_id": "npc_b",
+		"position": {"x": 0, "y": 0},
+		"dialogue_id": "test",
+		"required_flags": original_req
+	}
+	var def := NpcDefinitionClass.from_dict(data)
+	original_req["injected"] = "extra"
+	_check(not def.required_flags.has("injected"),
+		"required_flags is a duplicate; modifying original does not affect definition")

@@ -41,6 +41,13 @@ func _run_all_tests() -> void:
 	_test_reason_unknown_type()
 	_test_empty_fired_ids_allows_fire()
 	_test_quest_flags_ignored_for_combat_start()
+	_test_required_flags_met_allows_fire()
+	_test_required_flags_not_met_blocks_fire()
+	_test_required_flags_reason_flag_blocked()
+	_test_required_flags_partial_match_blocks_fire()
+	_test_required_flags_empty_dict_allows_fire()
+	_test_required_flags_multiple_all_met_allows_fire()
+	_test_required_flags_checked_before_already_fired()
 
 
 func _test_null_trigger_does_not_fire() -> void:
@@ -147,3 +154,109 @@ func _test_is_valid_type_empty_string_returns_false() -> void:
 	print("_test_is_valid_type_empty_string_returns_false")
 	var resolver := TriggerTileResolverClass.new()
 	_check(resolver.is_valid_type("") == false, "empty string returns false")
+
+
+# ---------------------------------------------------------------------------
+# required_flags — trigger-level flag gating
+# ---------------------------------------------------------------------------
+func _test_required_flags_met_allows_fire() -> void:
+	print("_test_required_flags_met_allows_fire")
+	var resolver := TriggerTileResolverClass.new()
+	var trigger: Dictionary = {
+		"type": "combat_start",
+		"encounter_id": "bandit_camp",
+		"required_flags": {"quest_started": true}
+	}
+	var flags: Dictionary = {"quest_started": true}
+	var result: Dictionary = resolver.resolve(trigger, [], flags)
+	_check(result["should_fire"] == true, "trigger fires when required_flags are satisfied")
+	_check(result["reason"] == "", "reason is empty when trigger fires")
+
+
+func _test_required_flags_not_met_blocks_fire() -> void:
+	print("_test_required_flags_not_met_blocks_fire")
+	var resolver := TriggerTileResolverClass.new()
+	var trigger: Dictionary = {
+		"type": "combat_start",
+		"encounter_id": "bandit_camp",
+		"required_flags": {"quest_started": true}
+	}
+	var result: Dictionary = resolver.resolve(trigger, [], {})
+	_check(result["should_fire"] == false,
+		"trigger does not fire when required_flags are not met")
+
+
+func _test_required_flags_reason_flag_blocked() -> void:
+	print("_test_required_flags_reason_flag_blocked")
+	var resolver := TriggerTileResolverClass.new()
+	var trigger: Dictionary = {
+		"type": "combat_start",
+		"encounter_id": "bandit_camp",
+		"required_flags": {"bandit_defeated": false}
+	}
+	var flags: Dictionary = {"bandit_defeated": true}
+	var result: Dictionary = resolver.resolve(trigger, [], flags)
+	_check(result["should_fire"] == false,
+		"trigger blocked when flag value does not match")
+	_check(result["reason"] == "flag_blocked",
+		"reason is flag_blocked when required_flags not satisfied")
+
+
+func _test_required_flags_partial_match_blocks_fire() -> void:
+	print("_test_required_flags_partial_match_blocks_fire")
+	var resolver := TriggerTileResolverClass.new()
+	var trigger: Dictionary = {
+		"type": "combat_start",
+		"encounter_id": "boss_fight",
+		"required_flags": {"act_one_done": true, "boss_unlocked": true}
+	}
+	var flags: Dictionary = {"act_one_done": true}
+	var result: Dictionary = resolver.resolve(trigger, [], flags)
+	_check(result["should_fire"] == false,
+		"trigger blocked when only some required_flags are met")
+	_check(result["reason"] == "flag_blocked",
+		"reason is flag_blocked for partial match")
+
+
+func _test_required_flags_empty_dict_allows_fire() -> void:
+	print("_test_required_flags_empty_dict_allows_fire")
+	var resolver := TriggerTileResolverClass.new()
+	var trigger: Dictionary = {
+		"type": "combat_start",
+		"encounter_id": "road_ambush",
+		"required_flags": {}
+	}
+	var result: Dictionary = resolver.resolve(trigger, [], {})
+	_check(result["should_fire"] == true,
+		"empty required_flags dict does not block trigger")
+
+
+func _test_required_flags_multiple_all_met_allows_fire() -> void:
+	print("_test_required_flags_multiple_all_met_allows_fire")
+	var resolver := TriggerTileResolverClass.new()
+	var trigger: Dictionary = {
+		"type": "combat_start",
+		"encounter_id": "final_boss",
+		"required_flags": {"act_one_done": true, "act_two_done": true}
+	}
+	var flags: Dictionary = {"act_one_done": true, "act_two_done": true}
+	var result: Dictionary = resolver.resolve(trigger, [], flags)
+	_check(result["should_fire"] == true,
+		"trigger fires when all required_flags are satisfied")
+
+
+func _test_required_flags_checked_before_already_fired() -> void:
+	print("_test_required_flags_checked_before_already_fired")
+	var resolver := TriggerTileResolverClass.new()
+	var trigger: Dictionary = {
+		"type": "combat_start",
+		"encounter_id": "enc_gated",
+		"required_flags": {"gate_open": true}
+	}
+	# already_fired takes precedence over flag_blocked in the current flow
+	# (fired check runs before required_flags check)
+	var result: Dictionary = resolver.resolve(trigger, ["enc_gated"], {})
+	_check(result["should_fire"] == false,
+		"already_fired prevents re-fire regardless of flags")
+	_check(result["reason"] == "already_fired",
+		"reason is already_fired when encounter was already triggered")

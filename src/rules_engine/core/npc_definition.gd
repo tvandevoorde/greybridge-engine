@@ -25,14 +25,20 @@ var pass_through: bool = false
 ## Keys are flag names (String); values are the flag values (Variant).
 var quest_flags: Dictionary = {}
 
+## Quest flags that must all match the current world state before the player
+## can interact with this NPC.  Keys are flag names (String); values are the
+## required values (Variant).  An empty dictionary means no flags are required.
+var required_flags: Dictionary = {}
+
 
 ## Constructs an NpcDefinition from a Dictionary (e.g. parsed from JSON).
 ## Expected keys:
-##   "npc_id"       : String
-##   "position"     : Dictionary with "x" (int) and "y" (int)
-##   "dialogue_id"  : String
-##   "pass_through" : bool       (default false)
-##   "quest_flags"  : Dictionary (default {})
+##   "npc_id"         : String
+##   "position"       : Dictionary with "x" (int) and "y" (int)
+##   "dialogue_id"    : String
+##   "pass_through"   : bool       (default false)
+##   "quest_flags"    : Dictionary (default {})
+##   "required_flags" : Dictionary (default {}) — flags required to interact
 static func from_dict(data: Dictionary) -> NpcDefinition:
 	var def := NpcDefinitionClass.new()
 	def.npc_id = data.get("npc_id", "")
@@ -41,6 +47,7 @@ static func from_dict(data: Dictionary) -> NpcDefinition:
 	def.dialogue_id = data.get("dialogue_id", "")
 	def.pass_through = bool(data.get("pass_through", false))
 	def.quest_flags = data.get("quest_flags", {}).duplicate()
+	def.required_flags = data.get("required_flags", {}).duplicate()
 	return def
 
 

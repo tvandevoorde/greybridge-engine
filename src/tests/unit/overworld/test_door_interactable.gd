@@ -43,6 +43,13 @@ func _run_all_tests() -> void:
 	_test_from_dict_closed()
 	_test_from_dict_open()
 	_test_from_dict_position()
+	_test_interact_blocked_when_required_flags_not_met()
+	_test_interact_allowed_when_required_flags_met()
+	_test_interaction_blocked_signal_emitted_when_flags_not_met()
+	_test_set_quest_flags_updates_immediately()
+	_test_from_dict_parses_required_flags()
+	_test_from_dict_required_flags_defaults_empty()
+	_test_set_required_flags_stores_copy()
 
 
 # ---------------------------------------------------------------------------
@@ -176,4 +183,97 @@ func _test_from_dict_position() -> void:
 	var data := {"position": {"x": 5, "y": 3}, "is_open": false}
 	var door = DoorInteractableClass.from_dict(data)
 	_check(door.get_tile_position() == Vector2i(5, 3), "from_dict() parses position correctly")
+	door.free()
+
+
+# ---------------------------------------------------------------------------
+# required_flags gating
+# ---------------------------------------------------------------------------
+func _test_interact_blocked_when_required_flags_not_met() -> void:
+	print("_test_interact_blocked_when_required_flags_not_met")
+	var door := DoorInteractableClass.new()
+	door.set_required_flags({"door_key_found": true})
+	door.interact()
+	_check(door.is_open() == false, "door stays closed when required_flags not met")
+	door.free()
+
+
+func _test_interact_allowed_when_required_flags_met() -> void:
+	print("_test_interact_allowed_when_required_flags_met")
+	var door := DoorInteractableClass.new()
+	door.set_required_flags({"door_key_found": true})
+	door.set_quest_flags({"door_key_found": true})
+	door.interact()
+	_check(door.is_open() == true, "door opens when required_flags are satisfied")
+	door.free()
+
+
+func _test_interaction_blocked_signal_emitted_when_flags_not_met() -> void:
+	print("_test_interaction_blocked_signal_emitted_when_flags_not_met")
+	var door := DoorInteractableClass.new()
+	door.set_required_flags({"bridge_repaired": true})
+	var blocked_reasons: Array[String] = []
+	door.interaction_blocked.connect(func(reason: String) -> void:
+		blocked_reasons.append(reason)
+	)
+	door.interact()
+	_check(blocked_reasons.size() == 1,
+		"interaction_blocked emitted when required_flags not met")
+	_check(blocked_reasons[0] == "missing_flag",
+		"reason is missing_flag")
+	door.free()
+
+
+func _test_set_quest_flags_updates_immediately() -> void:
+	print("_test_set_quest_flags_updates_immediately")
+	var door := DoorInteractableClass.new()
+	door.set_required_flags({"pass_granted": true})
+	# First attempt blocked.
+	door.interact()
+	_check(door.is_open() == false, "door blocked before set_quest_flags")
+	# Set the flag — immediately enables interaction.
+	door.set_quest_flags({"pass_granted": true})
+	door.interact()
+	_check(door.is_open() == true, "door opens after set_quest_flags sets required flag")
+	door.free()
+
+
+func _test_from_dict_parses_required_flags() -> void:
+	print("_test_from_dict_parses_required_flags")
+	var data := {
+		"position": {"x": 2, "y": 4},
+		"is_open": false,
+		"required_flags": {"quest_done": true}
+	}
+	var door = DoorInteractableClass.from_dict(data)
+	_check(door.required_flags.has("quest_done"),
+		"from_dict() parses required_flags key")
+	_check(door.required_flags["quest_done"] == true,
+		"from_dict() required_flags value is true")
+	door.free()
+
+
+func _test_from_dict_required_flags_defaults_empty() -> void:
+	print("_test_from_dict_required_flags_defaults_empty")
+	var data := {"position": {"x": 1, "y": 1}, "is_open": false}
+	var door = DoorInteractableClass.from_dict(data)
+	_check(door.required_flags.is_empty(),
+		"from_dict() required_flags defaults to empty when omitted")
+	door.free()
+
+
+func _test_set_required_flags_stores_copy() -> void:
+	print("_test_set_required_flags_stores_copy")
+	var door := DoorInteractableClass.new()
+	var original_req := {"key_held": true}
+	door.set_required_flags(original_req)
+	original_req.clear()
+	# The stored copy should still block (key_held not in quest flags).
+	var blocked_count: int = 0
+	door.interaction_blocked.connect(func(_r: String) -> void:
+		blocked_count += 1
+	)
+	door.interact()
+	_check(blocked_count == 1,
+		"set_required_flags stores a copy; clearing original does not clear door flags")
 	door.free()
