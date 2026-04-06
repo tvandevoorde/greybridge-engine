@@ -34,6 +34,10 @@ signal collision_tiles_ready(blocked_tiles: Array)
 ## Emitted when the camera follow target is set, carrying the world position.
 signal camera_follow_initialized(position: Vector2)
 
+## Emitted when a map with a non-empty music_track is loaded.
+## The scene layer should use this to start background music.
+## Not emitted when the map has no associated music track.
+signal music_track_requested(track_id: String)
 ## Emitted with the raw transition Array from the map definition.
 ## Connect to MapTransitionController.load_transitions() in the scene layer.
 signal transitions_ready(transitions: Array)
@@ -48,6 +52,7 @@ var current_map: MapDefinitionClass = null
 ## Runs the full overworld bootstrap sequence for [param map_def],
 ## using the map's own spawn_point as the player starting position.
 ## Emits map_loaded, player_spawned, layers_initialized,
+## camera_follow_initialized, and music_track_requested (when track is set) in order.
 ## collision_tiles_ready, transitions_ready, and camera_follow_initialized.
 ## No combat systems are started.
 ##
@@ -80,4 +85,6 @@ func bootstrap_at(map_def: MapDefinitionClass, spawn: Vector2i) -> void:
 		spawn.y * TILE_SIZE
 	)
 	camera_follow_initialized.emit(world_pos)
+	if map_def.music_track != "":
+		music_track_requested.emit(map_def.music_track)
 	is_bootstrapped = true

@@ -51,6 +51,9 @@ func _run_all_tests() -> void:
 	_test_camera_follow_position_matches_spawn_point()
 	_test_bootstrap_no_combat_systems_active()
 	_test_bootstrap_overwrites_previous_state()
+	_test_bootstrap_emits_music_track_requested_when_track_set()
+	_test_bootstrap_does_not_emit_music_track_requested_when_no_track()
+
 	_test_bootstrap_emits_transitions_ready()
 	_test_bootstrap_at_uses_override_spawn_for_player_spawned()
 	_test_bootstrap_at_uses_override_spawn_for_camera()
@@ -256,6 +259,20 @@ func _test_bootstrap_overwrites_previous_state() -> void:
 
 
 # ---------------------------------------------------------------------------
+# bootstrap() emits music_track_requested when map has a non-empty music_track
+# ---------------------------------------------------------------------------
+func _test_bootstrap_emits_music_track_requested_when_track_set() -> void:
+	print("_test_bootstrap_emits_music_track_requested_when_track_set")
+	var ob := OverworldBootstrapClass.new()
+	var received_tracks: Array = []
+	ob.music_track_requested.connect(func(track_id: String) -> void:
+		received_tracks.append(track_id)
+	)
+	var def := _make_map_def("test_map", 0, 0, 1, 2)
+	def.music_track = "forest_theme"
+	ob.bootstrap(def)
+	_check(received_tracks.size() == 1, "music_track_requested emitted once")
+	_check(received_tracks[0] == "forest_theme", "music_track_requested carries the correct track id")
 # bootstrap() emits transitions_ready
 # ---------------------------------------------------------------------------
 func _test_bootstrap_emits_transitions_ready() -> void:
@@ -272,6 +289,20 @@ func _test_bootstrap_emits_transitions_ready() -> void:
 
 
 # ---------------------------------------------------------------------------
+# bootstrap() does NOT emit music_track_requested when map has no music_track
+# ---------------------------------------------------------------------------
+func _test_bootstrap_does_not_emit_music_track_requested_when_no_track() -> void:
+	print("_test_bootstrap_does_not_emit_music_track_requested_when_no_track")
+	var ob := OverworldBootstrapClass.new()
+	var received_tracks: Array = []
+	ob.music_track_requested.connect(func(track_id: String) -> void:
+		received_tracks.append(track_id)
+	)
+	var def := _make_map_def("test_map", 0, 0, 1, 2)
+	# def.music_track is "" by default
+	ob.bootstrap(def)
+	_check(received_tracks.size() == 0, "music_track_requested not emitted when track is empty")
+	ob.free()
 # transitions_ready carries the map's transition list
 # ---------------------------------------------------------------------------
 func _test_transitions_ready_carries_map_transitions() -> void:

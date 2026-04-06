@@ -48,6 +48,10 @@ func _run_all_tests() -> void:
 	_test_set_blocked_tiles_duplicates_input()
 	_test_multiple_steps_accumulate()
 	_test_lock_clears_hold_state()
+	_test_request_step_emits_footstep_requested_on_success()
+	_test_request_step_footstep_position_is_new_position()
+	_test_request_step_no_footstep_when_blocked()
+	_test_request_step_no_footstep_when_locked()
 
 
 # ---------------------------------------------------------------------------
@@ -280,4 +284,60 @@ func _test_lock_clears_hold_state() -> void:
 	_check(ctrl.current_position == Vector2i(1, 0),
 		"position unchanged after lock_controls() even when _process is driven")
 	_check(stepped_events.size() == 1, "no additional stepped events after lock_controls()")
+	ctrl.free()
+
+
+# ---------------------------------------------------------------------------
+# footstep_requested
+# ---------------------------------------------------------------------------
+func _test_request_step_emits_footstep_requested_on_success() -> void:
+	print("_test_request_step_emits_footstep_requested_on_success")
+	var ctrl := GridMovementControllerClass.new()
+	var footstep_events: Array = []
+	ctrl.footstep_requested.connect(func(pos: Vector2i) -> void:
+		footstep_events.append(pos)
+	)
+	ctrl.request_step(Vector2i(1, 0))
+	_check(footstep_events.size() == 1, "footstep_requested emitted once on successful step")
+	ctrl.free()
+
+
+func _test_request_step_footstep_position_is_new_position() -> void:
+	print("_test_request_step_footstep_position_is_new_position")
+	var ctrl := GridMovementControllerClass.new()
+	ctrl.set_position(Vector2i(3, 4))
+	var footstep_positions: Array = []
+	ctrl.footstep_requested.connect(func(pos: Vector2i) -> void:
+		footstep_positions.append(pos)
+	)
+	ctrl.request_step(Vector2i(0, 1))
+	_check(footstep_positions.size() == 1, "footstep_requested emitted once")
+	_check(footstep_positions[0] == Vector2i(3, 5),
+		"footstep_requested position is the tile just stepped onto")
+	ctrl.free()
+
+
+func _test_request_step_no_footstep_when_blocked() -> void:
+	print("_test_request_step_no_footstep_when_blocked")
+	var ctrl := GridMovementControllerClass.new()
+	ctrl.set_blocked_tiles([Vector2i(1, 0)])
+	var footstep_events: Array = []
+	ctrl.footstep_requested.connect(func(pos: Vector2i) -> void:
+		footstep_events.append(pos)
+	)
+	ctrl.request_step(Vector2i(1, 0))
+	_check(footstep_events.size() == 0, "footstep_requested not emitted when step is blocked")
+	ctrl.free()
+
+
+func _test_request_step_no_footstep_when_locked() -> void:
+	print("_test_request_step_no_footstep_when_locked")
+	var ctrl := GridMovementControllerClass.new()
+	ctrl.lock_controls()
+	var footstep_events: Array = []
+	ctrl.footstep_requested.connect(func(pos: Vector2i) -> void:
+		footstep_events.append(pos)
+	)
+	ctrl.request_step(Vector2i(1, 0))
+	_check(footstep_events.size() == 0, "footstep_requested not emitted when controls are locked")
 	ctrl.free()
