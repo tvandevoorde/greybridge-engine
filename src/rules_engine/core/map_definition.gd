@@ -34,3 +34,22 @@ func is_valid() -> bool:
 	if map_width <= 0 or map_height <= 0:
 		return false
 	return true
+
+
+## Returns the blocked tile positions derived from the collision layer.
+##
+## Iterates over layers["collision"] (Array of rows, each row an Array of ints)
+## and collects every tile where the value is 1 (blocked).
+##
+## Returns an empty Array when no collision layer is present.
+func get_blocked_tiles() -> Array:
+	var result: Array = []
+	if not layers.has("collision"):
+		return result
+	var collision_layer: Array = layers["collision"]
+	for row_idx: int in range(collision_layer.size()):
+		var row: Array = collision_layer[row_idx]
+		for col_idx: int in range(row.size()):
+			if row[col_idx] == 1:
+				result.append(Vector2i(col_idx, row_idx))
+	return result

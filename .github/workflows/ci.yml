@@ -167,9 +167,21 @@ jobs:
         working-directory: src
         run: godot --headless --script ./tests/unit/overworld/test_overworld_camera_controller.gd
 
+      - name: Unit tests — collision_debug_overlay
+        working-directory: src
+        run: godot --headless --script ./tests/unit/overworld/test_collision_debug_overlay.gd
+
       - name: Unit tests — movement_system
         working-directory: src
         run: godot --headless --script ./tests/unit/rules_engine/test_movement_system.gd
+
+      - name: Unit tests — map_transition
+        working-directory: src
+        run: godot --headless --script ./tests/unit/rules_engine/test_map_transition.gd
+
+      - name: Unit tests — map_transition_resolver
+        working-directory: src
+        run: godot --headless --script ./tests/unit/rules_engine/test_map_transition_resolver.gd
 
       - name: Integration test — combat harness
         working-directory: src
@@ -229,6 +241,24 @@ jobs:
       - name: Unit tests — grid_movement_controller
         working-directory: src
         run: godot --headless --script ./tests/unit/overworld/test_grid_movement_controller.gd
+      - name: Unit tests — map_transition_controller
+        working-directory: src
+        run: godot --headless --script ./tests/unit/overworld/test_map_transition_controller.gd
+
+      - name: Unit tests — inventory
+        working-directory: src
+        run: godot --headless --script ./tests/unit/rules_engine/test_inventory.gd
+
+      - name: Unit tests — chest_interactable
+        working-directory: src
+        run: godot --headless --script ./tests/unit/overworld/test_chest_interactable.gd
+      - name: Unit tests — interact_resolver
+        working-directory: src
+        run: godot --headless --script ./tests/unit/rules_engine/test_interact_resolver.gd
+
+      - name: Unit tests — interaction_controller
+        working-directory: src
+        run: godot --headless --script ./tests/unit/overworld/test_interaction_controller.gd
       - name: Unit tests — map_loader
         working-directory: src
         run: godot --headless --script ./tests/unit/rules_engine/test_map_loader.gd
@@ -240,7 +270,48 @@ jobs:
       - name: Unit tests — fog_of_war_controller
         working-directory: src
         run: godot --headless --script ./tests/unit/overworld/test_fog_of_war_controller.gd
+      - name: Unit tests — door_state
+        working-directory: src
+        run: godot --headless --script ./tests/unit/rules_engine/test_door_state.gd
+
+      - name: Unit tests — door_interactable
+        working-directory: src
+        run: godot --headless --script ./tests/unit/overworld/test_door_interactable.gd
+      - name: Unit tests — trigger_tile_resolver
+        working-directory: src
+        run: godot --headless --script ./tests/unit/rules_engine/test_trigger_tile_resolver.gd
+
+      - name: Unit tests — trigger_tile_controller
+        working-directory: src
+        run: godot --headless --script ./tests/unit/overworld/test_trigger_tile_controller.gd
 
       - name: Integration test — map loading
         working-directory: src
         run: godot --headless --script ./tests/integration/test_map_loading.gd
+
+      - name: Unit tests — npc_definition
+        working-directory: src
+        run: godot --headless --script ./tests/unit/rules_engine/test_npc_definition.gd
+
+      - name: Unit tests — npc_registry
+        working-directory: src
+        run: godot --headless --script ./tests/unit/rules_engine/test_npc_registry.gd
+
+      - name: Unit tests — interact_resolver
+        working-directory: src
+        run: godot --headless --script ./tests/unit/rules_engine/test_interact_resolver.gd
+
+      - name: Unit tests — interaction_validator
+        working-directory: src
+        run: godot --headless --script ./tests/unit/rules_engine/test_interaction_validator.gd
+
+      - name: Unit tests — npc_controller
+        working-directory: src
+        run: godot --headless --script ./tests/unit/overworld/test_npc_controller.gd
+      - name: Unit tests — interaction_controller
+        working-directory: src
+        run: godot --headless --script ./tests/unit/overworld/test_interaction_controller.gd
+
+      - name: Unit tests — interaction_prompt
+        working-directory: src
+        run: godot --headless --script ./tests/unit/ui/test_interaction_prompt.gd

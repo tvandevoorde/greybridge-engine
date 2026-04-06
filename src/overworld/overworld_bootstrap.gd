@@ -27,8 +27,20 @@ signal player_spawned(position: Vector2i)
 ## Emitted when the collision and interaction layers are initialized.
 signal layers_initialized(collision_layer: int, interaction_layer: int)
 
+## Emitted with the blocked tile positions derived from the map definition.
+## blocked_tiles : Array of Vector2i — tiles the player cannot enter.
+signal collision_tiles_ready(blocked_tiles: Array)
+
 ## Emitted when the camera follow target is set, carrying the world position.
 signal camera_follow_initialized(position: Vector2)
+
+## Emitted when a map with a non-empty music_track is loaded.
+## The scene layer should use this to start background music.
+## Not emitted when the map has no associated music track.
+signal music_track_requested(track_id: String)
+## Emitted with the raw transition Array from the map definition.
+## Connect to MapTransitionController.load_transitions() in the scene layer.
+signal transitions_ready(transitions: Array)
 
 ## True after bootstrap() completes successfully.
 var is_bootstrapped: bool = false
@@ -37,21 +49,42 @@ var is_bootstrapped: bool = false
 var current_map: MapDefinitionClass = null
 
 
-## Runs the full overworld bootstrap sequence for [param map_def].
+## Runs the full overworld bootstrap sequence for [param map_def],
+## using the map's own spawn_point as the player starting position.
 ## Emits map_loaded, player_spawned, layers_initialized,
-## and camera_follow_initialized in order.
+## camera_follow_initialized, and music_track_requested (when track is set) in order.
+## collision_tiles_ready, transitions_ready, and camera_follow_initialized.
 ## No combat systems are started.
 ##
 ## map_def : A valid MapDefinition (use MapLoader to construct one).
 func bootstrap(map_def: MapDefinitionClass) -> void:
+	bootstrap_at(map_def, map_def.spawn_point)
+
+
+## Runs the full overworld bootstrap sequence for [param map_def],
+## placing the player at [param spawn] instead of the map default.
+## Use this when transitioning from another map so the player arrives at
+## the transition's target_spawn rather than the map's default spawn_point.
+##
+## Emits map_loaded, player_spawned, layers_initialized,
+## collision_tiles_ready, transitions_ready, and camera_follow_initialized.
+## No combat systems are started.
+##
+## map_def : A valid MapDefinition (use MapLoader to construct one).
+## spawn   : Grid tile to place the player on.
+func bootstrap_at(map_def: MapDefinitionClass, spawn: Vector2i) -> void:
 	is_bootstrapped = false
 	current_map = map_def
 	map_loaded.emit(map_def)
-	player_spawned.emit(map_def.spawn_point)
+	player_spawned.emit(spawn)
 	layers_initialized.emit(map_def.collision_layer, map_def.interaction_layer)
+	collision_tiles_ready.emit(map_def.blocked_tiles)
+	transitions_ready.emit(map_def.transitions)
 	var world_pos := Vector2(
-		map_def.spawn_point.x * TILE_SIZE,
-		map_def.spawn_point.y * TILE_SIZE
+		spawn.x * TILE_SIZE,
+		spawn.y * TILE_SIZE
 	)
 	camera_follow_initialized.emit(world_pos)
+	if map_def.music_track != "":
+		music_track_requested.emit(map_def.music_track)
 	is_bootstrapped = true
