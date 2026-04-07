@@ -118,27 +118,26 @@ func _test_refresh_hp_max_clamped_to_one() -> void:
 func _test_refresh_hp_signal_emitted() -> void:
 	print("_test_refresh_hp_signal_emitted")
 	var hud := _make_hud()
-	var emit_count: int = 0
-	hud.hp_updated.connect(func(_c: int, _m: int) -> void: emit_count += 1)
+	var state := {"emit_count": 0}
+	hud.hp_updated.connect(func(_c: int, _m: int) -> void: state["emit_count"] += 1)
 	hud.refresh_hp(5, 10)
-	_check(emit_count == 1, "hp_updated emitted once on refresh_hp")
+	_check(state["emit_count"] == 1, "hp_updated emitted once on refresh_hp")
 	hud.refresh_hp(3, 10)
-	_check(emit_count == 2, "hp_updated emitted again on second refresh_hp")
+	_check(state["emit_count"] == 2, "hp_updated emitted again on second refresh_hp")
 	hud.free()
 
 
 func _test_refresh_hp_signal_carries_values() -> void:
 	print("_test_refresh_hp_signal_carries_values")
 	var hud := _make_hud()
-	var received_current: int = -1
-	var received_max: int = -1
+	var state := {"current": -1, "max": -1}
 	hud.hp_updated.connect(func(c: int, m: int) -> void:
-		received_current = c
-		received_max = m
+		state["current"] = c
+		state["max"] = m
 	)
 	hud.refresh_hp(7, 12)
-	_check(received_current == 7,  "hp_updated signal carries current_hp = 7")
-	_check(received_max == 12,     "hp_updated signal carries max_hp = 12")
+	_check(state["current"] == 7,  "hp_updated signal carries current_hp = 7")
+	_check(state["max"] == 12,     "hp_updated signal carries max_hp = 12")
 	hud.free()
 
 
@@ -188,22 +187,22 @@ func _test_set_quest_objective_clear_with_empty_string() -> void:
 func _test_quest_objective_signal_emitted() -> void:
 	print("_test_quest_objective_signal_emitted")
 	var hud := _make_hud()
-	var emit_count: int = 0
-	hud.quest_objective_updated.connect(func(_t: String) -> void: emit_count += 1)
+	var state := {"emit_count": 0}
+	hud.quest_objective_updated.connect(func(_t: String) -> void: state["emit_count"] += 1)
 	hud.set_quest_objective("Reach Greybridge")
-	_check(emit_count == 1, "quest_objective_updated emitted on set_quest_objective")
+	_check(state["emit_count"] == 1, "quest_objective_updated emitted on set_quest_objective")
 	hud.set_quest_objective("")
-	_check(emit_count == 2, "quest_objective_updated emitted when objective cleared")
+	_check(state["emit_count"] == 2, "quest_objective_updated emitted when objective cleared")
 	hud.free()
 
 
 func _test_quest_objective_signal_carries_text() -> void:
 	print("_test_quest_objective_signal_carries_text")
 	var hud := _make_hud()
-	var received: String = ""
-	hud.quest_objective_updated.connect(func(t: String) -> void: received = t)
+	var state := {"received": ""}
+	hud.quest_objective_updated.connect(func(t: String) -> void: state["received"] = t)
 	hud.set_quest_objective("Escort the merchant")
-	_check(received == "Escort the merchant", "quest_objective_updated carries correct text")
+	_check(state["received"] == "Escort the merchant", "quest_objective_updated carries correct text")
 	hud.free()
 
 
