@@ -6,6 +6,9 @@
 ## Call to_dict() to obtain a fully serializable (JSON-compatible) Dictionary.
 ## Call from_dict() to reconstruct a snapshot from a saved Dictionary.
 class_name OverworldSnapshot
+extends RefCounted
+
+const OverworldSnapshotClass = preload("res://rules_engine/core/overworld_snapshot.gd")
 
 ## The map_id of the currently loaded map.
 var map_id: String = ""
@@ -47,8 +50,8 @@ func to_dict() -> Dictionary:
 ## Reconstruct an OverworldSnapshot from a Dictionary previously produced by
 ## to_dict(). Missing keys are filled with safe defaults so old save files
 ## remain loadable after adding new fields.
-static func from_dict(data: Dictionary) -> OverworldSnapshot:
-	var snap := OverworldSnapshot.new()
+static func from_dict(data: Dictionary) -> OverworldSnapshotClass:
+	var snap := OverworldSnapshotClass.new()
 	snap.map_id = data.get("map_id", "")
 	var pos: Dictionary = data.get("player_position", {"x": 0, "y": 0})
 	snap.player_position = Vector2i(pos.get("x", 0), pos.get("y", 0))
