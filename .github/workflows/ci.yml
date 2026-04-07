@@ -316,6 +316,9 @@ jobs:
         working-directory: src
         run: godot --headless --script ./tests/unit/ui/test_interaction_prompt.gd
 
+      - name: Unit tests — overworld_snapshot
+        working-directory: src
+        run: godot --headless --script ./tests/unit/rules_engine/test_overworld_snapshot.gd
       - name: Unit tests — overworld_hud
         working-directory: src
         run: godot --headless --script ./tests/unit/ui/test_overworld_hud.gd

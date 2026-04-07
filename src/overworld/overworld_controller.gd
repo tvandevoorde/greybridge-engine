@@ -9,6 +9,7 @@ extends Node
 
 const CombatInitializerClass = preload("res://combat_runtime/combat_initializer.gd")
 const DiceRollerClass = preload("res://rules_engine/core/dice_roller.gd")
+const OverworldSnapshotClass = preload("res://rules_engine/core/overworld_snapshot.gd")
 
 ## Emitted when the controls_locked state changes.
 signal controls_locked_changed(locked: bool)
@@ -38,6 +39,12 @@ signal overworld_music_resumed(track_id: String)
 ## target_spawn : Vector2i  — grid tile to place the player on arrival.
 signal map_transition_started(target_map: String, target_spawn: Vector2i)
 
+## Emitted by restore_state() after all internal state has been updated from
+## the provided snapshot.  The scene layer should connect to this signal and
+## restore individual controller state (player position, chest flags, door
+## states, etc.) from the supplied snapshot.
+signal overworld_state_restored(snapshot: OverworldSnapshotClass)
+
 ## True when the player cannot move or interact in the overworld.
 var controls_locked: bool = false
 
@@ -51,6 +58,31 @@ var current_music_track: String = ""
 ## The player's grid tile position at the moment combat was initiated.
 ## Preserved so the scene can restore the player after returning from combat.
 var saved_player_tile: Vector2i = Vector2i(0, 0)
+
+## ---------------------------------------------------------------------------
+## Serializable overworld state — updated via the on_* / set_* hooks below.
+## ---------------------------------------------------------------------------
+
+## map_id of the currently active map.  Set via set_current_map().
+var _current_map_id: String = ""
+
+## Most-recently-reported player grid position (updated via on_player_state_changed()).
+var _player_position: Vector2i = Vector2i.ZERO
+
+## Most-recently-reported player facing direction (updated via on_player_state_changed()).
+var _player_facing: Vector2i = Vector2i(0, 1)
+
+## Quest flags accumulated this session (updated via on_quest_flag_set()).
+var _quest_flags: Dictionary = {}
+
+## IDs of chests opened this session (updated via on_chest_opened()).
+var _opened_chest_ids: Array = []
+
+## Per-door open/closed state keyed by "x,y" string (updated via on_door_state_changed()).
+var _door_states: Dictionary = {}
+
+## Combat encounter IDs that have already fired (updated via on_trigger_fired()).
+var _fired_trigger_ids: Array = []
 
 
 ## Lock overworld controls, preventing player input.
@@ -118,3 +150,100 @@ func return_from_combat(rewards: Array) -> void:
 func start_map_transition(target_map: String, target_spawn: Vector2i) -> void:
 	lock_controls()
 	map_transition_started.emit(target_map, target_spawn)
+
+
+## ---------------------------------------------------------------------------
+## State-tracking hooks — call these from the scene layer to keep the
+## controller's internal state in sync for capture_state().
+## ---------------------------------------------------------------------------
+
+## Record the map_id of the map that has just been bootstrapped.
+## Call this after OverworldBootstrap emits map_loaded.
+##
+## map_id : String — map_id from MapDefinition.
+func set_current_map(map_id: String) -> void:
+	_current_map_id = map_id
+
+
+## Update the tracked player position and facing direction.
+## Call this whenever GridMovementController emits stepped or the player
+## rotates (e.g. from InteractionController.update_player_position).
+##
+## position : Vector2i — current player grid tile.
+## facing   : Vector2i — current cardinal facing direction (unit vector).
+func on_player_state_changed(position: Vector2i, facing: Vector2i) -> void:
+	_player_position = position
+	_player_facing = facing
+
+
+## Record that a chest has been opened.
+## Call this when ChestInteractable emits chest_opened.
+##
+## chest_id : String — unique identifier of the chest (from JSON "id" field).
+func on_chest_opened(chest_id: String) -> void:
+	if not _opened_chest_ids.has(chest_id):
+		_opened_chest_ids.append(chest_id)
+
+
+## Record a door's current open/closed state.
+## Call this when DoorInteractable emits door_state_changed.
+##
+## position : Vector2i — tile position of the door.
+## is_open  : bool     — true when the door is now open.
+func on_door_state_changed(position: Vector2i, is_open: bool) -> void:
+	var key: String = "%d,%d" % [position.x, position.y]
+	_door_states[key] = is_open
+
+
+## Record a quest flag update.
+## Call this when NpcController emits quest_flag_set or TriggerTileController
+## emits flag_trigger_fired.
+##
+## flag_name  : String  — the flag key.
+## flag_value : Variant — the flag value (typically bool or int).
+func on_quest_flag_set(flag_name: String, flag_value: Variant) -> void:
+	_quest_flags[flag_name] = flag_value
+
+
+## Record that a combat trigger has fired so it is suppressed on reload.
+## Call this when TriggerTileController emits combat_trigger_fired.
+##
+## encounter_id : String — identifier of the encounter that fired.
+func on_trigger_fired(encounter_id: String) -> void:
+	if not _fired_trigger_ids.has(encounter_id):
+		_fired_trigger_ids.append(encounter_id)
+
+
+## ---------------------------------------------------------------------------
+## Serialization hooks
+## ---------------------------------------------------------------------------
+
+## Build and return an OverworldSnapshot from the current tracked state.
+## The caller (save system / scene layer) can then call snapshot.to_dict()
+## to serialize to JSON.
+func capture_state() -> OverworldSnapshotClass:
+	var snap := OverworldSnapshotClass.new()
+	snap.map_id = _current_map_id
+	snap.player_position = _player_position
+	snap.player_facing = _player_facing
+	snap.quest_flags = _quest_flags.duplicate()
+	snap.opened_chest_ids = _opened_chest_ids.duplicate()
+	snap.door_states = _door_states.duplicate()
+	snap.fired_trigger_ids = _fired_trigger_ids.duplicate()
+	return snap
+
+
+## Restore internal state from a previously captured snapshot, then emit
+## overworld_state_restored so the scene layer can re-apply the state to
+## individual controllers (GridMovementController, ChestInteractable, etc.).
+##
+## snapshot : OverworldSnapshot — produced by OverworldSnapshot.from_dict().
+func restore_state(snapshot: OverworldSnapshotClass) -> void:
+	_current_map_id = snapshot.map_id
+	_player_position = snapshot.player_position
+	_player_facing = snapshot.player_facing
+	_quest_flags = snapshot.quest_flags.duplicate()
+	_opened_chest_ids = snapshot.opened_chest_ids.duplicate()
+	_door_states = snapshot.door_states.duplicate()
+	_fired_trigger_ids = snapshot.fired_trigger_ids.duplicate()
+	overworld_state_restored.emit(snapshot)

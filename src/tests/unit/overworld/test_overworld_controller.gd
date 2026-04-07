@@ -9,6 +9,7 @@ extends SceneTree
 
 const DiceRollerClass = preload("res://rules_engine/core/dice_roller.gd")
 const OverworldControllerClass = preload("res://overworld/overworld_controller.gd")
+const OverworldSnapshotClass = preload("res://rules_engine/core/overworld_snapshot.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -54,6 +55,27 @@ func _run_all_tests() -> void:
 	_test_start_map_transition_emits_signal()
 	_test_start_map_transition_signal_carries_target_map()
 	_test_start_map_transition_signal_carries_target_spawn()
+	_test_set_current_map()
+	_test_on_player_state_changed()
+	_test_on_chest_opened_adds_id()
+	_test_on_chest_opened_no_duplicates()
+	_test_on_door_state_changed_open()
+	_test_on_door_state_changed_close()
+	_test_on_quest_flag_set()
+	_test_on_trigger_fired_adds_id()
+	_test_on_trigger_fired_no_duplicates()
+	_test_capture_state_returns_snapshot()
+	_test_capture_state_map_id()
+	_test_capture_state_player_state()
+	_test_capture_state_opened_chest_ids()
+	_test_capture_state_door_states()
+	_test_capture_state_quest_flags()
+	_test_capture_state_fired_trigger_ids()
+	_test_capture_state_independence()
+	_test_restore_state_updates_internal_state()
+	_test_restore_state_emits_signal()
+	_test_restore_state_signal_carries_snapshot()
+	_test_restore_state_overwrites_previous_state()
 
 
 # ---------------------------------------------------------------------------
@@ -392,5 +414,319 @@ func _test_start_map_transition_signal_carries_target_spawn() -> void:
 	oc.start_map_transition("greybridge_town", Vector2i(3, 9))
 	_check(spawns.size() == 1 and spawns[0] == Vector2i(3, 9),
 		"map_transition_started carries correct target_spawn")
+	oc.free()
+
+
+# ---------------------------------------------------------------------------
+# set_current_map() stores the map id
+# ---------------------------------------------------------------------------
+func _test_set_current_map() -> void:
+	print("_test_set_current_map")
+	var oc := OverworldControllerClass.new()
+	oc.set_current_map("road_to_greybridge")
+	var snap := oc.capture_state()
+	_check(snap.map_id == "road_to_greybridge",
+		"capture_state().map_id reflects set_current_map()")
+	oc.free()
+
+
+# ---------------------------------------------------------------------------
+# on_player_state_changed() updates tracked position and facing
+# ---------------------------------------------------------------------------
+func _test_on_player_state_changed() -> void:
+	print("_test_on_player_state_changed")
+	var oc := OverworldControllerClass.new()
+	oc.on_player_state_changed(Vector2i(5, 9), Vector2i(-1, 0))
+	var snap := oc.capture_state()
+	_check(snap.player_position == Vector2i(5, 9),
+		"capture_state().player_position reflects on_player_state_changed()")
+	_check(snap.player_facing == Vector2i(-1, 0),
+		"capture_state().player_facing reflects on_player_state_changed()")
+	oc.free()
+
+
+# ---------------------------------------------------------------------------
+# on_chest_opened() appends chest id
+# ---------------------------------------------------------------------------
+func _test_on_chest_opened_adds_id() -> void:
+	print("_test_on_chest_opened_adds_id")
+	var oc := OverworldControllerClass.new()
+	oc.on_chest_opened("chest_1")
+	var snap := oc.capture_state()
+	_check(snap.opened_chest_ids.has("chest_1"),
+		"capture_state().opened_chest_ids contains chest_1 after on_chest_opened()")
+	oc.free()
+
+
+# ---------------------------------------------------------------------------
+# on_chest_opened() does not duplicate ids
+# ---------------------------------------------------------------------------
+func _test_on_chest_opened_no_duplicates() -> void:
+	print("_test_on_chest_opened_no_duplicates")
+	var oc := OverworldControllerClass.new()
+	oc.on_chest_opened("chest_1")
+	oc.on_chest_opened("chest_1")
+	var snap := oc.capture_state()
+	_check(snap.opened_chest_ids.size() == 1,
+		"on_chest_opened() does not duplicate the same chest id")
+	oc.free()
+
+
+# ---------------------------------------------------------------------------
+# on_door_state_changed() records open state
+# ---------------------------------------------------------------------------
+func _test_on_door_state_changed_open() -> void:
+	print("_test_on_door_state_changed_open")
+	var oc := OverworldControllerClass.new()
+	oc.on_door_state_changed(Vector2i(3, 4), true)
+	var snap := oc.capture_state()
+	_check(snap.door_states.get("3,4") == true,
+		"capture_state().door_states door at 3,4 is true after on_door_state_changed(open)")
+	oc.free()
+
+
+# ---------------------------------------------------------------------------
+# on_door_state_changed() records closed state
+# ---------------------------------------------------------------------------
+func _test_on_door_state_changed_close() -> void:
+	print("_test_on_door_state_changed_close")
+	var oc := OverworldControllerClass.new()
+	oc.on_door_state_changed(Vector2i(3, 4), true)
+	oc.on_door_state_changed(Vector2i(3, 4), false)
+	var snap := oc.capture_state()
+	_check(snap.door_states.get("3,4") == false,
+		"capture_state().door_states door at 3,4 is false after toggling closed")
+	oc.free()
+
+
+# ---------------------------------------------------------------------------
+# on_quest_flag_set() stores the flag
+# ---------------------------------------------------------------------------
+func _test_on_quest_flag_set() -> void:
+	print("_test_on_quest_flag_set")
+	var oc := OverworldControllerClass.new()
+	oc.on_quest_flag_set("met_merchant", true)
+	var snap := oc.capture_state()
+	_check(snap.quest_flags.get("met_merchant") == true,
+		"capture_state().quest_flags contains met_merchant after on_quest_flag_set()")
+	oc.free()
+
+
+# ---------------------------------------------------------------------------
+# on_trigger_fired() appends encounter id
+# ---------------------------------------------------------------------------
+func _test_on_trigger_fired_adds_id() -> void:
+	print("_test_on_trigger_fired_adds_id")
+	var oc := OverworldControllerClass.new()
+	oc.on_trigger_fired("bandit_ambush")
+	var snap := oc.capture_state()
+	_check(snap.fired_trigger_ids.has("bandit_ambush"),
+		"capture_state().fired_trigger_ids contains bandit_ambush after on_trigger_fired()")
+	oc.free()
+
+
+# ---------------------------------------------------------------------------
+# on_trigger_fired() does not duplicate ids
+# ---------------------------------------------------------------------------
+func _test_on_trigger_fired_no_duplicates() -> void:
+	print("_test_on_trigger_fired_no_duplicates")
+	var oc := OverworldControllerClass.new()
+	oc.on_trigger_fired("bandit_ambush")
+	oc.on_trigger_fired("bandit_ambush")
+	var snap := oc.capture_state()
+	_check(snap.fired_trigger_ids.size() == 1,
+		"on_trigger_fired() does not duplicate the same encounter id")
+	oc.free()
+
+
+# ---------------------------------------------------------------------------
+# capture_state() returns an OverworldSnapshot instance
+# ---------------------------------------------------------------------------
+func _test_capture_state_returns_snapshot() -> void:
+	print("_test_capture_state_returns_snapshot")
+	var oc := OverworldControllerClass.new()
+	var snap := oc.capture_state()
+	_check(snap != null, "capture_state() returns a non-null snapshot")
+	_check(snap is OverworldSnapshotClass, "capture_state() returns an OverworldSnapshot")
+	oc.free()
+
+
+# ---------------------------------------------------------------------------
+# capture_state() includes map_id
+# ---------------------------------------------------------------------------
+func _test_capture_state_map_id() -> void:
+	print("_test_capture_state_map_id")
+	var oc := OverworldControllerClass.new()
+	oc.set_current_map("greybridge_town")
+	var snap := oc.capture_state()
+	_check(snap.map_id == "greybridge_town", "capture_state() map_id is greybridge_town")
+	oc.free()
+
+
+# ---------------------------------------------------------------------------
+# capture_state() includes player position and facing
+# ---------------------------------------------------------------------------
+func _test_capture_state_player_state() -> void:
+	print("_test_capture_state_player_state")
+	var oc := OverworldControllerClass.new()
+	oc.on_player_state_changed(Vector2i(2, 6), Vector2i(0, 1))
+	var snap := oc.capture_state()
+	_check(snap.player_position == Vector2i(2, 6), "capture_state() player_position is (2,6)")
+	_check(snap.player_facing == Vector2i(0, 1), "capture_state() player_facing is (0,1)")
+	oc.free()
+
+
+# ---------------------------------------------------------------------------
+# capture_state() includes opened_chest_ids
+# ---------------------------------------------------------------------------
+func _test_capture_state_opened_chest_ids() -> void:
+	print("_test_capture_state_opened_chest_ids")
+	var oc := OverworldControllerClass.new()
+	oc.on_chest_opened("chest_1")
+	oc.on_chest_opened("chest_bandit_stash")
+	var snap := oc.capture_state()
+	_check(snap.opened_chest_ids.size() == 2, "capture_state() has 2 opened chest ids")
+	_check(snap.opened_chest_ids.has("chest_1"), "capture_state() chest_1 present")
+	_check(snap.opened_chest_ids.has("chest_bandit_stash"),
+		"capture_state() chest_bandit_stash present")
+	oc.free()
+
+
+# ---------------------------------------------------------------------------
+# capture_state() includes door_states
+# ---------------------------------------------------------------------------
+func _test_capture_state_door_states() -> void:
+	print("_test_capture_state_door_states")
+	var oc := OverworldControllerClass.new()
+	oc.on_door_state_changed(Vector2i(5, 3), true)
+	var snap := oc.capture_state()
+	_check(snap.door_states.get("5,3") == true, "capture_state() door at 5,3 is open")
+	oc.free()
+
+
+# ---------------------------------------------------------------------------
+# capture_state() includes quest_flags
+# ---------------------------------------------------------------------------
+func _test_capture_state_quest_flags() -> void:
+	print("_test_capture_state_quest_flags")
+	var oc := OverworldControllerClass.new()
+	oc.on_quest_flag_set("scout_rescued", true)
+	var snap := oc.capture_state()
+	_check(snap.quest_flags.get("scout_rescued") == true,
+		"capture_state() quest_flags contains scout_rescued")
+	oc.free()
+
+
+# ---------------------------------------------------------------------------
+# capture_state() includes fired_trigger_ids
+# ---------------------------------------------------------------------------
+func _test_capture_state_fired_trigger_ids() -> void:
+	print("_test_capture_state_fired_trigger_ids")
+	var oc := OverworldControllerClass.new()
+	oc.on_trigger_fired("encounter_road_1")
+	var snap := oc.capture_state()
+	_check(snap.fired_trigger_ids.has("encounter_road_1"),
+		"capture_state() fired_trigger_ids contains encounter_road_1")
+	oc.free()
+
+
+# ---------------------------------------------------------------------------
+# capture_state() snapshot is independent of the controller's internal arrays
+# ---------------------------------------------------------------------------
+func _test_capture_state_independence() -> void:
+	print("_test_capture_state_independence")
+	var oc := OverworldControllerClass.new()
+	oc.on_chest_opened("chest_1")
+	var snap := oc.capture_state()
+	oc.on_chest_opened("chest_2")
+	_check(snap.opened_chest_ids.size() == 1,
+		"snapshot opened_chest_ids is independent of controller (captured before second chest)")
+	oc.free()
+
+
+# ---------------------------------------------------------------------------
+# restore_state() restores all internal state fields
+# ---------------------------------------------------------------------------
+func _test_restore_state_updates_internal_state() -> void:
+	print("_test_restore_state_updates_internal_state")
+	var oc := OverworldControllerClass.new()
+	var snap := OverworldSnapshotClass.new()
+	snap.map_id = "road_to_greybridge"
+	snap.player_position = Vector2i(4, 3)
+	snap.player_facing = Vector2i(0, -1)
+	snap.opened_chest_ids = ["chest_1"]
+	snap.door_states = {"5,3": true}
+	snap.quest_flags = {"met_merchant": true}
+	snap.fired_trigger_ids = ["bandit_ambush"]
+	oc.restore_state(snap)
+	var captured := oc.capture_state()
+	_check(captured.map_id == "road_to_greybridge", "restore_state() map_id restored")
+	_check(captured.player_position == Vector2i(4, 3),
+		"restore_state() player_position restored")
+	_check(captured.player_facing == Vector2i(0, -1),
+		"restore_state() player_facing restored")
+	_check(captured.opened_chest_ids.has("chest_1"),
+		"restore_state() opened_chest_ids restored")
+	_check(captured.door_states.get("5,3") == true, "restore_state() door_states restored")
+	_check(captured.quest_flags.get("met_merchant") == true,
+		"restore_state() quest_flags restored")
+	_check(captured.fired_trigger_ids.has("bandit_ambush"),
+		"restore_state() fired_trigger_ids restored")
+	oc.free()
+
+
+# ---------------------------------------------------------------------------
+# restore_state() emits overworld_state_restored
+# ---------------------------------------------------------------------------
+func _test_restore_state_emits_signal() -> void:
+	print("_test_restore_state_emits_signal")
+	var oc := OverworldControllerClass.new()
+	var events: Array = []
+	oc.overworld_state_restored.connect(func(_s) -> void:
+		events.append(true)
+	)
+	oc.restore_state(OverworldSnapshotClass.new())
+	_check(events.size() == 1, "overworld_state_restored emitted once after restore_state()")
+	oc.free()
+
+
+# ---------------------------------------------------------------------------
+# restore_state() signal carries the snapshot
+# ---------------------------------------------------------------------------
+func _test_restore_state_signal_carries_snapshot() -> void:
+	print("_test_restore_state_signal_carries_snapshot")
+	var oc := OverworldControllerClass.new()
+	var received: Array = []
+	oc.overworld_state_restored.connect(func(s) -> void:
+		received.append(s)
+	)
+	var snap := OverworldSnapshotClass.new()
+	snap.map_id = "greybridge_town"
+	oc.restore_state(snap)
+	_check(received.size() == 1, "overworld_state_restored received one payload")
+	_check(received[0].map_id == "greybridge_town",
+		"overworld_state_restored payload has correct map_id")
+	oc.free()
+
+
+# ---------------------------------------------------------------------------
+# restore_state() overwrites previously tracked state
+# ---------------------------------------------------------------------------
+func _test_restore_state_overwrites_previous_state() -> void:
+	print("_test_restore_state_overwrites_previous_state")
+	var oc := OverworldControllerClass.new()
+	oc.set_current_map("old_map")
+	oc.on_chest_opened("chest_old")
+	var snap := OverworldSnapshotClass.new()
+	snap.map_id = "new_map"
+	snap.opened_chest_ids = ["chest_new"]
+	oc.restore_state(snap)
+	var captured := oc.capture_state()
+	_check(captured.map_id == "new_map",
+		"restore_state() overwrites map_id from previous state")
+	_check(not captured.opened_chest_ids.has("chest_old"),
+		"restore_state() clears previous opened_chest_ids")
+	_check(captured.opened_chest_ids.has("chest_new"),
+		"restore_state() installs new opened_chest_ids")
 	oc.free()
 
