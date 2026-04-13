@@ -38,13 +38,13 @@ static func from_dict(data: Dictionary) -> DialogueGraph:
 
 
 ## Returns the DialogueNode with the given node_id, or null if not found.
-func get_node(node_id: String) -> DialogueNode:
+func get_node(node_id: String):
 	return _nodes.get(node_id, null)
 
 
 ## Returns the starting DialogueNode (looked up via start_node_id),
 ## or null if start_node_id is empty or not present in the graph.
-func get_start_node() -> DialogueNode:
+func get_start_node():
 	if start_node_id == "":
 		return null
 	return get_node(start_node_id)

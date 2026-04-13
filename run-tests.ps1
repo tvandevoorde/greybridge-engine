@@ -8,7 +8,7 @@
 #>
 
 param(
-    [string]$GodotExe = "C:\apps\Godot_v4.6.1-stable_mono_win64\Godot_v4.6.1-stable_mono_win64\Godot_v4.6.1-stable_mono_win64_console.exe",
+    [string]$GodotExe = "C:\Users\tom_v\Godot\Editors\.editor_config\greybridge-engine\Godot_v4.6.2-stable_win64.exe",
     [switch]$StopOnFirstFailure
 )
 
