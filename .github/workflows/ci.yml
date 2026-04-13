@@ -330,3 +330,15 @@ jobs:
       - name: Unit tests — overworld_hud
         working-directory: src
         run: godot --headless --script ./tests/unit/ui/test_overworld_hud.gd
+
+      - name: Unit tests — dialogue_node
+        working-directory: src
+        run: godot --headless --script ./tests/unit/rules_engine/test_dialogue_node.gd
+
+      - name: Unit tests — dialogue_graph
+        working-directory: src
+        run: godot --headless --script ./tests/unit/rules_engine/test_dialogue_graph.gd
+
+      - name: Unit tests — dialogue_loader
+        working-directory: src
+        run: godot --headless --script ./tests/unit/rules_engine/test_dialogue_loader.gd

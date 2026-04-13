@@ -1,0 +1,27 @@
+{
+    "dialogue_id": "merchant_greeting",
+    "start_node_id": "greeting",
+    "nodes": [
+        {
+            "node_id": "greeting",
+            "text": "Hello, traveller! Care to browse my wares?",
+            "is_end": false,
+            "choices": [
+                { "text": "Yes, show me what you have.", "next_node_id": "show_wares" },
+                { "text": "No thank you, I must be on my way.", "next_node_id": "farewell" }
+            ]
+        },
+        {
+            "node_id": "show_wares",
+            "text": "Here are my finest goods. Potions, maps, and more!",
+            "is_end": true,
+            "choices": []
+        },
+        {
+            "node_id": "farewell",
+            "text": "Safe travels, friend. The road to Greybridge can be dangerous.",
+            "is_end": true,
+            "choices": []
+        }
+    ]
+}
