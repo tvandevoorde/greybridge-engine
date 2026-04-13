@@ -1,0 +1,27 @@
+{
+    "dialogue_id": "scout_quest_update",
+    "start_node_id": "wounded",
+    "nodes": [
+        {
+            "node_id": "wounded",
+            "text": "You... you cleared the bandits? Thank the gods. I've been trapped here for days.",
+            "is_end": false,
+            "choices": [
+                { "text": "Are you alright? Can you walk?", "next_node_id": "can_walk" },
+                { "text": "What happened here?", "next_node_id": "what_happened" }
+            ]
+        },
+        {
+            "node_id": "can_walk",
+            "text": "I'll manage. Head to Greybridge — warn the garrison. The bandit camp has more men than we thought.",
+            "is_end": true,
+            "choices": []
+        },
+        {
+            "node_id": "what_happened",
+            "text": "Ambushed on patrol. They came from the east. There's a full camp beyond the ridge. Greybridge needs to know.",
+            "is_end": true,
+            "choices": []
+        }
+    ]
+}
